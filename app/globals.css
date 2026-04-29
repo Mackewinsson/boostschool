@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════
+   TEMA — edita este bloque para cambiar la paleta completa del sitio.
+   Todos los colores del sitio se derivan de estas variables.
+   ═══════════════════════════════════════════════════════════════
+
+   GRADIENTE PRINCIPAL
+   ─────────────────── */
+:root {
+  --brand-from:     #06b6d4;   /* inicio del gradiente  (botones, badges, iconos) */
+  --brand-to:       #8b5cf6;   /* fin del gradiente     (avatares, efectos)       */
+
+  /* ACENTOS (texto, bordes, labels de sección) */
+  --accent:         #22d3ee;   /* acento primario   */
+  --accent-alt:     #a78bfa;   /* acento secundario */
+
+  /* FONDOS */
+  --canvas:         #030712;   /* fondo base de la página               */
+  --canvas-up:      #07101f;   /* fondo de secciones elevadas / banners */
+
+  /* SOMBRAS
+     Valores RGB de --brand-from para poder usar opacidad en box-shadow.
+     Actualizar si cambias --brand-from.                                 */
+  --brand-from-rgb: 6 182 212;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Registro de tokens como utilidades de Tailwind.
+   Uso: bg-canvas, text-accent, from-brand-from, border-brand-to, etc.
+   ═══════════════════════════════════════════════════════════════ */
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-background:  var(--canvas);
+  --color-foreground:  #f1f5f9;
+
+  --color-brand-from:  var(--brand-from);
+  --color-brand-to:    var(--brand-to);
+  --color-accent:      var(--accent);
+  --color-accent-alt:  var(--accent-alt);
+  --color-canvas:      var(--canvas);
+  --color-canvas-up:   var(--canvas-up);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Clases de sombra con brillo de marca.
+   No se pueden expresar como utilidades de Tailwind puras porque
+   necesitan blur/spread arbitrarios con opacidad variable.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Botones CTA — sombra suave que se intensifica al hover */
+.btn-glow {
+  box-shadow: 0 8px 25px -6px rgb(var(--brand-from-rgb) / 0.30);
+}
+.btn-glow:hover {
+  box-shadow: 0 8px 25px -6px rgb(var(--brand-from-rgb) / 0.50);
+}
+
+/* Tarjeta de precio — halo exterior difuminado */
+.card-glow {
+  box-shadow: 0 0 80px -20px rgb(var(--brand-from-rgb) / 0.25);
+}
+
+body {
+  background: var(--canvas);
+  color: #f1f5f9;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
