@@ -2,69 +2,136 @@
 
 /* ═══════════════════════════════════════════════════════════════
    TEMA — edita este bloque para cambiar la paleta completa del sitio.
-   Todos los colores del sitio se derivan de estas variables.
    ═══════════════════════════════════════════════════════════════
 
-   GRADIENTE PRINCIPAL
-   ─────────────────── */
+   COLORES DE MARCA (aplican igual en dark y light mode)          */
 :root {
-  --brand-from:     #06b6d4;   /* inicio del gradiente  (botones, badges, iconos) */
-  --brand-to:       #8b5cf6;   /* fin del gradiente     (avatares, efectos)       */
+  --brand-from:     #06b6d4;   /* inicio del gradiente  */
+  --brand-to:       #8b5cf6;   /* fin del gradiente     */
+  --accent:         #22d3ee;   /* acento primario       */
+  --accent-alt:     #a78bfa;   /* acento secundario     */
 
-  /* ACENTOS (texto, bordes, labels de sección) */
-  --accent:         #22d3ee;   /* acento primario   */
-  --accent-alt:     #a78bfa;   /* acento secundario */
-
-  /* FONDOS */
-  --canvas:         #030712;   /* fondo base de la página               */
-  --canvas-up:      #07101f;   /* fondo de secciones elevadas / banners */
-
-  /* SOMBRAS
-     Valores RGB de --brand-from para poder usar opacidad en box-shadow.
-     Actualizar si cambias --brand-from.                                 */
+  /* RGB de --brand-from para sombras con alpha.
+     Actualizar si cambias --brand-from.          */
   --brand-from-rgb: 6 182 212;
+}
+
+/* ─── DARK MODE (por defecto) ────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  /* Fondos */
+  --canvas:         #030712;
+  --canvas-up:      #07101f;
+  --card-bg:        #0b1120;
+  --card-bg-hover:  #0f1729;
+  --section-bg:     #060c18;
+
+  /* Bordes */
+  --border:         rgba(255, 255, 255, 0.06);
+  --border-strong:  rgba(255, 255, 255, 0.10);
+  --border-nav:     rgba(255, 255, 255, 0.07);
+  --section-border: rgba(255, 255, 255, 0.05);
+
+  /* Texto */
+  --fg:             #f1f5f9;
+  --fg-muted:       #94a3b8;
+  --fg-soft:        #cbd5e1;
+  --fg-faint:       #64748b;
+}
+
+/* ─── LIGHT MODE ─────────────────────────────────────────── */
+[data-theme="light"] {
+  /* Fondos */
+  --canvas:         #f8fafc;
+  --canvas-up:      #f1f5f9;
+  --card-bg:        #ffffff;
+  --card-bg-hover:  #f8fafc;
+  --section-bg:     #eef2f7;
+
+  /* Bordes */
+  --border:         rgba(0, 0, 0, 0.08);
+  --border-strong:  rgba(0, 0, 0, 0.12);
+  --border-nav:     rgba(0, 0, 0, 0.08);
+  --section-border: rgba(0, 0, 0, 0.06);
+
+  /* Texto */
+  --fg:             #0f172a;
+  --fg-muted:       #64748b;
+  --fg-soft:        #475569;
+  --fg-faint:       #94a3b8;
+
+  /* Ajustar acentos para mayor contraste sobre fondo claro */
+  --accent:         #0891b2;
+  --accent-alt:     #7c3aed;
+  --brand-from:     #0891b2;
+  --brand-to:       #7c3aed;
+  --brand-from-rgb: 8 145 178;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    Registro de tokens como utilidades de Tailwind.
-   Uso: bg-canvas, text-accent, from-brand-from, border-brand-to, etc.
+   Uso: bg-canvas, text-fg, from-brand-from, border-border, etc.
    ═══════════════════════════════════════════════════════════════ */
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  --color-background:  var(--canvas);
-  --color-foreground:  #f1f5f9;
+  /* Marca */
+  --color-brand-from:     var(--brand-from);
+  --color-brand-to:       var(--brand-to);
+  --color-accent:         var(--accent);
+  --color-accent-alt:     var(--accent-alt);
 
-  --color-brand-from:  var(--brand-from);
-  --color-brand-to:    var(--brand-to);
-  --color-accent:      var(--accent);
-  --color-accent-alt:  var(--accent-alt);
-  --color-canvas:      var(--canvas);
-  --color-canvas-up:   var(--canvas-up);
+  /* Fondos */
+  --color-canvas:         var(--canvas);
+  --color-canvas-up:      var(--canvas-up);
+  --color-card:           var(--card-bg);
+  --color-card-hover:     var(--card-bg-hover);
+  --color-section:        var(--section-bg);
+
+  /* Bordes */
+  --color-border:         var(--border);
+  --color-border-strong:  var(--border-strong);
+  --color-border-nav:     var(--border-nav);
+  --color-section-border: var(--section-border);
+
+  /* Texto */
+  --color-fg:             var(--fg);
+  --color-fg-muted:       var(--fg-muted);
+  --color-fg-soft:        var(--fg-soft);
+  --color-fg-faint:       var(--fg-faint);
+
+  /* Aliases legacy */
+  --color-background:     var(--canvas);
+  --color-foreground:     var(--fg);
 }
 
 /* ═══════════════════════════════════════════════════════════════
    Clases de sombra con brillo de marca.
-   No se pueden expresar como utilidades de Tailwind puras porque
-   necesitan blur/spread arbitrarios con opacidad variable.
+   Usan --brand-from-rgb para admitir alpha variable.
    ═══════════════════════════════════════════════════════════════ */
-
-/* Botones CTA — sombra suave que se intensifica al hover */
 .btn-glow {
   box-shadow: 0 8px 25px -6px rgb(var(--brand-from-rgb) / 0.30);
 }
 .btn-glow:hover {
   box-shadow: 0 8px 25px -6px rgb(var(--brand-from-rgb) / 0.50);
 }
-
-/* Tarjeta de precio — halo exterior difuminado */
 .card-glow {
   box-shadow: 0 0 80px -20px rgb(var(--brand-from-rgb) / 0.25);
 }
 
 body {
   background: var(--canvas);
-  color: #f1f5f9;
+  color: var(--fg);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Íconos del toggle de tema — se muestran/ocultan via CSS
+   para evitar hydration mismatch entre SSR y cliente.
+   ═══════════════════════════════════════════════════════════════ */
+.theme-icon-dark,
+.theme-icon-light { display: none; }
+
+[data-theme="dark"]  .theme-icon-dark  { display: block; }
+[data-theme="light"] .theme-icon-light { display: block; }
