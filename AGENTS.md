@@ -10,7 +10,29 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Descripción
 
-**Bilingual Boost** es la landing page y sitio principal de una escuela de idiomas online orientada al mercado latinoamericano. Todo el copy está en **español neutro LATAM**. El objetivo del sitio es convertir visitantes en estudiantes mediante una experiencia visual premium y copy directo al beneficio.
+**Bilingual Boost** es la landing page de **Paulina Poloca** — profe de inglés y español online. Todo el copy está en **español neutro LATAM**. El objetivo es convertir visitantes en alumnos mediante copy cercano y directo al beneficio.
+
+### Brief de la clienta
+
+La fuente autoritativa del copy y reglas de contenido está en:
+
+`.cursor/skills/bilingual-boost-client/SKILL.md`
+
+**Regla de copy:** cambios de texto van en `lib/landing-content.ts`. Cambios de estilo (colores, fuentes) requieren fase de diseño explícita.
+
+### Placeholders pendientes (confirmar con Paulina)
+
+- Método de pago concreto
+- URLs: Calendly, WhatsApp, Instagram, TikTok, correo
+- Testimonios reales de alumnos
+- Envío funcional del formulario de contacto
+
+### Copy aún no implementado (fase diseño)
+
+- Colores `#FFD93D` / `#FFA726` y fuentes Quicksand/Nunito/Superclarendon
+- Widget Calendly integrado
+- Versión EN del sitio
+- Tips de aprendizaje, cursos, packs
 
 ---
 
@@ -100,15 +122,39 @@ Toda la información de la landing está centralizada aquí. **No escribir strin
 
 | Export | Tipo | Descripción |
 |---|---|---|
-| `brand` | objeto | Nombre y badge de la marca |
-| `nav` | objeto | Links de navegación |
-| `hero` | objeto | Título, subtítulo, CTAs del hero |
-| `stats` | `Stat[]` | 3 estadísticas de confianza |
-| `features` | `Feature[]` | 3 características del método |
-| `outcomes` | `Feature[]` | 3 resultados para el estudiante |
-| `testimonials` | `Testimonial[]` | 3 testimonios de alumnos |
-| `plans` | objeto | Info de precio, features del plan, CTAs |
-| `faqs` | `FaqItem[]` | 3 preguntas frecuentes |
+| `brand` | objeto | Nombre, badge y tagline |
+| `nav` | objeto | Links de navegación (7) y `ctaLabel` |
+| `hero` | objeto | Título (before/highlight), subtítulo, CTAs |
+| `stats` | `Stat[]` | 3 credenciales de Paulina |
+| `about` | `AboutSection` | Sobre mí — 4 párrafos + alt de foto |
+| `featuresSection` | `SectionHeading` | Label y título de “Por qué clases conmigo” |
+| `features` | `Feature[]` | 3 pilares del enfoque |
+| `outcomesSection` | `SectionHeading` + linkText | Label y título de “Cómo son las clases” |
+| `outcomes` | `Feature[]` | 3 aspectos de la metodología |
+| `testimonialsSection` | `SectionHeading` | Label y título de testimonios |
+| `testimonials` | `Testimonial[]` | Placeholders hasta tener testimonios reales |
+| `plansSection` | `SectionHeading` | Label de sección precios |
+| `plans` | objeto | Trial gratis, 11/16/20 €, tipos de clase, CTA |
+| `faqSection` | `SectionHeading` | Label y título FAQ |
+| `faqs` | `FaqItem[]` | Requisitos, cómo empezar, inglés empresarial |
+| `contact` | `ContactSection` | Formulario estático + redes (placeholders) |
+| `finalCta` | objeto | Banner final de cierre |
+| `mobileStickyCta` | string | CTA sticky mobile |
+
+### Mapeo brief → slots de la página
+
+| Slot UI | Export(s) |
+|---|---|
+| Hero | `brand`, `hero` |
+| 3 stats | `stats` |
+| Sobre mí `#sobre-mi` | `about` |
+| Features `#programas` | `featuresSection`, `features` |
+| Outcomes `#resultados` | `outcomesSection`, `outcomes` |
+| Testimonios `#testimonios` | `testimonialsSection`, `testimonials` |
+| Pricing `#planes` | `plansSection`, `plans` |
+| FAQ `#faq` | `faqSection`, `faqs` |
+| CTA final | `finalCta` |
+| Contacto `#contacto` | `contact` |
 
 ### Tipos definidos
 
@@ -118,6 +164,8 @@ type Feature     = { title: string; description: string }
 type Testimonial = { name: string; role: string; quote: string }
 type FaqItem     = { question: string; answer: string }
 type NavLink     = { label: string; href: string }
+type AboutSection = { label: string; title: string; paragraphs: string[]; imageAlt: string }
+type ContactSection = { label: string; title: string; description: string; fields: object; socialLinks: NavLink[]; note: string }
 ```
 
 ---
@@ -129,14 +177,16 @@ page.tsx  (Server Component)
 └── LandingPage  (Server Component)
     ├── Navbar         ← "use client" — maneja scroll y menú mobile
     ├── Hero section
-    ├── Features section     (#programas)
-    ├── Outcomes section     (#resultados)
+    ├── About section      (#sobre-mi)
+    ├── Features section   (#programas)
+    ├── Outcomes section   (#resultados)
     ├── Testimonials section (#testimonios)
-    ├── Pricing section      (#planes)
-    ├── FAQ section          (#faq)
+    ├── Pricing section    (#planes)
+    ├── FAQ section        (#faq)
     ├── Final CTA Banner
+    ├── Contact section    (#contacto)
     ├── Footer
-    └── Mobile sticky CTA   (solo visible en < sm)
+    └── Mobile sticky CTA  (solo visible en < sm)
 ```
 
 ### Iconos de sección

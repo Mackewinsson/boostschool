@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bilingual Boost | Escuela de idiomas online",
+  title: "Bilingual Boost | Inglés y español con Paulina Poloca",
   description:
-    "Aprende ingles con clases en vivo, metodologia practica y acompanamiento real en Bilingual Boost.",
+    "Organízate, supérate y aprende inglés y español con Paulina Poloca (English with Paulina Poloca). Clases online personalizadas, conversación desde el primer día, clase de prueba gratis.",
 };
 
 export default function RootLayout({

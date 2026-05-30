@@ -24,120 +24,229 @@ export type FaqItem = {
   answer: string;
 };
 
+export type SectionHeading = {
+  label: string;
+  title: string;
+};
+
+export type AboutSection = {
+  label: string;
+  title: string;
+  paragraphs: string[];
+  imageAlt: string;
+};
+
+export type ContactSection = {
+  label: string;
+  title: string;
+  description: string;
+  fields: {
+    name: string;
+    namePlaceholder: string;
+    email: string;
+    emailPlaceholder: string;
+    message: string;
+    messagePlaceholder: string;
+    submit: string;
+  };
+  socialLinks: { label: string; href: string }[];
+  note: string;
+};
+
 export const brand = {
   name: "Bilingual Boost",
-  badge: "Inscripciones abiertas",
+  badge: "Clase de prueba gratis",
+  tagline: "Inglés y español con Paulina Poloca",
 };
 
 export const nav = {
+  ctaLabel: "Reserva tu clase de prueba",
   links: [
-    { label: "Programas", href: "#programas" },
-    { label: "Resultados", href: "#resultados" },
+    { label: "Sobre mí", href: "#sobre-mi" },
+    { label: "Clases", href: "#programas" },
+    { label: "Metodología", href: "#resultados" },
     { label: "Testimonios", href: "#testimonios" },
-    { label: "Planes", href: "#planes" },
+    { label: "Precios", href: "#planes" },
     { label: "FAQ", href: "#faq" },
+    { label: "Contacto", href: "#contacto" },
   ] as NavLink[],
 };
 
 export const hero = {
-  title: "Habla inglés con confianza en menos tiempo",
+  titleBefore: "Organízate, supérate y aprende ",
+  titleHighlight: "inglés/español",
   subtitle:
-    "En Bilingual Boost aprendes con clases dinámicas, seguimiento real y un plan claro para avanzar semana a semana.",
+    "Clases online personalizadas con Paulina Poloca — para que te sueltes al hablar y aprendas con confianza.",
   primaryCta: "Reserva tu clase de prueba",
-  secondaryCta: "Ver programas",
+  secondaryCta: "Ver clases",
 };
 
 export const stats: Stat[] = [
-  { value: "+4,500", label: "estudiantes impulsaron su inglés" },
-  { value: "92%", label: "de alumnos mejoran su fluidez en 90 días" },
-  { value: "4.9/5", label: "calificación promedio de satisfacción" },
+  { value: "5+ años", label: "enseñando con pasión" },
+  { value: "3 idiomas", label: "con fluidez · +2 aprendiendo" },
+  { value: "GRATIS", label: "tu primera clase de prueba" },
 ];
+
+export const about: AboutSection = {
+  label: "Sobre mí",
+  title: "¡Hola! Soy Paulina",
+  imageAlt: "Paulina Poloca, profe de inglés y español",
+  paragraphs: [
+    "Soy profe de inglés y español, y enseño con mucha alegría, cercanía y pasión desde hace más de 5 años.",
+    "Me encanta conectar con otras personas, ayudarlas a soltarse al hablar y demostrar que aprender un idioma también es una forma de crecer como persona y sentirse mejor con uno mismo. Y sí, también puede ser divertido y transformador!!",
+    "Hablo 3 idiomas con fluidez y actualmente estoy aprendiendo 2 más. Por eso, entiendo perfectamente las dificultades, dudas o bloqueos que puedes tener al aprender una lengua extranjera.",
+    "Yo también he pasado por ese camino, y sé cómo ayudarte a superar el miedo a hablar para que te sientas más seguro/a y libre al expresarte.",
+  ],
+};
+
+export const featuresSection: SectionHeading = {
+  label: "Clases online",
+  title: "¿Por qué tener clases conmigo?",
+};
 
 export const features: Feature[] = [
   {
-    title: "Método práctico y conversacional",
+    title: "Enfoque completamente personalizado",
     description:
-      "Hablas desde la primera clase con actividades reales para trabajo, viajes y vida diaria.",
+      "Adapto el contenido, la velocidad y los temas a tu nivel, tus objetivos y tu estilo de aprendizaje.",
   },
   {
-    title: "Mentores que te acompañan",
+    title: "Empatía y claridad",
     description:
-      "Recibes feedback personalizado, metas semanales y soporte constante para no perder el ritmo.",
+      "Yo también he aprendido idiomas, así que entiendo perfectamente lo que se siente al empezar desde cero o al estancarse. Te acompaño paso a paso, con empatía y claridad.",
   },
   {
-    title: "Horarios flexibles para tu rutina",
+    title: "Buen rollo, hablas desde el primer día",
     description:
-      "Elige mañana, tarde o noche y estudia en vivo desde donde estés, sin frenar tus planes.",
+      "Las clases son con buen rollo, sin estrés, pero con mucha motivación. No te aburrirás haciendo ejercicios mecánicos: aquí el enfoque está en hablar desde el primer día.",
   },
 ];
+
+export const outcomesSection: SectionHeading & { linkText: string } = {
+  label: "Metodología",
+  title: "¿Cómo son las clases? ¿Cómo enseño?",
+  linkText: "Reserva tu clase de prueba",
+};
 
 export const outcomes: Feature[] = [
   {
-    title: "Más oportunidades laborales",
-    description: "Mejora entrevistas, presentaciones y reuniones en inglés.",
+    title: "Conversación real",
+    description:
+      "En cada sesión trabajamos la conversación real: la que necesitas para moverte por el mundo, hacer amigos, hablar en el trabajo o expresar tus ideas más profundas.",
   },
   {
-    title: "Comunicación segura al viajar",
-    description: "Exprésate con naturalidad en aeropuertos, hoteles y nuevas ciudades.",
+    title: "Inmersión en el idioma",
+    description:
+      "Creo un entorno de inmersión en el idioma, como si vivieras en un país angloparlante o hispanohablante.",
   },
   {
-    title: "Progreso visible cada mes",
-    description: "Evalúa tu avance con indicadores simples y objetivos alcanzables.",
+    title: "Correcciones personalizadas",
+    description:
+      "Si quieres hablar con soltura, sentirte escuchado/a y recibir correcciones útiles, aquí tienes tu sitio. Todo está siempre ajustado a cada alumno, con correcciones y consejos personalizados.",
   },
 ];
+
+export const testimonialsSection: SectionHeading = {
+  label: "Testimonios",
+  title: "Próximamente: historias de alumnos",
+};
 
 export const testimonials: Testimonial[] = [
   {
-    name: "Camila R.",
-    role: "Analista de marketing",
+    name: "Próximamente",
+    role: "Testimonios de alumnos",
     quote:
-      "Pensaba que nunca iba a soltarme al hablar. En Bilingual Boost gané seguridad y hoy participo en reuniones globales sin miedo.",
+      "Estamos recopilando experiencias reales de quienes aprendieron con Paulina. Si ya tomaste clases, ¡tu historia puede aparecer aquí!",
   },
   {
-    name: "Diego M.",
-    role: "Desarrollador de software",
+    name: "Próximamente",
+    role: "Testimonios de alumnos",
     quote:
-      "El cambio fue real. En tres meses pasé de evitar hablar inglés a liderar demos con clientes de EE. UU.",
+      "¿Qué cambió en tu confianza al hablar? ¿Qué te gustó del enfoque de Paulina? ¿Recomendarías las clases a un amigo/a?",
   },
   {
-    name: "Valentina P.",
-    role: "Emprendedora",
+    name: "Próximamente",
+    role: "Testimonios de alumnos",
     quote:
-      "La metodología es clara y motivadora. Cada clase me deja herramientas concretas para usar en mi negocio.",
+      "Mientras tanto, reserva tu clase de prueba gratis y cuéntame tus objetivos — me encantará conocerte.",
   },
 ];
 
+export const plansSection: SectionHeading = {
+  label: "Precios",
+  title: "Precios y duración",
+};
+
 export const plans = {
-  title: "Elige tu impulso ideal",
+  title: "Precios y duración",
   description:
-    "Empieza hoy con una clase de prueba y descubre el plan que mejor se adapta a tu objetivo.",
-  monthlyLabel: "Plan mensual desde",
-  monthlyPrice: "USD 59",
-  cta: "Quiero comenzar ahora",
-  note: "Sin contratos largos. Puedes pausar o cambiar de nivel cuando lo necesites.",
+    "Primera clase de prueba (30 min): ¡GRATIS! Elige lo que necesites o combínalo según tus objetivos.",
+  monthlyLabel: "Clase de prueba",
+  monthlyPrice: "GRATIS",
+  priceSubtext: "30 minutos · sin compromiso",
+  cta: "Reserva tu clase de prueba",
+  note: "Pago fácil — detalles próximamente. Reserva online con Calendly o Google Calendar — próximamente.",
   features: [
-    "Clases en vivo con docentes certificados",
-    "Grupos reducidos (máx. 8 personas)",
-    "Materiales y grabaciones incluidos",
-    "Seguimiento personalizado semanal",
-    "Comunidad privada de práctica",
+    "30 min → 11 €",
+    "45 min → 16 €",
+    "60 min → 20 €",
+    "Inglés: conversación práctica, general, gramática, por objetivos (turismo, exámenes…)",
+    "Inglés empresarial — escríbeme en Contacto para propuesta personalizada",
+    "Español: conversación práctica, general, gramática, por objetivos (sin español de negocios)",
   ],
+};
+
+export const faqSection: SectionHeading = {
+  label: "Preguntas frecuentes",
+  title: "Resolvemos tus dudas",
 };
 
 export const faqs: FaqItem[] = [
   {
-    question: "¿En qué nivel debo estar para comenzar?",
+    question: "¿Qué necesitas tú?",
     answer:
-      "Puedes iniciar desde cero o con conocimientos previos. Evaluamos tu nivel y te ubicamos en el grupo correcto.",
+      "Una buena conexión a internet, ganas de aprender y energía positiva y mente abierta.",
   },
   {
-    question: "¿Las clases son en vivo o grabadas?",
+    question: "¿Cómo empezar?",
     answer:
-      "Son clases en vivo con docentes y compañeros. También tendrás recursos de práctica para reforzar entre sesiones.",
+      "Escríbeme por WhatsApp o correo — o usa el formulario de contacto —, cuéntame brevemente quién eres, tus objetivos y qué te gustaría trabajar. Elige día y hora para tu clase de prueba. ¡Nos vemos en clase!",
   },
   {
-    question: "¿Cuánto tiempo necesito para ver resultados?",
+    question: "¿Ofreces inglés empresarial?",
     answer:
-      "La mayoría de estudiantes nota mejoras de fluidez y confianza durante las primeras 6 a 8 semanas.",
+      "Sí. Para inglés de negocios o empresarial, escríbeme en la sección Contacto para una propuesta personalizada: clases individuales y en grupos de 2 personas.",
   },
 ];
+
+export const contact: ContactSection = {
+  label: "Contacto",
+  title: "Escríbeme",
+  description:
+    "Cuéntame quién eres, tus objetivos y qué te gustaría trabajar. Te respondo lo antes posible.",
+  fields: {
+    name: "Nombre y apellido",
+    namePlaceholder: "Tu nombre completo",
+    email: "Correo",
+    emailPlaceholder: "tu@correo.com",
+    message: "Contenido del mensaje",
+    messagePlaceholder: "Cuéntame tus objetivos y qué te gustaría trabajar…",
+    submit: "Enviar mensaje",
+  },
+  socialLinks: [
+    { label: "Instagram", href: "#" },
+    { label: "TikTok", href: "#" },
+    { label: "WhatsApp", href: "#" },
+  ],
+  note: "Próximamente conectaremos el envío del formulario y los enlaces de redes.",
+};
+
+export const finalCta = {
+  titleBefore: "Dime qué necesitas y ",
+  titleHighlight: "arrancamos",
+  subtitle:
+    "Si estás buscando a alguien que te anime, te escuche y te ayude a hablar con seguridad y mucho optimismo… ¡bienvenido/a!",
+  cta: "Reserva tu clase de prueba",
+};
+
+export const mobileStickyCta = "Reserva tu clase de prueba";

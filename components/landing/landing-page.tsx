@@ -8,17 +8,27 @@ import {
   Star,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import { Navbar } from "./navbar";
 import {
+  about,
   brand,
+  contact,
+  faqSection,
   faqs,
   features,
+  featuresSection,
+  finalCta,
   hero,
+  mobileStickyCta,
   nav,
   outcomes,
+  outcomesSection,
   plans,
+  plansSection,
   stats,
   testimonials,
+  testimonialsSection,
 } from "@/lib/landing-content";
 
 // Íconos de sección (orden = orden del array en landing-content.ts)
@@ -44,11 +54,10 @@ export function LandingPage() {
 
           {/* Headline */}
           <h1 className="mt-7 max-w-3xl text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">
-            Habla inglés con{" "}
+            {hero.titleBefore}
             <span className="bg-gradient-to-r from-accent to-accent-alt bg-clip-text text-transparent">
-              confianza
-            </span>{" "}
-            en menos tiempo
+              {hero.titleHighlight}
+            </span>
           </h1>
 
           <p className="mt-6 max-w-xl text-base leading-relaxed text-fg-muted sm:text-lg">
@@ -86,13 +95,45 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ── ABOUT ───────────────────────────────────────────────── */}
+      <section
+        id="sobre-mi"
+        className="border-y border-section-border bg-section py-20"
+      >
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-10">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
+            {about.label}
+          </p>
+          <h2 className="mt-3 max-w-2xl text-3xl font-bold sm:text-4xl">{about.title}</h2>
+          <div className="mt-10 grid items-start gap-8 md:grid-cols-2 md:gap-12">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card">
+              <Image
+                src="/paulina.png"
+                alt={about.imageAlt}
+                width={600}
+                height={600}
+                className="aspect-square w-full object-cover"
+                priority
+              />
+            </div>
+            <div className="space-y-4">
+              {about.paragraphs.map((paragraph) => (
+                <p key={paragraph.slice(0, 40)} className="text-sm leading-relaxed text-fg-muted sm:text-base">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── FEATURES ────────────────────────────────────────────── */}
       <section id="programas" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-10">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
-          Metodología
+          {featuresSection.label}
         </p>
         <h2 className="mt-3 max-w-2xl text-3xl font-bold sm:text-4xl">
-          Aprende con una metodología pensada para hablar, no memorizar
+          {featuresSection.title}
         </h2>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {features.map((feature, i) => {
@@ -124,17 +165,17 @@ export function LandingPage() {
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-xl">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent-alt">
-                Resultados
+                {outcomesSection.label}
               </p>
               <h2 className="mt-3 text-3xl font-bold sm:text-4xl">
-                Resultados que se sienten en tu vida profesional y personal
+                {outcomesSection.title}
               </h2>
             </div>
             <a
               href="#planes"
               className="inline-flex shrink-0 items-center justify-center rounded-xl border border-accent-alt/30 bg-brand-to/10 px-5 py-2.5 text-sm font-semibold text-accent-alt transition-all duration-300 hover:bg-brand-to/20"
             >
-              Unirme a {brand.name}
+              {outcomesSection.linkText}
             </a>
           </div>
           <div className="mt-10 grid gap-5 md:grid-cols-3">
@@ -165,15 +206,15 @@ export function LandingPage() {
         className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-10"
       >
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
-          Historias reales
+          {testimonialsSection.label}
         </p>
         <h2 className="mt-3 max-w-2xl text-3xl font-bold sm:text-4xl">
-          Miles de estudiantes ya dieron el salto con {brand.name}
+          {testimonialsSection.title}
         </h2>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {testimonials.map((t) => (
             <article
-              key={t.name}
+              key={t.quote}
               className="flex flex-col rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-from/20 hover:bg-card-hover"
             >
               <div className="flex gap-0.5 text-amber-400">
@@ -206,7 +247,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-10">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
-              Planes
+              {plansSection.label}
             </p>
             <h2 className="mt-3 text-3xl font-bold sm:text-4xl">{plans.title}</h2>
             <p className="mt-4 text-base text-fg-muted">{plans.description}</p>
@@ -222,7 +263,7 @@ export function LandingPage() {
                 <p className="mt-2 text-5xl font-extrabold text-fg">
                   {plans.monthlyPrice}
                 </p>
-                <p className="mt-1 text-sm text-fg-muted">por mes · sin permanencia</p>
+                <p className="mt-1 text-sm text-fg-muted">{plans.priceSubtext}</p>
 
                 <ul className="mt-7 space-y-3">
                   {plans.features.map((f) => (
@@ -234,7 +275,7 @@ export function LandingPage() {
                 </ul>
 
                 <a
-                  href="#"
+                  href="#contacto"
                   className="btn-glow mt-8 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
                 >
                   {plans.cta}
@@ -249,10 +290,10 @@ export function LandingPage() {
       {/* ── FAQ ─────────────────────────────────────────────────── */}
       <section id="faq" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-10">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
-          Preguntas frecuentes
+          {faqSection.label}
         </p>
         <h2 className="mt-3 max-w-xl text-3xl font-bold sm:text-4xl">
-          Resolvemos tus dudas
+          {faqSection.title}
         </h2>
         <div className="mt-8 space-y-3">
           {faqs.map((faq) => (
@@ -274,20 +315,90 @@ export function LandingPage() {
             <div className="pointer-events-none absolute left-1/2 top-0 h-60 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-from/20 blur-[80px]" />
             <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-60 rounded-full bg-brand-to/15 blur-[60px]" />
             <h2 className="relative text-3xl font-extrabold sm:text-4xl">
-              Tu próximo nivel en inglés{" "}
+              {finalCta.titleBefore}
               <span className="bg-gradient-to-r from-accent to-accent-alt bg-clip-text text-transparent">
-                empieza hoy
+                {finalCta.titleHighlight}
               </span>
             </h2>
-            <p className="relative mt-4 text-fg-muted">
-              Únete a miles de personas que ya cambiaron su historia con {brand.name}.
-            </p>
+            <p className="relative mt-4 text-fg-muted">{finalCta.subtitle}</p>
             <a
-              href="#planes"
+              href="#contacto"
               className="btn-glow relative mt-8 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-8 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
             >
-              Quiero inscribirme ahora
+              {finalCta.cta}
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CONTACT ─────────────────────────────────────────────── */}
+      <section id="contacto" className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-10">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
+          {contact.label}
+        </p>
+        <h2 className="mt-3 max-w-xl text-3xl font-bold sm:text-4xl">{contact.title}</h2>
+        <p className="mt-4 max-w-lg text-base text-fg-muted">{contact.description}</p>
+
+        <div className="mx-auto mt-10 max-w-lg">
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+            <form action="#" className="space-y-4">
+              <div>
+                <label htmlFor="contact-name" className="block text-sm font-medium text-fg">
+                  {contact.fields.name}
+                </label>
+                <input
+                  id="contact-name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder={contact.fields.namePlaceholder}
+                  className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="contact-email" className="block text-sm font-medium text-fg">
+                  {contact.fields.email}
+                </label>
+                <input
+                  id="contact-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder={contact.fields.emailPlaceholder}
+                  className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="contact-message" className="block text-sm font-medium text-fg">
+                  {contact.fields.message}
+                </label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  rows={4}
+                  placeholder={contact.fields.messagePlaceholder}
+                  className="mt-1.5 w-full resize-y rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn-glow inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
+              >
+                {contact.fields.submit}
+              </button>
+            </form>
+            <p className="mt-4 text-center text-xs text-fg-faint">{contact.note}</p>
+            <div className="mt-6 flex flex-wrap justify-center gap-4">
+              {contact.socialLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className="text-sm font-medium text-accent transition hover:text-accent-alt"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -328,7 +439,7 @@ export function LandingPage() {
           href="#planes"
           className="btn-glow inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3 text-sm font-semibold text-white transition active:scale-[0.99]"
         >
-          Empezar en {brand.name}
+          {mobileStickyCta}
         </a>
       </div>
     </div>

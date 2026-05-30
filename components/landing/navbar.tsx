@@ -53,7 +53,7 @@ export function Navbar() {
             href="#planes"
             className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.03]"
           >
-            Empezar gratis
+            {nav.ctaLabel}
           </a>
         </div>
 
@@ -118,7 +118,7 @@ export function Navbar() {
             onClick={() => setOpen(false)}
             className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-3 text-sm font-semibold text-white"
           >
-            Empezar gratis
+            {nav.ctaLabel}
           </a>
         </div>
       </div>
