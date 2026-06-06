@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { getLocaleFromCookies } from "@/lib/locale-server";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,20 +12,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Bilingual Boost | Inglés y español con Paulina Poloca",
-  description:
-    "Organízate, supérate y aprende inglés y español con Paulina Poloca (English with Paulina Poloca). Clases online personalizadas, conversación desde el primer día, clase de prueba gratis.",
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocaleFromCookies();
+
   return (
     <html
-      lang="es"
+      lang={locale}
       data-theme="dark"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
@@ -34,7 +30,7 @@ export default function RootLayout({
         {/* Inline script runs before paint to apply stored theme and avoid flash */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}`,
+            __html: `try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);var l=localStorage.getItem("locale");if(l==="es"||l==="en"||l==="pl")document.documentElement.setAttribute("lang",l)}catch(e){}`,
           }}
         />
         {children}

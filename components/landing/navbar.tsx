@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { brand, nav } from "@/lib/landing-content";
+import type { LandingContent } from "@/lib/landing-content";
+import type { Locale } from "@/lib/locale";
+import { LanguageToggle } from "./language-toggle";
 import { ThemeToggle } from "./theme-toggle";
 
-export function Navbar() {
+type NavbarProps = {
+  locale: Locale;
+  brand: LandingContent["brand"];
+  nav: LandingContent["nav"];
+  ui: LandingContent["ui"];
+};
+
+export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -48,7 +57,8 @@ export function Navbar() {
 
         {/* Desktop controls */}
         <div className="hidden items-center gap-3 md:flex">
-          <ThemeToggle />
+          <LanguageToggle locale={locale} ariaLabel={ui.languageToggleAria} />
+          <ThemeToggle ariaLabel={ui.themeToggleAria} />
           <a
             href="#planes"
             className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.03]"
@@ -59,10 +69,11 @@ export function Navbar() {
 
         {/* Mobile controls */}
         <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle />
+          <LanguageToggle locale={locale} ariaLabel={ui.languageToggleAria} />
+          <ThemeToggle ariaLabel={ui.themeToggleAria} />
           <button
             onClick={() => setOpen(!open)}
-            aria-label="Abrir menú"
+            aria-label={ui.openMenuAria}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-border-strong bg-card text-fg-muted transition hover:bg-card-hover hover:text-fg"
           >
             {open ? (

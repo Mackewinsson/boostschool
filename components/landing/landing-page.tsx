@@ -9,36 +9,44 @@ import {
   Users,
 } from "lucide-react";
 import Image from "next/image";
+import { getLandingContent } from "@/lib/landing-content";
+import type { Locale } from "@/lib/locale";
 import { Navbar } from "./navbar";
-import {
-  about,
-  brand,
-  contact,
-  faqSection,
-  faqs,
-  features,
-  featuresSection,
-  finalCta,
-  hero,
-  mobileStickyCta,
-  nav,
-  outcomes,
-  outcomesSection,
-  plans,
-  plansSection,
-  stats,
-  testimonials,
-  testimonialsSection,
-} from "@/lib/landing-content";
 
-// Íconos de sección (orden = orden del array en landing-content.ts)
+// Íconos de sección (orden = orden del array en landing-content)
 const featureIcons = [MessageSquare, Users, Clock];
 const outcomeIcons = [Briefcase, Compass, BarChart3];
 
-export function LandingPage() {
+type LandingPageProps = {
+  locale: Locale;
+};
+
+export function LandingPage({ locale }: LandingPageProps) {
+  const {
+    about,
+    brand,
+    contact,
+    faqSection,
+    faqs,
+    features,
+    featuresSection,
+    finalCta,
+    hero,
+    mobileStickyCta,
+    nav,
+    outcomes,
+    outcomesSection,
+    plans,
+    plansSection,
+    stats,
+    testimonials,
+    testimonialsSection,
+    ui,
+  } = getLandingContent(locale);
+
   return (
     <div className="min-h-screen bg-canvas text-fg">
-      <Navbar />
+      <Navbar locale={locale} brand={brand} nav={nav} ui={ui} />
 
       {/* ── HERO ────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-20">
@@ -415,7 +423,7 @@ export function LandingPage() {
                 {brand.name.split(" ")[1]}
               </span>
               <p className="mt-1 text-sm text-fg-faint">
-                © {new Date().getFullYear()} {brand.name}. Todos los derechos reservados.
+                © {new Date().getFullYear()} {brand.name}. {ui.copyright}
               </p>
             </div>
             <nav className="flex flex-wrap gap-5">
