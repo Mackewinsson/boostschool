@@ -1,3 +1,5 @@
+import type { LinkHrefKey } from "@/lib/site-links";
+
 export type NavLink = {
   label: string;
   href: string;
@@ -6,6 +8,7 @@ export type NavLink = {
 export type Stat = {
   label: string;
   value: string;
+  hrefKey?: "calendly";
 };
 
 export type Feature = {
@@ -13,15 +16,16 @@ export type Feature = {
   description: string;
 };
 
-export type Testimonial = {
-  name: string;
-  role: string;
-  quote: string;
+export type LinkedLine = {
+  before?: string;
+  link?: { label: string; hrefKey: LinkHrefKey };
+  after?: string;
+  plain?: string;
 };
 
 export type FaqItem = {
   question: string;
-  answer: string;
+  answer: LinkedLine;
 };
 
 export type SectionHeading = {
@@ -49,7 +53,7 @@ export type ContactSection = {
     messagePlaceholder: string;
     submit: string;
   };
-  socialLinks: { label: string; href: string }[];
+  whatsappLabel: string;
   note: string;
 };
 
@@ -58,6 +62,12 @@ export type UiStrings = {
   themeToggleAria: string;
   languageToggleAria: string;
   copyright: string;
+};
+
+export type TestimonialsEmbed = {
+  viewAllLabel: string;
+  fallbackText: string;
+  poweredByLabel: string;
 };
 
 export type LandingContent = {
@@ -89,7 +99,7 @@ export type LandingContent = {
   outcomesSection: SectionHeading & { linkText: string };
   outcomes: Feature[];
   testimonialsSection: SectionHeading;
-  testimonials: Testimonial[];
+  testimonialsEmbed: TestimonialsEmbed;
   plansSection: SectionHeading;
   plans: {
     title: string;
@@ -99,7 +109,7 @@ export type LandingContent = {
     priceSubtext: string;
     cta: string;
     note: string;
-    features: string[];
+    features: LinkedLine[];
   };
   faqSection: SectionHeading;
   faqs: FaqItem[];

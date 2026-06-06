@@ -40,7 +40,7 @@ export const es: LandingContent = {
   stats: [
     { value: "5+ años", label: "enseñando con pasión" },
     { value: "3 idiomas", label: "con fluidez · +2 aprendiendo" },
-    { value: "GRATIS", label: "tu primera clase de prueba" },
+    { value: "GRATIS", label: "tu primera clase de prueba", hrefKey: "calendly" },
   ],
   about: {
     label: "Sobre mí",
@@ -97,29 +97,14 @@ export const es: LandingContent = {
     },
   ],
   testimonialsSection: {
-    label: "Testimonios",
-    title: "Próximamente: historias de alumnos",
+    label: "Reseñas",
+    title: "Lo que dicen mis alumnos en Google",
   },
-  testimonials: [
-    {
-      name: "Próximamente",
-      role: "Testimonios de alumnos",
-      quote:
-        "Estamos recopilando experiencias reales de quienes aprendieron con Paulina. Si ya tomaste clases, ¡tu historia puede aparecer aquí!",
-    },
-    {
-      name: "Próximamente",
-      role: "Testimonios de alumnos",
-      quote:
-        "¿Qué cambió en tu confianza al hablar? ¿Qué te gustó del enfoque de Paulina? ¿Recomendarías las clases a un amigo/a?",
-    },
-    {
-      name: "Próximamente",
-      role: "Testimonios de alumnos",
-      quote:
-        "Mientras tanto, reserva tu clase de prueba gratis y cuéntame tus objetivos — me encantará conocerte.",
-    },
-  ],
+  testimonialsEmbed: {
+    viewAllLabel: "Ver todas las reseñas en Google",
+    fallbackText: "Próximamente conectaremos las reseñas de Google.",
+    poweredByLabel: "Reseñas de Google",
+  },
   plansSection: {
     label: "Precios",
     title: "Precios y duración",
@@ -132,14 +117,29 @@ export const es: LandingContent = {
     monthlyPrice: "GRATIS",
     priceSubtext: "30 minutos · sin compromiso",
     cta: "Reserva tu clase de prueba",
-    note: "Pago fácil — detalles próximamente. Reserva online con Calendly o Google Calendar — próximamente.",
+    note: "Reserva online con Calendly. Pago fácil — detalles próximamente.",
     features: [
-      "30 min → 11 €",
-      "45 min → 16 €",
-      "60 min → 20 €",
-      "Inglés: conversación práctica, general, gramática, por objetivos (turismo, exámenes…)",
-      "Inglés empresarial — escríbeme en Contacto para propuesta personalizada",
-      "Español: conversación práctica, general, gramática, por objetivos (sin español de negocios)",
+      { plain: "30 min → 11 €" },
+      { plain: "45 min → 16 €" },
+      { plain: "60 min → 20 €" },
+      {
+        plain:
+          "Inglés: conversación práctica, general, gramática, por objetivos (turismo, exámenes…)",
+      },
+      {
+        before: "Inglés empresarial — escríbeme en ",
+        link: { label: "Contacto", hrefKey: "contact" },
+        after: " para una propuesta personalizada",
+      },
+      {
+        plain:
+          "Español: conversación práctica, general, gramática, por objetivos",
+      },
+      {
+        before: "Inglés y español en grupo (2–3 personas) — 60 min, 15 € por persona. ",
+        link: { label: "Escríbeme por WhatsApp", hrefKey: "whatsapp" },
+        after: " para coordinar.",
+      },
     ],
   },
   faqSection: {
@@ -149,18 +149,26 @@ export const es: LandingContent = {
   faqs: [
     {
       question: "¿Qué necesitas tú?",
-      answer:
-        "Una buena conexión a internet, ganas de aprender y energía positiva y mente abierta.",
+      answer: {
+        plain:
+          "Una buena conexión a internet, ganas de aprender y energía positiva y mente abierta.",
+      },
     },
     {
       question: "¿Cómo empezar?",
-      answer:
-        "Escríbeme por WhatsApp o correo — o usa el formulario de contacto —, cuéntame brevemente quién eres, tus objetivos y qué te gustaría trabajar. Elige día y hora para tu clase de prueba. ¡Nos vemos en clase!",
+      answer: {
+        plain:
+          "Escríbeme por WhatsApp o correo — o usa el formulario de contacto —, cuéntame brevemente quién eres, tus objetivos y qué te gustaría trabajar. Elige día y hora para tu clase de prueba. ¡Nos vemos en clase!",
+      },
     },
     {
       question: "¿Ofreces inglés empresarial?",
-      answer:
-        "Sí. Para inglés de negocios o empresarial, escríbeme en la sección Contacto para una propuesta personalizada: clases individuales y en grupos de 2 personas.",
+      answer: {
+        before: "Sí. Para inglés de negocios o empresarial, escríbeme en la sección ",
+        link: { label: "Contacto", hrefKey: "contact" },
+        after:
+          " para una propuesta personalizada: clases individuales y en grupos de 2 personas.",
+      },
     },
   ],
   contact: {
@@ -177,12 +185,8 @@ export const es: LandingContent = {
       messagePlaceholder: "Cuéntame tus objetivos y qué te gustaría trabajar…",
       submit: "Enviar mensaje",
     },
-    socialLinks: [
-      { label: "Instagram", href: "#" },
-      { label: "TikTok", href: "#" },
-      { label: "WhatsApp", href: "#" },
-    ],
-    note: "Próximamente conectaremos el envío del formulario y los enlaces de redes.",
+    whatsappLabel: "WhatsApp",
+    note: "Próximamente conectaremos el envío del formulario.",
   },
   finalCta: {
     titleBefore: "Dime qué necesitas y ",

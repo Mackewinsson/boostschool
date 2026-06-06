@@ -20,9 +20,10 @@ export type {
   FaqItem,
   Feature,
   LandingContent,
+  LinkedLine,
   NavLink,
   SectionHeading,
   Stat,
-  Testimonial,
+  TestimonialsEmbed,
   UiStrings,
 } from "./types";

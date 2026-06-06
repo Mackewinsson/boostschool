@@ -40,7 +40,7 @@ export const en: LandingContent = {
   stats: [
     { value: "5+ years", label: "teaching with passion" },
     { value: "3 languages", label: "fluent · +2 learning" },
-    { value: "FREE", label: "your first trial lesson" },
+    { value: "FREE", label: "your first trial lesson", hrefKey: "calendly" },
   ],
   about: {
     label: "About me",
@@ -97,29 +97,14 @@ export const en: LandingContent = {
     },
   ],
   testimonialsSection: {
-    label: "Testimonials",
-    title: "Coming soon: student stories",
+    label: "Reviews",
+    title: "What my students say on Google",
   },
-  testimonials: [
-    {
-      name: "Coming soon",
-      role: "Student testimonials",
-      quote:
-        "We're collecting real experiences from people who learned with Paulina. If you've already taken classes, your story could appear here!",
-    },
-    {
-      name: "Coming soon",
-      role: "Student testimonials",
-      quote:
-        "What changed in your confidence when speaking? What did you like about Paulina's approach? Would you recommend the classes to a friend?",
-    },
-    {
-      name: "Coming soon",
-      role: "Student testimonials",
-      quote:
-        "In the meantime, book your free trial lesson and tell me your goals — I'd love to meet you.",
-    },
-  ],
+  testimonialsEmbed: {
+    viewAllLabel: "See all reviews on Google",
+    fallbackText: "We'll connect Google reviews soon.",
+    poweredByLabel: "Reviews from Google",
+  },
   plansSection: {
     label: "Pricing",
     title: "Pricing and duration",
@@ -132,14 +117,29 @@ export const en: LandingContent = {
     monthlyPrice: "FREE",
     priceSubtext: "30 minutes · no commitment",
     cta: "Book your trial lesson",
-    note: "Easy payment — details coming soon. Book online with Calendly or Google Calendar — coming soon.",
+    note: "Book online with Calendly. Easy payment — details coming soon.",
     features: [
-      "30 min → €11",
-      "45 min → €16",
-      "60 min → €20",
-      "English: practical conversation, general, grammar, goal-based (travel, exams…)",
-      "Business English — message me via Contact for a personalized proposal",
-      "Spanish: practical conversation, general, grammar, goal-based (no business Spanish)",
+      { plain: "30 min → €11" },
+      { plain: "45 min → €16" },
+      { plain: "60 min → €20" },
+      {
+        plain:
+          "English: practical conversation, general, grammar, goal-based (travel, exams…)",
+      },
+      {
+        before: "Business English — message me via ",
+        link: { label: "Contact", hrefKey: "contact" },
+        after: " for a personalized proposal",
+      },
+      {
+        plain:
+          "Spanish: practical conversation, general, grammar, goal-based",
+      },
+      {
+        before: "English and Spanish group classes (2–3 people) — 60 min, €15 per person. ",
+        link: { label: "Message me on WhatsApp", hrefKey: "whatsapp" },
+        after: " to coordinate.",
+      },
     ],
   },
   faqSection: {
@@ -149,18 +149,26 @@ export const en: LandingContent = {
   faqs: [
     {
       question: "What do you need?",
-      answer:
-        "A good internet connection, a willingness to learn, and positive energy with an open mind.",
+      answer: {
+        plain:
+          "A good internet connection, a willingness to learn, and positive energy with an open mind.",
+      },
     },
     {
       question: "How do I get started?",
-      answer:
-        "Message me on WhatsApp or email — or use the contact form — tell me briefly who you are, your goals, and what you'd like to work on. Pick a day and time for your trial lesson. See you in class!",
+      answer: {
+        plain:
+          "Message me on WhatsApp or email — or use the contact form — tell me briefly who you are, your goals, and what you'd like to work on. Pick a day and time for your trial lesson. See you in class!",
+      },
     },
     {
       question: "Do you offer business English?",
-      answer:
-        "Yes. For business or corporate English, message me in the Contact section for a personalized proposal: individual classes and groups of 2.",
+      answer: {
+        before: "Yes. For business or corporate English, message me in the ",
+        link: { label: "Contact", hrefKey: "contact" },
+        after:
+          " section for a personalized proposal: individual classes and groups of 2.",
+      },
     },
   ],
   contact: {
@@ -177,12 +185,8 @@ export const en: LandingContent = {
       messagePlaceholder: "Tell me your goals and what you'd like to work on…",
       submit: "Send message",
     },
-    socialLinks: [
-      { label: "Instagram", href: "#" },
-      { label: "TikTok", href: "#" },
-      { label: "WhatsApp", href: "#" },
-    ],
-    note: "We'll connect the form submission and social links soon.",
+    whatsappLabel: "WhatsApp",
+    note: "We'll connect the form submission soon.",
   },
   finalCta: {
     titleBefore: "Tell me what you need and ",

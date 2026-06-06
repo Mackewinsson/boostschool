@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { LandingContent } from "@/lib/landing-content";
 import type { Locale } from "@/lib/locale";
+import { externalLinkProps, siteLinks } from "@/lib/site-links";
 import { LanguageToggle } from "./language-toggle";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -16,6 +17,7 @@ type NavbarProps = {
 export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const bookingLinkProps = externalLinkProps(siteLinks.calendly);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -60,8 +62,9 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
           <LanguageToggle locale={locale} ariaLabel={ui.languageToggleAria} />
           <ThemeToggle ariaLabel={ui.themeToggleAria} />
           <a
-            href="#planes"
+            href={siteLinks.calendly}
             className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.03]"
+            {...bookingLinkProps}
           >
             {nav.ctaLabel}
           </a>
@@ -125,9 +128,10 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
             ))}
           </nav>
           <a
-            href="#planes"
+            href={siteLinks.calendly}
             onClick={() => setOpen(false)}
             className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-3 text-sm font-semibold text-white"
+            {...bookingLinkProps}
           >
             {nav.ctaLabel}
           </a>

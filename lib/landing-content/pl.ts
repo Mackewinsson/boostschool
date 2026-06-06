@@ -40,7 +40,7 @@ export const pl: LandingContent = {
   stats: [
     { value: "5+ lat", label: "nauczania z pasją" },
     { value: "3 języki", label: "płynnie · +2 w nauce" },
-    { value: "ZA DARMO", label: "pierwsza lekcja próbna" },
+    { value: "ZA DARMO", label: "pierwsza lekcja próbna", hrefKey: "calendly" },
   ],
   about: {
     label: "O mnie",
@@ -98,28 +98,13 @@ export const pl: LandingContent = {
   ],
   testimonialsSection: {
     label: "Opinie",
-    title: "Wkrótce: historie uczniów",
+    title: "Co mówią moi uczniowie w Google",
   },
-  testimonials: [
-    {
-      name: "Wkrótce",
-      role: "Opinie uczniów",
-      quote:
-        "Zbieramy prawdziwe doświadczenia osób, które uczyły się u Pauliny. Jeśli już brałeś/aś lekcje, Twoja historia może się tu pojawić!",
-    },
-    {
-      name: "Wkrótce",
-      role: "Opinie uczniów",
-      quote:
-        "Co zmieniło się w Twojej pewności siebie podczas mówienia? Co podobało Ci się w podejściu Pauliny? Poleciłbyś/abyś lekcje znajomemu?",
-    },
-    {
-      name: "Wkrótce",
-      role: "Opinie uczniów",
-      quote:
-        "Tymczasem zarezerwuj darmową lekcję próbną i opowiedz mi o swoich celach — chętnie Cię poznam.",
-    },
-  ],
+  testimonialsEmbed: {
+    viewAllLabel: "Zobacz wszystkie opinie w Google",
+    fallbackText: "Wkrótce podłączymy opinie z Google.",
+    poweredByLabel: "Opinie z Google",
+  },
   plansSection: {
     label: "Cennik",
     title: "Cennik i czas trwania",
@@ -132,14 +117,29 @@ export const pl: LandingContent = {
     monthlyPrice: "ZA DARMO",
     priceSubtext: "30 minut · bez zobowiązań",
     cta: "Zarezerwuj lekcję próbną",
-    note: "Łatwa płatność — szczegóły wkrótce. Rezerwacja online przez Calendly lub Google Calendar — wkrótce.",
+    note: "Rezerwacja online przez Calendly. Łatwa płatność — szczegóły wkrótce.",
     features: [
-      "30 min → 11 €",
-      "45 min → 16 €",
-      "60 min → 20 €",
-      "Angielski: praktyczna rozmowa, ogólny, gramatyka, według celów (turystyka, egzaminy…)",
-      "Angielski biznesowy — napisz do mnie w Kontakcie po indywidualną ofertę",
-      "Hiszpański: praktyczna rozmowa, ogólny, gramatyka, według celów (bez hiszpańskiego biznesowego)",
+      { plain: "30 min → 11 €" },
+      { plain: "45 min → 16 €" },
+      { plain: "60 min → 20 €" },
+      {
+        plain:
+          "Angielski: praktyczna rozmowa, ogólny, gramatyka, według celów (turystyka, egzaminy…)",
+      },
+      {
+        before: "Angielski biznesowy — napisz do mnie w ",
+        link: { label: "Kontakcie", hrefKey: "contact" },
+        after: " po indywidualną ofertę",
+      },
+      {
+        plain:
+          "Hiszpański: praktyczna rozmowa, ogólny, gramatyka, według celów",
+      },
+      {
+        before: "Angielski i hiszpański w grupie (2–3 osoby) — 60 min, 15 € za osobę. ",
+        link: { label: "Napisz do mnie na WhatsApp", hrefKey: "whatsapp" },
+        after: ", żeby ustalić szczegóły.",
+      },
     ],
   },
   faqSection: {
@@ -149,18 +149,26 @@ export const pl: LandingContent = {
   faqs: [
     {
       question: "Czego potrzebujesz?",
-      answer:
-        "Dobre połączenie internetowe, chęć do nauki oraz pozytywną energię i otwarty umysł.",
+      answer: {
+        plain:
+          "Dobre połączenie internetowe, chęć do nauki oraz pozytywną energię i otwarty umysł.",
+      },
     },
     {
       question: "Jak zacząć?",
-      answer:
-        "Napisz do mnie na WhatsApp lub mail — albo użyj formularza kontaktowego — opowiedz krótko, kim jesteś, jakie masz cele i nad czym chciałbyś/abyś pracować. Wybierz dzień i godzinę lekcji próbnej. Do zobaczenia na lekcji!",
+      answer: {
+        plain:
+          "Napisz do mnie na WhatsApp lub mail — albo użyj formularza kontaktowego — opowiedz krótko, kim jesteś, jakie masz cele i nad czym chciałbyś/abyś pracować. Wybierz dzień i godzinę lekcji próbnej. Do zobaczenia na lekcji!",
+      },
     },
     {
       question: "Czy oferujesz angielski biznesowy?",
-      answer:
-        "Tak. W sprawie angielskiego biznesowego lub korporacyjnego napisz do mnie w sekcji Kontakt po indywidualną ofertę: lekcje indywidualne i w grupach 2-osobowych.",
+      answer: {
+        before: "Tak. W sprawie angielskiego biznesowego lub korporacyjnego napisz do mnie w sekcji ",
+        link: { label: "Kontakt", hrefKey: "contact" },
+        after:
+          " po indywidualną ofertę: lekcje indywidualne i w grupach 2-osobowych.",
+      },
     },
   ],
   contact: {
@@ -177,12 +185,8 @@ export const pl: LandingContent = {
       messagePlaceholder: "Opowiedz o swoich celach i nad czym chciałbyś/abyś pracować…",
       submit: "Wyślij wiadomość",
     },
-    socialLinks: [
-      { label: "Instagram", href: "#" },
-      { label: "TikTok", href: "#" },
-      { label: "WhatsApp", href: "#" },
-    ],
-    note: "Wkrótce podłączymy wysyłkę formularza i linki do mediów społecznościowych.",
+    whatsappLabel: "WhatsApp",
+    note: "Wkrótce podłączymy wysyłkę formularza.",
   },
   finalCta: {
     titleBefore: "Powiedz, czego potrzebujesz, a ",
