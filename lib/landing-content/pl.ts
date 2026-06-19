@@ -119,25 +119,27 @@ export const pl: LandingContent = {
     cta: "Zarezerwuj lekcję próbną",
     note: "Rezerwacja online przez Calendly. Łatwa płatność — szczegóły wkrótce.",
     features: [
-      { plain: "30 min → 11 €" },
-      { plain: "45 min → 16 €" },
-      { plain: "60 min → 20 €" },
+      { plain: "30 min → 11 € / 46,75 PLN" },
+      { plain: "45 min → 16 € / 68 PLN" },
+      { plain: "60 min → 20 € / 85 PLN" },
+      {
+        plain:
+          "Hiszpański: konwersacje, ogólny, gramatyka, według celów",
+      },
       {
         plain:
           "Angielski: konwersacje, ogólny, gramatyka, według celów (turystyka, egzaminy…)",
       },
       {
-        before: "Angielski biznesowy/angielski dla firm — napisz do mnie w ",
+        before:
+          "Angielski i hiszpański biznesowy dla firm — od 28 €/godz. (119 PLN/godz.). Napisz do mnie w ",
         link: { label: "Kontakcie", hrefKey: "contact" },
-        after: " aby uzyskać indywidualną ofertę",
+        after: ", aby uzyskać więcej informacji.",
       },
       {
-        plain:
-          "Hiszpański: konwersacje, ogólny, gramatyka, według celów (turystyka, egzaminy…)",
-      },
-      {
-        before: "Angielski i hiszpański w grupie (2–3 osoby) — 60 min, 15 € za osobę. ",
-        link: { label: "Napisz do mnie na WhatsApp", hrefKey: "whatsapp" },
+        before:
+          "Angielski i hiszpański w grupie (2–3 osoby) — 60 min, 15 € / 63,75 PLN za osobę. Napisz do mnie na WhatsApp lub przez ",
+        link: { label: "formularz kontaktowy", hrefKey: "contact" },
         after: ", żeby ustalić szczegóły.",
       },
     ],
@@ -162,12 +164,13 @@ export const pl: LandingContent = {
       },
     },
     {
-      question: "Czy oferujesz angielski biznesowy?",
+      question: "Czy oferujesz angielski i hiszpański biznesowy?",
       answer: {
-        before: "Tak. W sprawie angielskiego biznesowego lub dla firm napisz do mnie w sekcji ",
+        before:
+          "Tak. W sprawie angielskiego i hiszpańskiego biznesowego dla firm stawki zaczynają się od 28 €/godz. (119 PLN/godz.). Napisz do mnie w sekcji ",
         link: { label: "Kontakt", hrefKey: "contact" },
         after:
-          " aby uzyskać indywidualną ofertę: lekcje indywidualne i w grupach 2/3-osobowych.",
+          " aby uzyskać indywidualną ofertę: lekcje indywidualne i w grupach 2–3-osobowych.",
       },
     },
   ],

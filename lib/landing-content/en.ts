@@ -124,20 +124,21 @@ export const en: LandingContent = {
       { plain: "60 min → €20" },
       {
         plain:
-          "English: practical conversation, general, grammar, goal-based (travel, exams…)",
-      },
-      {
-        before: "Business English — message me via ",
-        link: { label: "Contact", hrefKey: "contact" },
-        after: " for a personalized proposal",
-      },
-      {
-        plain:
           "Spanish: practical conversation, general, grammar, goal-based",
       },
       {
-        before: "English and Spanish group classes (2–3 people) — 60 min, €15 per person. ",
-        link: { label: "Message me on WhatsApp", hrefKey: "whatsapp" },
+        plain:
+          "English: practical conversation, general, grammar, goal-based (travel, exams…)",
+      },
+      {
+        before: "Business English/Spanish for companies — from €28/hour. Message me via ",
+        link: { label: "Contact", hrefKey: "contact" },
+        after: " for more details.",
+      },
+      {
+        before:
+          "English and Spanish group classes (2–3 people) — 60 min, €15 per person. Message me on WhatsApp or via the ",
+        link: { label: "contact form", hrefKey: "contact" },
         after: " to coordinate.",
       },
     ],
@@ -162,12 +163,13 @@ export const en: LandingContent = {
       },
     },
     {
-      question: "Do you offer business English?",
+      question: "Do you offer business English and Spanish?",
       answer: {
-        before: "Yes. For business or corporate English, message me in the ",
+        before:
+          "Yes. For business English and Spanish for companies, rates start at €28/hour. Message me via ",
         link: { label: "Contact", hrefKey: "contact" },
         after:
-          " section for a personalized proposal: individual classes and groups of 2.",
+          " for a personalized proposal: individual classes and groups of 2–3 people.",
       },
     },
   ],

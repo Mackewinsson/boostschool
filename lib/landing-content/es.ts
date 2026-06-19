@@ -124,20 +124,21 @@ export const es: LandingContent = {
       { plain: "60 min → 20 €" },
       {
         plain:
-          "Inglés: conversación práctica, general, gramática, por objetivos (turismo, exámenes…)",
-      },
-      {
-        before: "Inglés empresarial — escríbeme en ",
-        link: { label: "Contacto", hrefKey: "contact" },
-        after: " para una propuesta personalizada",
-      },
-      {
-        plain:
           "Español: conversación práctica, general, gramática, por objetivos",
       },
       {
-        before: "Inglés y español en grupo (2–3 personas) — 60 min, 15 € por persona. ",
-        link: { label: "Escríbeme por WhatsApp", hrefKey: "whatsapp" },
+        plain:
+          "Inglés: conversación práctica, general, gramática, por objetivos (turismo, exámenes…)",
+      },
+      {
+        before: "Inglés y español empresarial para empresas — desde 28 €/hora. Escríbeme en ",
+        link: { label: "Contacto", hrefKey: "contact" },
+        after: " para más detalles.",
+      },
+      {
+        before:
+          "Clases grupales de inglés y español (2–3 personas) — 60 min, 15 € por persona. Escríbeme por WhatsApp o usa el ",
+        link: { label: "formulario de contacto", hrefKey: "contact" },
         after: " para coordinar.",
       },
     ],
@@ -162,9 +163,10 @@ export const es: LandingContent = {
       },
     },
     {
-      question: "¿Ofreces inglés empresarial?",
+      question: "¿Ofreces inglés y español empresarial?",
       answer: {
-        before: "Sí. Para inglés de negocios o empresarial, escríbeme en la sección ",
+        before:
+          "Sí. Para inglés y español empresarial para empresas, las tarifas empiezan en 28 €/hora. Escríbeme en la sección ",
         link: { label: "Contacto", hrefKey: "contact" },
         after:
           " para una propuesta personalizada: clases individuales y en grupos de 2-3 personas.",
