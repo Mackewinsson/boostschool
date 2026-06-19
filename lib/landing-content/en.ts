@@ -151,7 +151,7 @@ export const en: LandingContent = {
       question: "What do you need?",
       answer: {
         plain:
-          "A good internet connection, a willingness to learn, and positive energy with an open mind.",
+          "A good internet connection, a notebook and a pen, a willingness to learn, positive energy, and an open mind.",
       },
     },
     {

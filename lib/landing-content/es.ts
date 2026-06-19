@@ -151,14 +151,14 @@ export const es: LandingContent = {
       question: "¿Qué necesitas tú?",
       answer: {
         plain:
-          "Una buena conexión a internet, ganas de aprender y energía positiva y mente abierta.",
+          "Una buena conexión a internet, un cuaderno y un lapicero, ganas de aprender, energía positiva y una mente abierta.",
       },
     },
     {
       question: "¿Cómo empezar?",
       answer: {
         plain:
-          "Escríbeme por WhatsApp o correo — o usa el formulario de contacto —, cuéntame brevemente quién eres, tus objetivos y qué te gustaría trabajar. Elige día y hora para tu clase de prueba. ¡Nos vemos en clase!",
+          "Escríbeme por WhatsApp o correo — o usa el formulario de contacto — cuéntame brevemente quién eres, tus objetivos y qué te gustaría trabajar. Elige día y hora para tu clase de prueba. ¡Nos vemos en clase!",
       },
     },
     {
@@ -167,7 +167,7 @@ export const es: LandingContent = {
         before: "Sí. Para inglés de negocios o empresarial, escríbeme en la sección ",
         link: { label: "Contacto", hrefKey: "contact" },
         after:
-          " para una propuesta personalizada: clases individuales y en grupos de 2 personas.",
+          " para una propuesta personalizada: clases individuales y en grupos de 2-3 personas.",
       },
     },
   ],

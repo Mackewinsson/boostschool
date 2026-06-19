@@ -4,7 +4,7 @@ export const pl: LandingContent = {
   metadata: {
     title: "Bilingual Boost | Angielski i hiszpański z Pauliną Poloca",
     description:
-      "Uporządkuj się, rozwijaj i ucz angielskiego oraz hiszpańskiego z Pauliną Poloca. Spersonalizowane lekcje online, rozmowa od pierwszego dnia i darmowa lekcja próbna.",
+      "Rozwijaj się i ucz angielskiego oraz hiszpańskiego z Pauliną. Spersonalizowane lekcje online, rozmowa od pierwszego dnia i darmowa lekcja próbna.",
   },
   ui: {
     openMenuAria: "Otwórz menu",
@@ -30,10 +30,10 @@ export const pl: LandingContent = {
     ],
   },
   hero: {
-    titleBefore: "Uporządkuj się, rozwijaj i ucz się ",
+    titleBefore: "Rozwijaj się i ucz ",
     titleHighlight: "angielskiego/hiszpańskiego",
     subtitle:
-      "Spersonalizowane lekcje online z Pauliną Poloca — żebyś swobodnie mówił/a i uczył/a się z pewnością siebie.",
+      "Spersonalizowane lekcje online z Pauliną — mów płynnie, na chillu i z pewnością siebie!",
     primaryCta: "Zarezerwuj lekcję próbną",
     secondaryCta: "Zobacz lekcje",
   },
@@ -48,14 +48,14 @@ export const pl: LandingContent = {
     imageAlt: "Paulina Poloca, nauczycielka angielskiego i hiszpańskiego",
     paragraphs: [
       "Jestem nauczycielką angielskiego i hiszpańskiego i od ponad 5 lat uczę z radością, ciepłem i pasją.",
-      "Uwielbiam nawiązywać kontakt z ludźmi, pomagać im rozluźnić się podczas mówienia i pokazywać, że nauka języka to także sposób na rozwój osobisty i lepsze samopoczucie. I tak — może być przy tym zabawnie i transformacyjnie!",
+      "Uwielbiam nawiązywać kontakt z ludźmi, pomagać im uczyć się i pokazywać, że nauka języka to także sposób na rozwój osobisty i lepsze samopoczucie. I tak — może być przy tym zabawnie i transformacyjnie!",
       "Mówię płynnie w 3 językach i obecnie uczę się 2 kolejnych. Dlatego doskonale rozumiem trudności, wątpliwości i blokady, które możesz mieć przy nauce obcego języka.",
-      "Sama przeszłam tę drogę i wiem, jak pomóc Ci przezwyciężyć strach przed mówieniem, żebyś czuł/a się pewniej i swobodniej, gdy się wypowiadasz.",
+      "Sama przeszłam tę drogę i wiem, jak pomóc Ci przezwyciężyć strach przed mówieniem, żeby móc czuć się pewniej i swobodniej, kiedy mówisz!",
     ],
   },
   featuresSection: {
     label: "Lekcje online",
-    title: "Dlaczego warto uczyć się u mnie?",
+    title: "Dlaczego warto uczyć się ze mną?",
   },
   features: [
     {
@@ -81,9 +81,9 @@ export const pl: LandingContent = {
   },
   outcomes: [
     {
-      title: "Prawdziwa rozmowa",
+      title: "Mów!",
       description:
-        "Na każdej lekcji pracujemy nad prawdziwą rozmową — taką, której potrzebujesz, żeby poruszać się po świecie, nawiązywać znajomości, mówić w pracy albo wyrażać swoje najgłębsze myśli.",
+        "Na każdej lekcji pracujemy nad tym żeby rozmawiać o tym, czego potrzebujesz: podróże, nawiązywanie znajomości, rozmowy w pracy…",
     },
     {
       title: "Immersja językowa",
@@ -91,9 +91,9 @@ export const pl: LandingContent = {
         "Tworzę środowisko immersji językowej, jakbyś mieszkał/a w kraju anglo- lub hiszpańskojęzycznym.",
     },
     {
-      title: "Spersonalizowane poprawki",
+      title: "Personalizacja",
       description:
-        "Jeśli chcesz mówić płynnie, czuć się wysłuchany/a i dostawać przydatne poprawki — jesteś we właściwym miejscu. Wszystko jest zawsze dopasowane do każdego ucznia, z indywidualnymi poprawkami i wskazówkami.",
+        "Jeśli chcesz mówić płynnie, poprawnie i dostawać przydatne wskazówki — jesteś we właściwym miejscu. Wszystko jest zawsze dopasowane do każdego ucznia, z indywidualnymi podejściem i tipami!",
     },
   ],
   testimonialsSection: {
@@ -124,16 +124,16 @@ export const pl: LandingContent = {
       { plain: "60 min → 20 €" },
       {
         plain:
-          "Angielski: praktyczna rozmowa, ogólny, gramatyka, według celów (turystyka, egzaminy…)",
+          "Angielski: konwersacje, ogólny, gramatyka, według celów (turystyka, egzaminy…)",
       },
       {
-        before: "Angielski biznesowy — napisz do mnie w ",
+        before: "Angielski biznesowy/angielski dla firm — napisz do mnie w ",
         link: { label: "Kontakcie", hrefKey: "contact" },
-        after: " po indywidualną ofertę",
+        after: " aby uzyskać indywidualną ofertę",
       },
       {
         plain:
-          "Hiszpański: praktyczna rozmowa, ogólny, gramatyka, według celów",
+          "Hiszpański: konwersacje, ogólny, gramatyka, według celów (turystyka, egzaminy…)",
       },
       {
         before: "Angielski i hiszpański w grupie (2–3 osoby) — 60 min, 15 € za osobę. ",
@@ -151,23 +151,23 @@ export const pl: LandingContent = {
       question: "Czego potrzebujesz?",
       answer: {
         plain:
-          "Dobre połączenie internetowe, chęć do nauki oraz pozytywną energię i otwarty umysł.",
+          "Dobre połączenie internetowe, zeszyt i długopis, chęć do nauki oraz pozytywną energię i otwarty umysł.",
       },
     },
     {
       question: "Jak zacząć?",
       answer: {
         plain:
-          "Napisz do mnie na WhatsApp lub mail — albo użyj formularza kontaktowego — opowiedz krótko, kim jesteś, jakie masz cele i nad czym chciałbyś/abyś pracować. Wybierz dzień i godzinę lekcji próbnej. Do zobaczenia na lekcji!",
+          "Napisz do mnie poprzez WhatsApp lub e-mail — albo użyj formularza kontaktowego — opowiedz krótko, kim jesteś, jakie masz cele i nad czym chcesz pracować. Wybierz dzień i godzinę lekcji próbnej. Do zobaczenia",
       },
     },
     {
       question: "Czy oferujesz angielski biznesowy?",
       answer: {
-        before: "Tak. W sprawie angielskiego biznesowego lub korporacyjnego napisz do mnie w sekcji ",
+        before: "Tak. W sprawie angielskiego biznesowego lub dla firm napisz do mnie w sekcji ",
         link: { label: "Kontakt", hrefKey: "contact" },
         after:
-          " po indywidualną ofertę: lekcje indywidualne i w grupach 2-osobowych.",
+          " aby uzyskać indywidualną ofertę: lekcje indywidualne i w grupach 2/3-osobowych.",
       },
     },
   ],
@@ -175,7 +175,7 @@ export const pl: LandingContent = {
     label: "Kontakt",
     title: "Napisz do mnie",
     description:
-      "Opowiedz mi, kim jesteś, jakie masz cele i nad czym chciałbyś/abyś pracować. Odpowiem najszybciej jak to możliwe.",
+      "Opowiedz mi, kim jesteś, jakie masz cele i nad czym chcesz pracować. Odpowiem najszybciej jak to możliwe.",
     fields: {
       name: "Imię i nazwisko",
       namePlaceholder: "Twoje imię i nazwisko",
@@ -189,10 +189,10 @@ export const pl: LandingContent = {
     note: "Wkrótce podłączymy wysyłkę formularza.",
   },
   finalCta: {
-    titleBefore: "Powiedz, czego potrzebujesz, a ",
+    titleBefore: "Powiedz, czego potrzebujesz i ",
     titleHighlight: "zaczynamy",
     subtitle:
-      "Jeśli szukasz kogoś, kto Cię zmotywuje, wysłucha i pomoże mówić z pewnością siebie i optymizmem… witaj!",
+      "Jeśli szukasz kogoś, kto Cię zmotywuje, wysłucha i pomoże mówić z pewnością siebie i optymizmem… jesteś we właściwym miejscu!",
     cta: "Zarezerwuj lekcję próbną",
   },
   mobileStickyCta: "Zarezerwuj lekcję próbną",
