@@ -23,7 +23,42 @@ function ReviewStars({ rating }: { rating: number }) {
   );
 }
 
+function GoogleMapsEmbed({ embed }: GoogleReviewsEmbedProps) {
+  return (
+    <div className="mt-10">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        <iframe
+          src={siteLinks.googleMapsEmbedUrl}
+          title={embed.mapEmbedTitle}
+          className="h-[min(28rem,70vh)] w-full"
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen
+        />
+      </div>
+
+      {siteLinks.googleReviewsUrl && (
+        <div className="mt-6 text-center">
+          <a
+            href={siteLinks.googleReviewsUrl}
+            className="text-sm font-medium text-accent transition hover:text-accent-alt"
+            {...externalLinkProps(siteLinks.googleReviewsUrl)}
+          >
+            {embed.viewAllLabel}
+          </a>
+        </div>
+      )}
+
+      <p className="mt-4 text-center text-xs text-fg-faint">{embed.poweredByLabel}</p>
+    </div>
+  );
+}
+
 function ReviewsFallback({ embed }: GoogleReviewsEmbedProps) {
+  if (siteLinks.googleMapsEmbedUrl) {
+    return <GoogleMapsEmbed embed={embed} />;
+  }
+
   if (siteLinks.googleReviewsUrl) {
     return (
       <div className="mt-10 text-center">

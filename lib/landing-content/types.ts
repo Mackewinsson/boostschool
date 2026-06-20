@@ -8,7 +8,7 @@ export type NavLink = {
 export type Stat = {
   label: string;
   value: string;
-  hrefKey?: "calendly";
+  hrefKey?: "booking";
 };
 
 export type Feature = {
@@ -21,6 +21,7 @@ export type LinkedLine = {
   link?: { label: string; hrefKey: LinkHrefKey };
   after?: string;
   plain?: string;
+  kind?: "duration" | "class" | "business" | "group";
 };
 
 export type FaqItem = {
@@ -53,7 +54,12 @@ export type ContactSection = {
     messagePlaceholder: string;
     submit: string;
   };
-  whatsappLabel: string;
+  whatsapp: {
+    divider: string;
+    title: string;
+    hint: string;
+    ariaLabel: string;
+  };
   note: string;
 };
 
@@ -68,6 +74,18 @@ export type TestimonialsEmbed = {
   viewAllLabel: string;
   fallbackText: string;
   poweredByLabel: string;
+  mapEmbedTitle: string;
+};
+
+export type BookingPageSection = {
+  metadata: {
+    title: string;
+    description: string;
+  };
+  title: string;
+  subtitle: string;
+  backLabel: string;
+  fallbackText: string;
 };
 
 export type LandingContent = {
@@ -109,6 +127,7 @@ export type LandingContent = {
     priceSubtext: string;
     cta: string;
     note: string;
+    classTypesLabel: string;
     features: LinkedLine[];
   };
   faqSection: SectionHeading;
@@ -121,4 +140,5 @@ export type LandingContent = {
     cta: string;
   };
   mobileStickyCta: string;
+  bookingPage: BookingPageSection;
 };

@@ -16,6 +16,7 @@ export function getLandingContent(locale: Locale): LandingContent {
 
 export type {
   AboutSection,
+  BookingPageSection,
   ContactSection,
   FaqItem,
   Feature,

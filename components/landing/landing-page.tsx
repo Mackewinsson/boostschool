@@ -1,7 +1,6 @@
 import {
   BarChart3,
   Briefcase,
-  Check,
   Clock,
   Compass,
   MessageSquare,
@@ -17,14 +16,16 @@ import {
   siteLinks,
 } from "@/lib/site-links";
 import { GoogleReviewsEmbed } from "./google-reviews-embed";
-import { LinkedLineText, linkedLineKey } from "./linked-line";
+import { LinkedLineText } from "./linked-line";
+import { PricingFeatures } from "./pricing-features";
 import { Navbar } from "./navbar";
+import { WhatsAppCta } from "./whatsapp-cta";
 
 // Íconos de sección (orden = orden del array en landing-content)
 const featureIcons = [MessageSquare, Users, Clock];
 const outcomeIcons = [Briefcase, Compass, BarChart3];
 
-const bookingLinkProps = externalLinkProps(siteLinks.calendly);
+const bookingLinkProps = externalLinkProps(siteLinks.booking);
 
 type LandingPageProps = {
   locale: Locale;
@@ -65,7 +66,7 @@ export function LandingPage({ locale }: LandingPageProps) {
         <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-20 lg:px-10">
           {/* Badge */}
           <a
-            href={siteLinks.calendly}
+            href={siteLinks.booking}
             className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-4 py-1.5 transition-all duration-200 hover:border-accent/40 hover:bg-accent/15"
             {...bookingLinkProps}
           >
@@ -88,7 +89,7 @@ export function LandingPage({ locale }: LandingPageProps) {
           {/* CTAs */}
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:gap-4">
             <a
-              href={siteLinks.calendly}
+              href={siteLinks.booking}
               className="btn-glow inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-7 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:scale-[1.02] sm:w-auto"
               {...bookingLinkProps}
             >
@@ -218,7 +219,7 @@ export function LandingPage({ locale }: LandingPageProps) {
               </h2>
             </div>
             <a
-              href={siteLinks.calendly}
+              href={siteLinks.booking}
               className="inline-flex shrink-0 items-center justify-center rounded-xl border border-accent-alt/30 bg-brand-to/10 px-5 py-2.5 text-sm font-semibold text-accent-alt transition-all duration-300 hover:bg-brand-to/20"
               {...bookingLinkProps}
             >
@@ -295,20 +296,15 @@ export function LandingPage({ locale }: LandingPageProps) {
                 </p>
                 <p className="mt-1 text-sm text-fg-muted">{plans.priceSubtext}</p>
 
-                <ul className="mt-7 space-y-3">
-                  {plans.features.map((feature, i) => (
-                    <li
-                      key={linkedLineKey(feature, i)}
-                      className="flex items-start gap-3 text-sm text-fg-soft"
-                    >
-                      <Check size={16} className="mt-0.5 shrink-0 text-accent" />
-                      <LinkedLineText line={feature} />
-                    </li>
-                  ))}
-                </ul>
+                <div className="mt-7">
+                  <PricingFeatures
+                    features={plans.features}
+                    classTypesLabel={plans.classTypesLabel}
+                  />
+                </div>
 
                 <a
-                  href={siteLinks.calendly}
+                  href={siteLinks.booking}
                   className="btn-glow mt-8 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
                   {...bookingLinkProps}
                 >
@@ -358,7 +354,7 @@ export function LandingPage({ locale }: LandingPageProps) {
             </h2>
             <p className="relative mt-4 text-fg-muted">{finalCta.subtitle}</p>
             <a
-              href={siteLinks.calendly}
+              href={siteLinks.booking}
               className="btn-glow relative mt-8 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-8 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
               {...bookingLinkProps}
             >
@@ -425,15 +421,7 @@ export function LandingPage({ locale }: LandingPageProps) {
               </button>
             </form>
             <p className="mt-4 text-center text-xs text-fg-faint">{contact.note}</p>
-            <div className="mt-6 flex justify-center">
-              <a
-                href={siteLinks.whatsapp}
-                className="text-sm font-medium text-accent transition hover:text-accent-alt"
-                {...externalLinkProps(siteLinks.whatsapp)}
-              >
-                {contact.whatsappLabel}
-              </a>
-            </div>
+            <WhatsAppCta whatsapp={contact.whatsapp} />
           </div>
         </div>
       </section>
@@ -471,7 +459,7 @@ export function LandingPage({ locale }: LandingPageProps) {
       {/* ── MOBILE STICKY CTA ───────────────────────────────────── */}
       <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border-strong bg-canvas/90 px-4 py-3 backdrop-blur-md sm:hidden">
         <a
-          href={siteLinks.calendly}
+          href={siteLinks.booking}
           className="btn-glow inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3 text-sm font-semibold text-white transition active:scale-[0.99]"
           {...bookingLinkProps}
         >

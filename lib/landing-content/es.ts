@@ -40,7 +40,7 @@ export const es: LandingContent = {
   stats: [
     { value: "5+ años", label: "enseñando con pasión" },
     { value: "3 idiomas", label: "con fluidez · +2 aprendiendo" },
-    { value: "GRATIS", label: "tu primera clase de prueba", hrefKey: "calendly" },
+    { value: "GRATIS", label: "tu primera clase de prueba", hrefKey: "booking" },
   ],
   about: {
     label: "Sobre mí",
@@ -104,6 +104,7 @@ export const es: LandingContent = {
     viewAllLabel: "Ver todas las reseñas en Google",
     fallbackText: "Próximamente conectaremos las reseñas de Google.",
     poweredByLabel: "Reseñas de Google",
+    mapEmbedTitle: "Bilingual Boost en Google Maps",
   },
   plansSection: {
     label: "Precios",
@@ -117,29 +118,42 @@ export const es: LandingContent = {
     monthlyPrice: "GRATIS",
     priceSubtext: "30 minutos · sin compromiso",
     cta: "Reserva tu clase de prueba",
-    note: "Reserva online con Calendly. Pago fácil — detalles próximamente.",
+    note: "Reserva online con Cal.com. Pago fácil — detalles próximamente.",
+    classTypesLabel: "Clases disponibles",
     features: [
-      { plain: "30 min → 11 €" },
-      { plain: "45 min → 16 €" },
-      { plain: "60 min → 20 €" },
+      { plain: "30 min → 11 €", kind: "duration" },
+      { plain: "45 min → 16 €", kind: "duration" },
+      { plain: "60 min → 20 €", kind: "duration" },
       {
         plain:
           "Español: conversación práctica, general, gramática, por objetivos",
+        kind: "class",
       },
       {
         plain:
           "Inglés: conversación práctica, general, gramática, por objetivos (turismo, exámenes…)",
+        kind: "class",
       },
       {
-        before: "Inglés y español empresarial para empresas — desde 28 €/hora. Escríbeme en ",
+        before:
+          "Inglés de negocios: comunicación empresarial, reuniones, presentaciones — desde 28 €/hora. Escríbeme en ",
         link: { label: "Contacto", hrefKey: "contact" },
         after: " para más detalles.",
+        kind: "business",
+      },
+      {
+        before:
+          "Español de negocios: comunicación empresarial, reuniones, presentaciones — desde 28 €/hora. Escríbeme en ",
+        link: { label: "Contacto", hrefKey: "contact" },
+        after: " para más detalles.",
+        kind: "business",
       },
       {
         before:
           "Clases grupales de inglés y español (2–3 personas) — 60 min, 15 € por persona. Escríbeme por WhatsApp o usa el ",
         link: { label: "formulario de contacto", hrefKey: "contact" },
         after: " para coordinar.",
+        kind: "group",
       },
     ],
   },
@@ -187,7 +201,12 @@ export const es: LandingContent = {
       messagePlaceholder: "Cuéntame tus objetivos y qué te gustaría trabajar…",
       submit: "Enviar mensaje",
     },
-    whatsappLabel: "WhatsApp",
+    whatsapp: {
+      divider: "o",
+      title: "Escríbeme por WhatsApp",
+      hint: "Respuesta rápida",
+      ariaLabel: "Escribir a Bilingual Boost por WhatsApp al +48 515 025 685",
+    },
     note: "Próximamente conectaremos el envío del formulario.",
   },
   finalCta: {
@@ -198,4 +217,16 @@ export const es: LandingContent = {
     cta: "Reserva tu clase de prueba",
   },
   mobileStickyCta: "Reserva tu clase de prueba",
+  bookingPage: {
+    metadata: {
+      title: "Reservar clase de prueba | Bilingual Boost",
+      description:
+        "Reserva tu clase de prueba gratis de 30 minutos con Paulina Poloca. Elige día y hora online.",
+    },
+    title: "Reserva tu clase de prueba",
+    subtitle: "30 minutos · gratis · sin compromiso",
+    backLabel: "Volver al inicio",
+    fallbackText:
+      "Mientras activamos el calendario, escríbeme por WhatsApp o usa el formulario de contacto.",
+  },
 };

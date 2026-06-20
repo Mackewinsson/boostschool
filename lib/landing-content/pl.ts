@@ -40,7 +40,7 @@ export const pl: LandingContent = {
   stats: [
     { value: "5+ lat", label: "nauczania z pasją" },
     { value: "3 języki", label: "płynnie · +2 w nauce" },
-    { value: "ZA DARMO", label: "pierwsza lekcja próbna", hrefKey: "calendly" },
+    { value: "ZA DARMO", label: "pierwsza lekcja próbna", hrefKey: "booking" },
   ],
   about: {
     label: "O mnie",
@@ -104,6 +104,7 @@ export const pl: LandingContent = {
     viewAllLabel: "Zobacz wszystkie opinie w Google",
     fallbackText: "Wkrótce podłączymy opinie z Google.",
     poweredByLabel: "Opinie z Google",
+    mapEmbedTitle: "Bilingual Boost w Google Maps",
   },
   plansSection: {
     label: "Cennik",
@@ -117,30 +118,42 @@ export const pl: LandingContent = {
     monthlyPrice: "ZA DARMO",
     priceSubtext: "30 minut · bez zobowiązań",
     cta: "Zarezerwuj lekcję próbną",
-    note: "Rezerwacja online przez Calendly. Łatwa płatność — szczegóły wkrótce.",
+    note: "Rezerwacja online przez Cal.com. Łatwa płatność — szczegóły wkrótce.",
+    classTypesLabel: "Dostępne lekcje",
     features: [
-      { plain: "30 min → 11 € / 46,75 PLN" },
-      { plain: "45 min → 16 € / 68 PLN" },
-      { plain: "60 min → 20 € / 85 PLN" },
+      { plain: "30 min → 11 € / 46,75 PLN", kind: "duration" },
+      { plain: "45 min → 16 € / 68 PLN", kind: "duration" },
+      { plain: "60 min → 20 € / 85 PLN", kind: "duration" },
       {
         plain:
           "Hiszpański: konwersacje, ogólny, gramatyka, według celów",
+        kind: "class",
       },
       {
         plain:
           "Angielski: konwersacje, ogólny, gramatyka, według celów (turystyka, egzaminy…)",
+        kind: "class",
       },
       {
         before:
-          "Angielski i hiszpański biznesowy dla firm — od 28 €/godz. (119 PLN/godz.). Napisz do mnie w ",
+          "Angielski biznesowy: komunikacja w firmie, spotkania, prezentacje — od 28 €/godz. (119 PLN/godz.). Napisz w ",
         link: { label: "Kontakcie", hrefKey: "contact" },
         after: ", aby uzyskać więcej informacji.",
+        kind: "business",
+      },
+      {
+        before:
+          "Hiszpański biznesowy: komunikacja w firmie, spotkania, prezentacje — od 28 €/godz. (119 PLN/godz.). Napisz w ",
+        link: { label: "Kontakcie", hrefKey: "contact" },
+        after: ", aby uzyskać więcej informacji.",
+        kind: "business",
       },
       {
         before:
           "Angielski i hiszpański w grupie (2–3 osoby) — 60 min, 15 € / 63,75 PLN za osobę. Napisz do mnie na WhatsApp lub przez ",
         link: { label: "formularz kontaktowy", hrefKey: "contact" },
         after: ", żeby ustalić szczegóły.",
+        kind: "group",
       },
     ],
   },
@@ -188,7 +201,12 @@ export const pl: LandingContent = {
       messagePlaceholder: "Opowiedz o swoich celach i nad czym chciałbyś/abyś pracować…",
       submit: "Wyślij wiadomość",
     },
-    whatsappLabel: "WhatsApp",
+    whatsapp: {
+      divider: "lub",
+      title: "Napisz na WhatsApp",
+      hint: "Szybka odpowiedź",
+      ariaLabel: "Napisz do Bilingual Boost na WhatsApp pod numer +48 515 025 685",
+    },
     note: "Wkrótce podłączymy wysyłkę formularza.",
   },
   finalCta: {
@@ -199,4 +217,16 @@ export const pl: LandingContent = {
     cta: "Zarezerwuj lekcję próbną",
   },
   mobileStickyCta: "Zarezerwuj lekcję próbną",
+  bookingPage: {
+    metadata: {
+      title: "Rezerwacja lekcji próbnej | Bilingual Boost",
+      description:
+        "Zarezerwuj darmową 30-minutową lekcję próbną z Pauliną Poloca. Wybierz dzień i godzinę online.",
+    },
+    title: "Zarezerwuj lekcję próbną",
+    subtitle: "30 minut · za darmo · bez zobowiązań",
+    backLabel: "Wróć na stronę główną",
+    fallbackText:
+      "Gdy uruchomimy kalendarz, napisz do mnie na WhatsApp lub użyj formularza kontaktowego.",
+  },
 };

@@ -40,7 +40,7 @@ export const en: LandingContent = {
   stats: [
     { value: "5+ years", label: "teaching with passion" },
     { value: "3 languages", label: "fluent · +2 learning" },
-    { value: "FREE", label: "your first trial lesson", hrefKey: "calendly" },
+    { value: "FREE", label: "your first trial lesson", hrefKey: "booking" },
   ],
   about: {
     label: "About me",
@@ -104,6 +104,7 @@ export const en: LandingContent = {
     viewAllLabel: "See all reviews on Google",
     fallbackText: "We'll connect Google reviews soon.",
     poweredByLabel: "Reviews from Google",
+    mapEmbedTitle: "Bilingual Boost on Google Maps",
   },
   plansSection: {
     label: "Pricing",
@@ -117,29 +118,42 @@ export const en: LandingContent = {
     monthlyPrice: "FREE",
     priceSubtext: "30 minutes · no commitment",
     cta: "Book your trial lesson",
-    note: "Book online with Calendly. Easy payment — details coming soon.",
+    note: "Book online with Cal.com. Easy payment — details coming soon.",
+    classTypesLabel: "Available classes",
     features: [
-      { plain: "30 min → €11" },
-      { plain: "45 min → €16" },
-      { plain: "60 min → €20" },
+      { plain: "30 min → €11", kind: "duration" },
+      { plain: "45 min → €16", kind: "duration" },
+      { plain: "60 min → €20", kind: "duration" },
       {
         plain:
           "Spanish: practical conversation, general, grammar, goal-based",
+        kind: "class",
       },
       {
         plain:
           "English: practical conversation, general, grammar, goal-based (travel, exams…)",
+        kind: "class",
       },
       {
-        before: "Business English/Spanish for companies — from €28/hour. Message me via ",
+        before:
+          "Business English: corporate communication, meetings, presentations — from €28/hour. Message me via ",
         link: { label: "Contact", hrefKey: "contact" },
         after: " for more details.",
+        kind: "business",
+      },
+      {
+        before:
+          "Business Spanish: corporate communication, meetings, presentations — from €28/hour. Message me via ",
+        link: { label: "Contact", hrefKey: "contact" },
+        after: " for more details.",
+        kind: "business",
       },
       {
         before:
           "English and Spanish group classes (2–3 people) — 60 min, €15 per person. Message me on WhatsApp or via the ",
         link: { label: "contact form", hrefKey: "contact" },
         after: " to coordinate.",
+        kind: "group",
       },
     ],
   },
@@ -187,7 +201,12 @@ export const en: LandingContent = {
       messagePlaceholder: "Tell me your goals and what you'd like to work on…",
       submit: "Send message",
     },
-    whatsappLabel: "WhatsApp",
+    whatsapp: {
+      divider: "or",
+      title: "Message me on WhatsApp",
+      hint: "Usually replies quickly",
+      ariaLabel: "Message Bilingual Boost on WhatsApp at +48 515 025 685",
+    },
     note: "We'll connect the form submission soon.",
   },
   finalCta: {
@@ -198,4 +217,16 @@ export const en: LandingContent = {
     cta: "Book your trial lesson",
   },
   mobileStickyCta: "Book your trial lesson",
+  bookingPage: {
+    metadata: {
+      title: "Book trial lesson | Bilingual Boost",
+      description:
+        "Book your free 30-minute trial lesson with Paulina Poloca. Pick a day and time online.",
+    },
+    title: "Book your trial lesson",
+    subtitle: "30 minutes · free · no commitment",
+    backLabel: "Back to home",
+    fallbackText:
+      "While we set up the calendar, message me on WhatsApp or use the contact form.",
+  },
 };

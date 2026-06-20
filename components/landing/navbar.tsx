@@ -17,7 +17,7 @@ type NavbarProps = {
 export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const bookingLinkProps = externalLinkProps(siteLinks.calendly);
+  const bookingLinkProps = externalLinkProps(siteLinks.booking);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -62,7 +62,7 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
           <LanguageToggle locale={locale} ariaLabel={ui.languageToggleAria} />
           <ThemeToggle ariaLabel={ui.themeToggleAria} />
           <a
-            href={siteLinks.calendly}
+            href={siteLinks.booking}
             className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.03]"
             {...bookingLinkProps}
           >
@@ -128,7 +128,7 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
             ))}
           </nav>
           <a
-            href={siteLinks.calendly}
+            href={siteLinks.booking}
             onClick={() => setOpen(false)}
             className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-3 text-sm font-semibold text-white"
             {...bookingLinkProps}
