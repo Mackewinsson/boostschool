@@ -5,6 +5,9 @@ export const contactPhone = {
   whatsappUrl: bilingualBoostWhatsappUrl,
 } as const;
 
+const bilingualBoostCalLink = "paulina-łaczmanska-cozgba/clase-de-prueba";
+const bilingualBoostCalNamespace = "clase-de-prueba";
+
 const bilingualBoostMapsPlaceUrl =
   "https://www.google.com/maps/place/Bilingual+Boost/@52.244203,21.2776013,17z/data=!4m6!3m5!1s0x471ed780178a953d:0xa54f4b85291fa03e!8m2!3d52.244203!4d21.2776013!16s%2Fg%2F11npd2g9y4";
 
@@ -35,21 +38,30 @@ export function getCalLink(): string | null {
   const bookingUrl =
     process.env.NEXT_PUBLIC_BOOKING_URL?.trim() ??
     process.env.NEXT_PUBLIC_CALENDLY_URL?.trim();
-  if (!bookingUrl) {
-    return null;
-  }
-
-  if (bookingUrl.startsWith("http")) {
-    try {
-      const { pathname } = new URL(bookingUrl);
-      const slug = pathname.replace(/^\/+/, "");
-      return slug || null;
-    } catch {
-      return null;
+  if (bookingUrl) {
+    if (bookingUrl.startsWith("http")) {
+      try {
+        const { pathname } = new URL(bookingUrl);
+        const slug = pathname.replace(/^\/+/, "");
+        if (slug) {
+          return slug;
+        }
+      } catch {
+        // fall through to default
+      }
+    } else {
+      const slug = bookingUrl.replace(/^\/+/, "");
+      if (slug) {
+        return slug;
+      }
     }
   }
 
-  return bookingUrl.replace(/^\/+/, "");
+  return bilingualBoostCalLink;
+}
+
+export function getCalNamespace(): string {
+  return process.env.NEXT_PUBLIC_CAL_NAMESPACE?.trim() || bilingualBoostCalNamespace;
 }
 
 export function resolveHrefKey(key: LinkHrefKey): string {

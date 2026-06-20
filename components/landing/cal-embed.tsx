@@ -1,11 +1,13 @@
 "use client";
 
-import Cal from "@calcom/embed-react";
+import Cal, { getCalApi } from "@calcom/embed-react";
 import Link from "next/link";
+import { useEffect } from "react";
 import {
   contactPhone,
   externalLinkProps,
   getCalLink,
+  getCalNamespace,
   siteLinks,
 } from "@/lib/site-links";
 
@@ -16,6 +18,18 @@ type CalEmbedProps = {
 
 export function CalEmbed({ fallbackText, contactLabel }: CalEmbedProps) {
   const calLink = getCalLink();
+  const calNamespace = getCalNamespace();
+
+  useEffect(() => {
+    if (!calLink) {
+      return;
+    }
+
+    (async function () {
+      const cal = await getCalApi({ namespace: calNamespace });
+      cal("ui", { hideEventTypeDetails: false, layout: "month_view" });
+    })();
+  }, [calLink, calNamespace]);
 
   if (!calLink) {
     return (
@@ -43,9 +57,10 @@ export function CalEmbed({ fallbackText, contactLabel }: CalEmbedProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 sm:p-6">
       <Cal
+        namespace={calNamespace}
         calLink={calLink}
         style={{ width: "100%", height: "100%", minHeight: "32rem", overflow: "scroll" }}
-        config={{ layout: "month_view" }}
+        config={{ layout: "month_view", useSlotsViewOnSmallScreen: "true" }}
       />
     </div>
   );
