@@ -2,7 +2,7 @@ import { Briefcase, Check } from "lucide-react";
 import type { LinkedLine } from "@/lib/landing-content/types";
 import { LinkedLineText, linkedLineKey } from "./linked-line";
 
-const DURATION_COUNT = 3;
+const DURATION_COUNT = 1;
 
 type PricingFeaturesProps = {
   features: LinkedLine[];

@@ -24,7 +24,7 @@ export const en: LandingContent = {
       { label: "Classes", href: "#programas" },
       { label: "Method", href: "#resultados" },
       { label: "Testimonials", href: "#testimonios" },
-      { label: "Pricing", href: "#planes" },
+      { label: "Classes", href: "#planes" },
       { label: "FAQ", href: "#faq" },
       { label: "Contact", href: "#contacto" },
     ],
@@ -107,11 +107,11 @@ export const en: LandingContent = {
     mapEmbedTitle: "Bilingual Boost on Google Maps",
   },
   plansSection: {
-    label: "Pricing",
-    title: "Pricing and duration",
+    label: "Classes",
+    title: "Classes and duration",
   },
   plans: {
-    title: "Pricing and duration",
+    title: "Classes and duration",
     description:
       "First trial lesson (30 min): FREE! Choose what you need or mix and match based on your goals.",
     monthlyLabel: "Trial lesson",
@@ -121,9 +121,7 @@ export const en: LandingContent = {
     note: "Book online with Cal.com. Easy payment — details coming soon.",
     classTypesLabel: "Available classes",
     features: [
-      { plain: "30 min → €11", kind: "duration" },
-      { plain: "45 min → €16", kind: "duration" },
-      { plain: "60 min → €20", kind: "duration" },
+      { plain: "30, 45, or 60 minutes", kind: "duration" },
       {
         plain:
           "Spanish: practical conversation, general, grammar, goal-based",
@@ -136,21 +134,21 @@ export const en: LandingContent = {
       },
       {
         before:
-          "Business English: corporate communication, meetings, presentations — from €28/hour. Message me via ",
+          "Business English: corporate communication, meetings, presentations. Message me via ",
         link: { label: "Contact", hrefKey: "contact" },
         after: " for more details.",
         kind: "business",
       },
       {
         before:
-          "Business Spanish: corporate communication, meetings, presentations — from €28/hour. Message me via ",
+          "Business Spanish: corporate communication, meetings, presentations. Message me via ",
         link: { label: "Contact", hrefKey: "contact" },
         after: " for more details.",
         kind: "business",
       },
       {
         before:
-          "English and Spanish group classes (2–3 people) — 60 min, €15 per person. Message me on WhatsApp or via the ",
+          "English and Spanish group classes (2–3 people) — 60 min. Message me on WhatsApp or via the ",
         link: { label: "contact form", hrefKey: "contact" },
         after: " to coordinate.",
         kind: "group",
@@ -180,7 +178,7 @@ export const en: LandingContent = {
       question: "Do you offer business English and Spanish?",
       answer: {
         before:
-          "Yes. For business English and Spanish for companies, rates start at €28/hour. Message me via ",
+          "Yes. For business English and Spanish for companies, message me via ",
         link: { label: "Contact", hrefKey: "contact" },
         after:
           " for a personalized proposal: individual classes and groups of 2–3 people.",

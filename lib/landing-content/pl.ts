@@ -24,7 +24,7 @@ export const pl: LandingContent = {
       { label: "Lekcje", href: "#programas" },
       { label: "Metoda", href: "#resultados" },
       { label: "Opinie", href: "#testimonios" },
-      { label: "Cennik", href: "#planes" },
+      { label: "Lekcje", href: "#planes" },
       { label: "FAQ", href: "#faq" },
       { label: "Kontakt", href: "#contacto" },
     ],
@@ -107,11 +107,11 @@ export const pl: LandingContent = {
     mapEmbedTitle: "Bilingual Boost w Google Maps",
   },
   plansSection: {
-    label: "Cennik",
-    title: "Cennik i czas trwania",
+    label: "Lekcje",
+    title: "Lekcje i czas trwania",
   },
   plans: {
-    title: "Cennik i czas trwania",
+    title: "Lekcje i czas trwania",
     description:
       "Pierwsza lekcja próbna (30 min): ZA DARMO! Wybierz to, czego potrzebujesz, albo łącz według swoich celów.",
     monthlyLabel: "Lekcja próbna",
@@ -121,9 +121,7 @@ export const pl: LandingContent = {
     note: "Rezerwacja online przez Cal.com. Łatwa płatność — szczegóły wkrótce.",
     classTypesLabel: "Dostępne lekcje",
     features: [
-      { plain: "30 min → 11 € / 46,75 PLN", kind: "duration" },
-      { plain: "45 min → 16 € / 68 PLN", kind: "duration" },
-      { plain: "60 min → 20 € / 85 PLN", kind: "duration" },
+      { plain: "30, 45 lub 60 minut", kind: "duration" },
       {
         plain:
           "Hiszpański: konwersacje, ogólny, gramatyka, według celów",
@@ -136,21 +134,21 @@ export const pl: LandingContent = {
       },
       {
         before:
-          "Angielski biznesowy: komunikacja w firmie, spotkania, prezentacje — od 28 €/godz. (119 PLN/godz.). Napisz w ",
+          "Angielski biznesowy: komunikacja w firmie, spotkania, prezentacje. Napisz w ",
         link: { label: "Kontakcie", hrefKey: "contact" },
         after: ", aby uzyskać więcej informacji.",
         kind: "business",
       },
       {
         before:
-          "Hiszpański biznesowy: komunikacja w firmie, spotkania, prezentacje — od 28 €/godz. (119 PLN/godz.). Napisz w ",
+          "Hiszpański biznesowy: komunikacja w firmie, spotkania, prezentacje. Napisz w ",
         link: { label: "Kontakcie", hrefKey: "contact" },
         after: ", aby uzyskać więcej informacji.",
         kind: "business",
       },
       {
         before:
-          "Angielski i hiszpański w grupie (2–3 osoby) — 60 min, 15 € / 63,75 PLN za osobę. Napisz do mnie na WhatsApp lub przez ",
+          "Angielski i hiszpański w grupie (2–3 osoby) — 60 min. Napisz do mnie na WhatsApp lub przez ",
         link: { label: "formularz kontaktowy", hrefKey: "contact" },
         after: ", żeby ustalić szczegóły.",
         kind: "group",
@@ -180,7 +178,7 @@ export const pl: LandingContent = {
       question: "Czy oferujesz angielski i hiszpański biznesowy?",
       answer: {
         before:
-          "Tak. W sprawie angielskiego i hiszpańskiego biznesowego dla firm stawki zaczynają się od 28 €/godz. (119 PLN/godz.). Napisz do mnie w sekcji ",
+          "Tak. W sprawie angielskiego i hiszpańskiego biznesowego dla firm napisz do mnie w sekcji ",
         link: { label: "Kontakt", hrefKey: "contact" },
         after:
           " aby uzyskać indywidualną ofertę: lekcje indywidualne i w grupach 2–3-osobowych.",

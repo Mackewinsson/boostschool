@@ -24,7 +24,7 @@ export const es: LandingContent = {
       { label: "Clases", href: "#programas" },
       { label: "Metodología", href: "#resultados" },
       { label: "Testimonios", href: "#testimonios" },
-      { label: "Precios", href: "#planes" },
+      { label: "Clases", href: "#planes" },
       { label: "FAQ", href: "#faq" },
       { label: "Contacto", href: "#contacto" },
     ],
@@ -107,11 +107,11 @@ export const es: LandingContent = {
     mapEmbedTitle: "Bilingual Boost en Google Maps",
   },
   plansSection: {
-    label: "Precios",
-    title: "Precios y duración",
+    label: "Clases",
+    title: "Clases y duración",
   },
   plans: {
-    title: "Precios y duración",
+    title: "Clases y duración",
     description:
       "Primera clase de prueba (30 min): ¡GRATIS! Elige lo que necesites o combínalo según tus objetivos.",
     monthlyLabel: "Clase de prueba",
@@ -121,9 +121,7 @@ export const es: LandingContent = {
     note: "Reserva online con Cal.com. Pago fácil — detalles próximamente.",
     classTypesLabel: "Clases disponibles",
     features: [
-      { plain: "30 min → 11 €", kind: "duration" },
-      { plain: "45 min → 16 €", kind: "duration" },
-      { plain: "60 min → 20 €", kind: "duration" },
+      { plain: "30, 45 o 60 minutos", kind: "duration" },
       {
         plain:
           "Español: conversación práctica, general, gramática, por objetivos",
@@ -136,21 +134,21 @@ export const es: LandingContent = {
       },
       {
         before:
-          "Inglés de negocios: comunicación empresarial, reuniones, presentaciones — desde 28 €/hora. Escríbeme en ",
+          "Inglés de negocios: comunicación empresarial, reuniones, presentaciones. Escríbeme en ",
         link: { label: "Contacto", hrefKey: "contact" },
         after: " para más detalles.",
         kind: "business",
       },
       {
         before:
-          "Español de negocios: comunicación empresarial, reuniones, presentaciones — desde 28 €/hora. Escríbeme en ",
+          "Español de negocios: comunicación empresarial, reuniones, presentaciones. Escríbeme en ",
         link: { label: "Contacto", hrefKey: "contact" },
         after: " para más detalles.",
         kind: "business",
       },
       {
         before:
-          "Clases grupales de inglés y español (2–3 personas) — 60 min, 15 € por persona. Escríbeme por WhatsApp o usa el ",
+          "Clases grupales de inglés y español (2–3 personas) — 60 min. Escríbeme por WhatsApp o usa el ",
         link: { label: "formulario de contacto", hrefKey: "contact" },
         after: " para coordinar.",
         kind: "group",
@@ -180,7 +178,7 @@ export const es: LandingContent = {
       question: "¿Ofreces inglés y español empresarial?",
       answer: {
         before:
-          "Sí. Para inglés y español empresarial para empresas, las tarifas empiezan en 28 €/hora. Escríbeme en la sección ",
+          "Sí. Para inglés y español empresarial para empresas, escríbeme en la sección ",
         link: { label: "Contacto", hrefKey: "contact" },
         after:
           " para una propuesta personalizada: clases individuales y en grupos de 2-3 personas.",
