@@ -113,6 +113,40 @@ export type BlogSection = SectionHeading & {
   readingTimeLabel: string;
 };
 
+export type LeadMagnetFormCopy = {
+  nameLabel: string;
+  namePlaceholder: string;
+  emailLabel: string;
+  emailPlaceholder: string;
+  submitLabel: string;
+  privacyNote: string;
+  successTitle: string;
+  successBody: string;
+  downloadLabel: string;
+  errorGeneric: string;
+  errorName: string;
+  errorEmail: string;
+};
+
+export type LeadMagnetSection = SectionHeading & {
+  description: string;
+  bullets: string[];
+  form: LeadMagnetFormCopy;
+};
+
+export type LeadMagnetPageSection = {
+  metadata: {
+    title: string;
+    description: string;
+  };
+  label: string;
+  title: string;
+  subtitle: string;
+  backLabel: string;
+  bullets: string[];
+  form: LeadMagnetFormCopy;
+};
+
 export type LandingContent = {
   metadata: {
     title: string;
@@ -165,6 +199,8 @@ export type LandingContent = {
     cta: string;
   };
   mobileStickyCta: string;
+  leadMagnetSection: LeadMagnetSection;
+  leadMagnetPage: LeadMagnetPageSection;
   blogSection: BlogSection;
   blogPage: BlogPageSection;
   bookingPage: BookingPageSection;

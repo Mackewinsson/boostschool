@@ -17,6 +17,7 @@ import {
 } from "@/lib/site-links";
 import { GoogleReviewsEmbed } from "./google-reviews-embed";
 import { BlogSection } from "@/components/blog/blog-section";
+import { LeadMagnetSection } from "@/components/landing/lead-magnet-section";
 import { LinkedLineText } from "./linked-line";
 import { PricingFeatures } from "./pricing-features";
 import { Navbar } from "./navbar";
@@ -317,6 +318,8 @@ export function LandingPage({ locale }: LandingPageProps) {
           </div>
         </div>
       </section>
+
+      <LeadMagnetSection locale={locale} />
 
       <BlogSection locale={locale} />
 

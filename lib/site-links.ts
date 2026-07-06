@@ -16,6 +16,7 @@ const bilingualBoostMapsEmbedUrl =
 
 export const siteLinks = {
   blog: "/blog",
+  resources: "/recursos",
   booking: "/reserva",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_URL ?? contactPhone.whatsappUrl,
   contact: "#contacto",
