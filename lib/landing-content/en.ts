@@ -26,6 +26,7 @@ export const en: LandingContent = {
       { label: "Testimonials", href: "#testimonios" },
       { label: "Classes", href: "#planes" },
       { label: "FAQ", href: "#faq" },
+      { label: "Blog", href: "/blog" },
       { label: "Contact", href: "#contacto" },
     ],
   },
@@ -215,6 +216,33 @@ export const en: LandingContent = {
     cta: "Book your trial lesson",
   },
   mobileStickyCta: "Book your trial lesson",
+  blogSection: {
+    label: "Blog",
+    title: "Tips to learn with confidence",
+    viewAllLabel: "View all articles",
+    emptyLabel: "New articles are coming soon.",
+    readMoreLabel: "Read more",
+    readingTimeLabel: "{minutes} min read",
+  },
+  blogPage: {
+    metadata: {
+      title: "Blog | Bilingual Boost",
+      description:
+        "Practical tips to learn English and Spanish with confidence, real conversation, and habits that work.",
+    },
+    label: "Blog",
+    title: "Tips to learn with confidence",
+    subtitle:
+      "Clear, practical ideas to speak more freely, organize your study, and keep moving forward.",
+    backLabel: "Back to home",
+    emptyLabel: "No articles published in this language yet.",
+    readMoreLabel: "Read more",
+    readingTimeLabel: "{minutes} min read",
+    ctaTitle: "Want to practice this in class?",
+    ctaSubtitle: "Book your free trial lesson and we will build your personalized plan.",
+    ctaLabel: "Book your trial lesson",
+    backToBlogLabel: "Back to blog",
+  },
   bookingPage: {
     metadata: {
       title: "Book trial lesson | Bilingual Boost",

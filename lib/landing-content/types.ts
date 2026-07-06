@@ -88,6 +88,31 @@ export type BookingPageSection = {
   fallbackText: string;
 };
 
+export type BlogPageSection = {
+  metadata: {
+    title: string;
+    description: string;
+  };
+  label: string;
+  title: string;
+  subtitle: string;
+  backLabel: string;
+  emptyLabel: string;
+  readMoreLabel: string;
+  readingTimeLabel: string;
+  ctaTitle: string;
+  ctaSubtitle: string;
+  ctaLabel: string;
+  backToBlogLabel: string;
+};
+
+export type BlogSection = SectionHeading & {
+  viewAllLabel: string;
+  emptyLabel: string;
+  readMoreLabel: string;
+  readingTimeLabel: string;
+};
+
 export type LandingContent = {
   metadata: {
     title: string;
@@ -140,5 +165,7 @@ export type LandingContent = {
     cta: string;
   };
   mobileStickyCta: string;
+  blogSection: BlogSection;
+  blogPage: BlogPageSection;
   bookingPage: BookingPageSection;
 };

@@ -26,6 +26,7 @@ export const es: LandingContent = {
       { label: "Testimonios", href: "#testimonios" },
       { label: "Clases", href: "#planes" },
       { label: "FAQ", href: "#faq" },
+      { label: "Blog", href: "/blog" },
       { label: "Contacto", href: "#contacto" },
     ],
   },
@@ -215,6 +216,33 @@ export const es: LandingContent = {
     cta: "Reserva tu clase de prueba",
   },
   mobileStickyCta: "Reserva tu clase de prueba",
+  blogSection: {
+    label: "Blog",
+    title: "Tips para aprender con confianza",
+    viewAllLabel: "Ver todos los artículos",
+    emptyLabel: "Próximamente publicaremos nuevos artículos.",
+    readMoreLabel: "Leer más",
+    readingTimeLabel: "{minutes} min de lectura",
+  },
+  blogPage: {
+    metadata: {
+      title: "Blog | Bilingual Boost",
+      description:
+        "Consejos prácticos para aprender inglés y español con confianza, conversación real y hábitos que funcionan.",
+    },
+    label: "Blog",
+    title: "Tips para aprender con confianza",
+    subtitle:
+      "Ideas claras y prácticas para soltarte al hablar, organizar tu estudio y avanzar con buen rollo.",
+    backLabel: "Volver al inicio",
+    emptyLabel: "Aún no hay artículos publicados en este idioma.",
+    readMoreLabel: "Leer más",
+    readingTimeLabel: "{minutes} min de lectura",
+    ctaTitle: "¿Quieres practicar esto en clase?",
+    ctaSubtitle: "Reserva tu clase de prueba gratis y armamos tu plan personalizado.",
+    ctaLabel: "Reserva tu clase de prueba",
+    backToBlogLabel: "Volver al blog",
+  },
   bookingPage: {
     metadata: {
       title: "Reservar clase de prueba | Bilingual Boost",

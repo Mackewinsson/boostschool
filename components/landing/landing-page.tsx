@@ -16,6 +16,7 @@ import {
   siteLinks,
 } from "@/lib/site-links";
 import { GoogleReviewsEmbed } from "./google-reviews-embed";
+import { BlogSection } from "@/components/blog/blog-section";
 import { LinkedLineText } from "./linked-line";
 import { PricingFeatures } from "./pricing-features";
 import { Navbar } from "./navbar";
@@ -316,6 +317,8 @@ export function LandingPage({ locale }: LandingPageProps) {
           </div>
         </div>
       </section>
+
+      <BlogSection locale={locale} />
 
       {/* ── FAQ ─────────────────────────────────────────────────── */}
       <section id="faq" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-10">

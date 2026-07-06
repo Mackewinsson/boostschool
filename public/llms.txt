@@ -1,0 +1,28 @@
+# Bilingual Boost
+
+> Online English and Spanish classes with Paulina Poloca — personalized conversation-first lessons for learners in Latin America, Europe, and beyond.
+
+Bilingual Boost helps people speak English and Spanish with confidence through live online classes, a free 30-minute trial lesson, and practical language-learning content.
+
+## Main pages
+
+- Home: https://www.bilingualboost.online/
+- Book a free trial class: https://www.bilingualboost.online/reserva
+- Blog: https://www.bilingualboost.online/blog
+- Contact: https://www.bilingualboost.online/#contacto
+
+## About the teacher
+
+Paulina Poloca teaches English and Spanish online with an empathetic, conversation-first approach. She speaks three languages fluently and focuses on helping learners overcome fear of speaking.
+
+## Blog topics
+
+Language learning tips, speaking confidence, conversation practice, study habits, English and Spanish for everyday life and work.
+
+## Languages
+
+The site supports Spanish (default), English, and Polish via a language toggle. Blog posts are published per locale under /blog.
+
+## Optional
+
+- Sitemap: https://www.bilingualboost.online/sitemap.xml

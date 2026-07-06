@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { LandingContent } from "@/lib/landing-content";
 import type { Locale } from "@/lib/locale";
@@ -35,14 +36,14 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-10">
         {/* Logo */}
-        <a href="#" className="flex shrink-0 items-center">
+        <Link href="/" className="flex shrink-0 items-center">
           <span className="text-xl font-extrabold tracking-tight text-fg">
             {brand.name.split(" ")[0]}
           </span>
           <span className="ml-1.5 bg-gradient-to-r from-accent to-accent-alt bg-clip-text text-xl font-extrabold tracking-tight text-transparent">
             {brand.name.split(" ")[1]}
           </span>
-        </a>
+        </Link>
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-7 md:flex">

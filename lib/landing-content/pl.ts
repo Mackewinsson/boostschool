@@ -26,6 +26,7 @@ export const pl: LandingContent = {
       { label: "Opinie", href: "#testimonios" },
       { label: "Lekcje", href: "#planes" },
       { label: "FAQ", href: "#faq" },
+      { label: "Blog", href: "/blog" },
       { label: "Kontakt", href: "#contacto" },
     ],
   },
@@ -215,6 +216,33 @@ export const pl: LandingContent = {
     cta: "Zarezerwuj lekcję próbną",
   },
   mobileStickyCta: "Zarezerwuj lekcję próbną",
+  blogSection: {
+    label: "Blog",
+    title: "Porady, jak uczyć się z pewnością",
+    viewAllLabel: "Zobacz wszystkie artykuły",
+    emptyLabel: "Wkrótce opublikujemy nowe artykuły.",
+    readMoreLabel: "Czytaj więcej",
+    readingTimeLabel: "{minutes} min czytania",
+  },
+  blogPage: {
+    metadata: {
+      title: "Blog | Bilingual Boost",
+      description:
+        "Praktyczne porady, jak uczyć się angielskiego i hiszpańskiego z pewnością, przez rozmowę i skuteczne nawyki.",
+    },
+    label: "Blog",
+    title: "Porady, jak uczyć się z pewnością",
+    subtitle:
+      "Jasne, praktyczne pomysły, żeby swobodniej mówić, uporządkować naukę i iść do przodu.",
+    backLabel: "Wróć na stronę główną",
+    emptyLabel: "Brak artykułów w tym języku.",
+    readMoreLabel: "Czytaj więcej",
+    readingTimeLabel: "{minutes} min czytania",
+    ctaTitle: "Chcesz przećwiczyć to na lekcji?",
+    ctaSubtitle: "Zarezerwuj darmową lekcję próbną i ułożymy Twój plan.",
+    ctaLabel: "Zarezerwuj lekcję próbną",
+    backToBlogLabel: "Wróć do bloga",
+  },
   bookingPage: {
     metadata: {
       title: "Rezerwacja lekcji próbnej | Bilingual Boost",
