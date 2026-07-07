@@ -60,7 +60,14 @@ export type ContactSection = {
     hint: string;
     ariaLabel: string;
   };
-  note: string;
+  successTitle: string;
+  successBody: string;
+  errorGeneric: string;
+  errorName: string;
+  errorEmail: string;
+  errorMessage: string;
+  privacyNote: string;
+  privacyLinkLabel: string;
 };
 
 export type UiStrings = {
@@ -68,6 +75,7 @@ export type UiStrings = {
   themeToggleAria: string;
   languageToggleAria: string;
   copyright: string;
+  privacyLinkLabel: string;
 };
 
 export type TestimonialsEmbed = {
@@ -120,6 +128,7 @@ export type LeadMagnetFormCopy = {
   emailPlaceholder: string;
   submitLabel: string;
   privacyNote: string;
+  privacyLinkLabel: string;
   successTitle: string;
   successBody: string;
   downloadLabel: string;

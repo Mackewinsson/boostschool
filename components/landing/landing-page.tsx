@@ -20,8 +20,8 @@ import { BlogSection } from "@/components/blog/blog-section";
 import { LeadMagnetSection } from "@/components/landing/lead-magnet-section";
 import { LinkedLineText } from "./linked-line";
 import { PricingFeatures } from "./pricing-features";
+import { ContactForm } from "./contact-form";
 import { Navbar } from "./navbar";
-import { WhatsAppCta } from "./whatsapp-cta";
 
 // Íconos de sección (orden = orden del array en landing-content)
 const featureIcons = [MessageSquare, Users, Clock];
@@ -380,54 +380,7 @@ export function LandingPage({ locale }: LandingPageProps) {
 
         <div className="mx-auto mt-10 max-w-lg">
           <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
-            <form action="#" className="space-y-4">
-              <div>
-                <label htmlFor="contact-name" className="block text-sm font-medium text-fg">
-                  {contact.fields.name}
-                </label>
-                <input
-                  id="contact-name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
-                  placeholder={contact.fields.namePlaceholder}
-                  className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label htmlFor="contact-email" className="block text-sm font-medium text-fg">
-                  {contact.fields.email}
-                </label>
-                <input
-                  id="contact-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder={contact.fields.emailPlaceholder}
-                  className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label htmlFor="contact-message" className="block text-sm font-medium text-fg">
-                  {contact.fields.message}
-                </label>
-                <textarea
-                  id="contact-message"
-                  name="message"
-                  rows={4}
-                  placeholder={contact.fields.messagePlaceholder}
-                  className="mt-1.5 w-full resize-y rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-                />
-              </div>
-              <button
-                type="submit"
-                className="btn-glow inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
-              >
-                {contact.fields.submit}
-              </button>
-            </form>
-            <p className="mt-4 text-center text-xs text-fg-faint">{contact.note}</p>
-            <WhatsAppCta whatsapp={contact.whatsapp} />
+            <ContactForm locale={locale} copy={contact} />
           </div>
         </div>
       </section>
@@ -457,6 +410,12 @@ export function LandingPage({ locale }: LandingPageProps) {
                   {link.label}
                 </a>
               ))}
+              <a
+                href="/privacidad"
+                className="text-sm text-fg-muted transition hover:text-fg"
+              >
+                {ui.privacyLinkLabel}
+              </a>
             </nav>
           </div>
         </div>

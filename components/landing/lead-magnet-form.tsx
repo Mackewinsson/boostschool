@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { LeadMagnetFormCopy } from "@/lib/landing-content/types";
 import type { Locale } from "@/lib/locale";
+import { PrivacyNote } from "./privacy-note";
 
 type LeadMagnetFormProps = {
   locale: Locale;
@@ -128,7 +129,7 @@ export function LeadMagnetForm({
           {errorMessage}
         </p>
       ) : null}
-      <p className="text-center text-xs text-fg-faint">{copy.privacyNote}</p>
+      <PrivacyNote note={copy.privacyNote} linkLabel={copy.privacyLinkLabel} />
     </form>
   );
 }
