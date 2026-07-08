@@ -255,7 +255,7 @@ export const pl: LandingContent = {
   },
   leadMagnetPage: {
     metadata: {
-      title: "Darmowy przewodnik | Bilingual Boost",
+      title: "Darmowy przewodnik",
       description:
         "Pobierz darmowy przewodnik Bilingual Boost, aby mówić po angielsku lub hiszpańsku z większą pewnością.",
     },

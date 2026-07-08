@@ -255,7 +255,7 @@ export const en: LandingContent = {
   },
   leadMagnetPage: {
     metadata: {
-      title: "Free guide | Bilingual Boost",
+      title: "Free guide",
       description:
         "Download the free Bilingual Boost guide to speak English or Spanish with more confidence.",
     },
