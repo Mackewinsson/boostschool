@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { LandingContent } from "@/lib/landing-content";
 import type { Locale } from "@/lib/locale";
 import { externalLinkProps, siteLinks } from "@/lib/site-links";
+import { PortalNavLink } from "./portal-nav-link";
 import { LanguageToggle } from "./language-toggle";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -56,6 +57,7 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
               {link.label}
             </a>
           ))}
+          <PortalNavLink label={ui.portalNavLabel} />
         </nav>
 
         {/* Desktop controls */}
@@ -127,6 +129,7 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
                 {link.label}
               </a>
             ))}
+            <PortalNavLink label={ui.portalNavLabel} />
           </nav>
           <a
             href={siteLinks.booking}

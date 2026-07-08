@@ -76,6 +76,7 @@ export type UiStrings = {
   languageToggleAria: string;
   copyright: string;
   privacyLinkLabel: string;
+  portalNavLabel: string;
 };
 
 export type TestimonialsEmbed = {

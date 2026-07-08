@@ -12,6 +12,7 @@ export const es: LandingContent = {
     languageToggleAria: "Cambiar idioma",
     copyright: "Todos los derechos reservados.",
     privacyLinkLabel: "Privacidad",
+    portalNavLabel: "Mi área",
   },
   brand: {
     name: "Bilingual Boost",
