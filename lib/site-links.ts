@@ -74,6 +74,14 @@ export function isExternalHref(href: string): boolean {
   return href.startsWith("http");
 }
 
+/** Hash section links must point at the home page from any route. */
+export function resolveNavHref(href: string): string {
+  if (href.startsWith("#")) {
+    return `/${href}`;
+  }
+  return href;
+}
+
 export function externalLinkProps(href: string) {
   return isExternalHref(href)
     ? { target: "_blank" as const, rel: "noopener noreferrer" }

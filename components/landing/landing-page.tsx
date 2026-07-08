@@ -7,12 +7,14 @@ import {
   Users,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { Suspense } from "react";
 import { getLandingContent } from "@/lib/landing-content";
 import type { Locale } from "@/lib/locale";
 import {
   externalLinkProps,
   resolveHrefKey,
+  resolveNavHref,
   siteLinks,
 } from "@/lib/site-links";
 import { GoogleReviewsEmbed } from "./google-reviews-embed";
@@ -403,19 +405,31 @@ export function LandingPage({ locale }: LandingPageProps) {
             <nav className="flex flex-wrap gap-5">
               {nav.links.map((link) => (
                 <a
-                  key={link.href}
-                  href={link.href}
+                  key={`${link.href}-${link.label}`}
+                  href={resolveNavHref(link.href)}
                   className="text-sm text-fg-muted transition hover:text-fg"
                 >
                   {link.label}
                 </a>
               ))}
-              <a
+              <Link
+                href="/blog"
+                className="text-sm text-fg-muted transition hover:text-fg"
+              >
+                {ui.blogLinkLabel}
+              </Link>
+              <Link
+                href="/recursos"
+                className="text-sm text-fg-muted transition hover:text-fg"
+              >
+                {ui.resourcesLinkLabel}
+              </Link>
+              <Link
                 href="/privacidad"
                 className="text-sm text-fg-muted transition hover:text-fg"
               >
                 {ui.privacyLinkLabel}
-              </a>
+              </Link>
             </nav>
           </div>
         </div>

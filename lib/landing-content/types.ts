@@ -77,6 +77,9 @@ export type UiStrings = {
   copyright: string;
   privacyLinkLabel: string;
   portalNavLabel: string;
+  signInNavLabel: string;
+  blogLinkLabel: string;
+  resourcesLinkLabel: string;
 };
 
 export type TestimonialsEmbed = {
