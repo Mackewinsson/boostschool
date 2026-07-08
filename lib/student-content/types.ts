@@ -39,15 +39,11 @@ export type StudentContent = {
     searchPlaceholder: string;
     searchEmpty: string;
     deleteLabel: string;
-    assignTitle: string;
+    assignButton: string;
     assignHint: string;
-    studentLabel: string;
-    studentPlaceholder: string;
-    saveAssignments: string;
-    assigned: string;
-    notAssigned: string;
     assignAllLabel: string;
     completedLabel: string;
+    noStudents: string;
     successAdded: string;
     successAssigned: string;
     errorGeneric: string;

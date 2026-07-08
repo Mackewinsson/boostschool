@@ -1,42 +1,22 @@
 "use client";
 
-import { Check, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ChevronDown, Search, UserPlus } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { StudentContent } from "@/lib/student-content/types";
-import {
-  detectMaterialKind,
-} from "@/lib/materials/material-kind";
+import { detectMaterialKind } from "@/lib/materials/material-kind";
 import type { Assignment, Material, StudentSummary } from "@/lib/materials/types";
+import { MaterialAssignPanel } from "./material-assign-panel";
 import { MaterialKindIcon } from "./material-kind-icon";
 
 type TeacherDashboardProps = {
   copy: StudentContent["teacher"];
 };
 
-function formatStudentLabel(
-  student: StudentSummary,
-  assignments: Assignment[],
-): string {
-  const name =
-    student.firstName || student.lastName
-      ? `${student.firstName ?? ""} ${student.lastName ?? ""}`.trim()
-      : student.email;
-  const studentAssignments = assignments.filter((a) => a.clerkUserId === student.id);
-  const assignedCount = studentAssignments.length;
-  const completedCount = studentAssignments.filter((a) => a.completedAt).length;
-  const emailSuffix = student.email && name !== student.email ? ` (${student.email})` : "";
-  const counts =
-    assignedCount > 0
-      ? ` (${assignedCount}${completedCount > 0 ? ` · ${completedCount} ✓` : ""})`
-      : "";
-  return `${name}${emailSuffix}${counts}`;
-}
-
 export function TeacherDashboard({ copy }: TeacherDashboardProps) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [expandedMaterialId, setExpandedMaterialId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -45,8 +25,7 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const activeStudentId = selectedStudentId || students[0]?.id || "";
+  const listRef = useRef<HTMLUListElement>(null);
 
   const filteredMaterials = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -60,6 +39,14 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
         material.url.toLowerCase().includes(query),
     );
   }, [materials, searchQuery]);
+
+  async function refreshAssignments() {
+    const response = await fetch("/api/alumno/assignments");
+    if (response.ok) {
+      const data = (await response.json()) as { assignments?: Assignment[] };
+      setAssignments(data.assignments ?? []);
+    }
+  }
 
   async function loadData() {
     const [materialsRes, studentsRes, assignmentsRes] = await Promise.all([
@@ -144,11 +131,23 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
         setError(copy.errorGeneric);
         return;
       }
+      const data = (await response.json()) as { material?: Material };
       setTitle("");
       setDescription("");
       setUrl("");
+      setSearchQuery("");
       setMessage(copy.successAdded);
       await loadData();
+      // Open the assignment panel of the just-created material so the next
+      // step (assigning it) is obvious.
+      if (data.material) {
+        setExpandedMaterialId(data.material.id);
+        requestAnimationFrame(() => {
+          listRef.current
+            ?.querySelector(`[data-material-id="${data.material?.id}"]`)
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      }
     } catch {
       setError(copy.errorGeneric);
     } finally {
@@ -161,6 +160,9 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
     setError(null);
     try {
       await fetch(`/api/alumno/materials/${id}`, { method: "DELETE" });
+      if (expandedMaterialId === id) {
+        setExpandedMaterialId(null);
+      }
       await loadData();
     } catch {
       setError(copy.errorGeneric);
@@ -169,26 +171,10 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
     }
   }
 
-  function getAssignment(materialId: string, studentId = activeStudentId): Assignment | undefined {
-    return assignments.find(
-      (assignment) =>
-        assignment.clerkUserId === studentId && assignment.materialId === materialId,
-    );
-  }
-
-  function isAssigned(materialId: string): boolean {
-    return Boolean(getAssignment(materialId));
-  }
-
-  async function toggleAssignment(materialId: string, studentId = activeStudentId) {
-    if (!studentId) {
-      return;
-    }
+  async function toggleAssignment(materialId: string, studentId: string, assigned: boolean) {
     setSaving(true);
     setError(null);
     setMessage(null);
-    const assigned = isAssigned(materialId);
-
     try {
       const response = await fetch("/api/alumno/assignments", {
         method: assigned ? "DELETE" : "POST",
@@ -200,11 +186,7 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
         return;
       }
       setMessage(copy.successAssigned);
-      const assignmentsRes = await fetch("/api/alumno/assignments");
-      if (assignmentsRes.ok) {
-        const data = (await assignmentsRes.json()) as { assignments?: Assignment[] };
-        setAssignments(data.assignments ?? []);
-      }
+      await refreshAssignments();
     } catch {
       setError(copy.errorGeneric);
     } finally {
@@ -213,15 +195,18 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
   }
 
   async function assignToAll(materialId: string) {
-    if (students.length === 0) {
-      return;
-    }
     setSaving(true);
     setError(null);
     setMessage(null);
-
     try {
-      const unassigned = students.filter((student) => !getAssignment(materialId, student.id));
+      const unassigned = students.filter(
+        (student) =>
+          !assignments.some(
+            (assignment) =>
+              assignment.materialId === materialId &&
+              assignment.clerkUserId === student.id,
+          ),
+      );
       await Promise.all(
         unassigned.map((student) =>
           fetch("/api/alumno/assignments", {
@@ -232,16 +217,16 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
         ),
       );
       setMessage(copy.successAssigned);
-      const assignmentsRes = await fetch("/api/alumno/assignments");
-      if (assignmentsRes.ok) {
-        const data = (await assignmentsRes.json()) as { assignments?: Assignment[] };
-        setAssignments(data.assignments ?? []);
-      }
+      await refreshAssignments();
     } catch {
       setError(copy.errorGeneric);
     } finally {
       setSaving(false);
     }
+  }
+
+  function assignedCount(materialId: string): number {
+    return assignments.filter((assignment) => assignment.materialId === materialId).length;
   }
 
   if (loading) {
@@ -330,107 +315,88 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
         ) : filteredMaterials.length === 0 ? (
           <p className="mt-4 text-sm text-fg-muted">{copy.searchEmpty}</p>
         ) : (
-          <ul className="mt-4 space-y-3">
-            {filteredMaterials.map((material) => (
+          <ul ref={listRef} className="mt-4 space-y-3">
+            {filteredMaterials.map((material) => {
+              const expanded = expandedMaterialId === material.id;
+              const count = assignedCount(material.id);
+              return (
                 <li
                   key={material.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+                  data-material-id={material.id}
+                  className={`rounded-2xl border bg-card p-4 transition ${
+                    expanded ? "border-accent/40" : "border-border"
+                  }`}
                 >
-                  <div className="flex min-w-0 items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-from/20 text-accent">
-                      <MaterialKindIcon kind={detectMaterialKind(material.url)} size={18} />
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-from/20 text-accent">
+                        <MaterialKindIcon kind={detectMaterialKind(material.url)} size={18} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-fg">{material.title}</p>
+                        {material.description ? (
+                          <p className="mt-1 text-sm text-fg-muted">{material.description}</p>
+                        ) : null}
+                        <p className="mt-1 truncate text-xs text-fg-faint">{material.url}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-fg">{material.title}</p>
-                      {material.description ? (
-                        <p className="mt-1 text-sm text-fg-muted">{material.description}</p>
-                      ) : null}
-                      <p className="mt-1 truncate text-xs text-fg-faint">{material.url}</p>
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 flex-wrap gap-2">
-                    {students.length > 0 ? (
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => void assignToAll(material.id)}
-                        disabled={saving}
-                        className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent disabled:opacity-60"
+                        onClick={() =>
+                          setExpandedMaterialId(expanded ? null : material.id)
+                        }
+                        aria-expanded={expanded}
+                        className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${
+                          expanded
+                            ? "border-accent/40 bg-accent/10 text-accent"
+                            : "border-border text-fg-muted hover:border-accent/30 hover:text-accent"
+                        }`}
                       >
-                        {copy.assignAllLabel}
-                      </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      onClick={() => void handleDeleteMaterial(material.id)}
-                      disabled={saving}
-                      className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-fg-muted transition hover:border-red-400/40 hover:text-red-400 disabled:opacity-60"
-                    >
-                      {copy.deleteLabel}
-                    </button>
-                  </div>
-                </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
-        <h2 className="text-xl font-bold text-fg">{copy.assignTitle}</h2>
-        <p className="mt-2 text-sm text-fg-muted">{copy.assignHint}</p>
-
-        <div className="mt-5">
-          <label htmlFor="student-select" className="block text-sm font-medium text-fg">
-            {copy.studentLabel}
-          </label>
-          <select
-            id="student-select"
-            value={activeStudentId}
-            onChange={(event) => setSelectedStudentId(event.target.value)}
-            className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg focus:border-accent/50 focus:outline-none"
-          >
-            <option value="">{copy.studentPlaceholder}</option>
-            {students.map((student) => (
-              <option key={student.id} value={student.id}>
-                {formatStudentLabel(student, assignments)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {activeStudentId && materials.length > 0 ? (
-          <ul className="mt-5 space-y-2">
-            {materials.map((material) => {
-              const assigned = isAssigned(material.id);
-              const assignment = getAssignment(material.id);
-              const completed = Boolean(assignment?.completedAt);
-              return (
-                <li key={material.id}>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => void toggleAssignment(material.id)}
-                    className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition ${
-                      assigned
-                        ? "border-accent/40 bg-accent/10 text-fg"
-                        : "border-border bg-canvas text-fg-muted hover:border-brand-from/30"
-                    }`}
-                  >
-                    <span className="min-w-0 truncate">{material.title}</span>
-                    <span className="flex shrink-0 items-center gap-2 text-xs font-medium">
-                      {assigned && completed ? (
-                        <span className="inline-flex items-center gap-1 text-accent">
-                          <Check size={14} aria-hidden="true" />
-                          {copy.completedLabel}
+                        <UserPlus size={15} aria-hidden="true" />
+                        {copy.assignButton}
+                        <span
+                          className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${
+                            count > 0 ? "bg-accent/15 text-accent" : "bg-canvas text-fg-faint"
+                          }`}
+                        >
+                          {count}/{students.length}
                         </span>
-                      ) : null}
-                      <span>{assigned ? copy.assigned : copy.notAssigned}</span>
-                    </span>
-                  </button>
+                        <ChevronDown
+                          size={14}
+                          aria-hidden="true"
+                          className={`transition-transform ${expanded ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteMaterial(material.id)}
+                        disabled={saving}
+                        className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-fg-muted transition hover:border-red-400/40 hover:text-red-400 disabled:opacity-60"
+                      >
+                        {copy.deleteLabel}
+                      </button>
+                    </div>
+                  </div>
+
+                  {expanded ? (
+                    <MaterialAssignPanel
+                      materialId={material.id}
+                      students={students}
+                      assignments={assignments}
+                      saving={saving}
+                      copy={copy}
+                      onToggle={(materialId, studentId, assigned) =>
+                        void toggleAssignment(materialId, studentId, assigned)
+                      }
+                      onAssignAll={(materialId) => void assignToAll(materialId)}
+                    />
+                  ) : null}
                 </li>
               );
             })}
           </ul>
-        ) : null}
+        )}
       </section>
 
       {message ? <p className="mt-6 text-sm text-accent">{message}</p> : null}
