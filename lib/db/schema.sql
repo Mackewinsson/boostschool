@@ -11,8 +11,12 @@ CREATE TABLE IF NOT EXISTS student_materials (
   clerk_user_id TEXT NOT NULL,
   material_id UUID NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
   assigned_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  completed_at TIMESTAMPTZ,
   PRIMARY KEY (clerk_user_id, material_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_student_materials_user
   ON student_materials (clerk_user_id);
+
+ALTER TABLE student_materials
+  ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;

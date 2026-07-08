@@ -18,6 +18,10 @@ export type StudentContent = {
     emptyTitle: string;
     emptyBody: string;
     openLabel: string;
+    newBadge: string;
+    markDone: string;
+    markUndone: string;
+    doneBadge: string;
   };
   teacher: {
     title: string;
@@ -32,6 +36,8 @@ export type StudentContent = {
     addButton: string;
     materialsTitle: string;
     materialsEmpty: string;
+    searchPlaceholder: string;
+    searchEmpty: string;
     deleteLabel: string;
     assignTitle: string;
     assignHint: string;
@@ -40,6 +46,8 @@ export type StudentContent = {
     saveAssignments: string;
     assigned: string;
     notAssigned: string;
+    assignAllLabel: string;
+    completedLabel: string;
     successAdded: string;
     successAssigned: string;
     errorGeneric: string;

@@ -9,12 +9,15 @@ type MaterialRow = {
   url: string;
   locale: string;
   created_at: string;
+  assigned_at?: string;
+  completed_at?: string | null;
 };
 
 type AssignmentRow = {
   clerk_user_id: string;
   material_id: string;
   assigned_at: string;
+  completed_at: string | null;
 };
 
 function mapMaterial(row: MaterialRow): Material {
@@ -25,6 +28,8 @@ function mapMaterial(row: MaterialRow): Material {
     url: row.url,
     locale: row.locale as Locale,
     createdAt: row.created_at,
+    ...(row.assigned_at !== undefined ? { assignedAt: row.assigned_at } : {}),
+    ...(row.completed_at !== undefined ? { completedAt: row.completed_at } : {}),
   };
 }
 
@@ -65,13 +70,13 @@ export async function listAssignments(userId?: string): Promise<Assignment[]> {
   const sql = getDb();
   const rows = (userId
     ? await sql`
-        SELECT clerk_user_id, material_id, assigned_at
+        SELECT clerk_user_id, material_id, assigned_at, completed_at
         FROM student_materials
         WHERE clerk_user_id = ${userId}
         ORDER BY assigned_at DESC
       `
     : await sql`
-        SELECT clerk_user_id, material_id, assigned_at
+        SELECT clerk_user_id, material_id, assigned_at, completed_at
         FROM student_materials
         ORDER BY assigned_at DESC
       `) as AssignmentRow[];
@@ -80,6 +85,7 @@ export async function listAssignments(userId?: string): Promise<Assignment[]> {
     clerkUserId: row.clerk_user_id,
     materialId: row.material_id,
     assignedAt: row.assigned_at,
+    completedAt: row.completed_at,
   }));
 }
 
@@ -111,11 +117,27 @@ export async function unassignMaterial(
 export async function listMaterialsForStudent(userId: string): Promise<Material[]> {
   const sql = getDb();
   const rows = (await sql`
-    SELECT m.id, m.title, m.description, m.url, m.locale, m.created_at
+    SELECT m.id, m.title, m.description, m.url, m.locale, m.created_at,
+           sm.assigned_at, sm.completed_at
     FROM materials m
     INNER JOIN student_materials sm ON sm.material_id = m.id
     WHERE sm.clerk_user_id = ${userId}
     ORDER BY sm.assigned_at DESC
   `) as MaterialRow[];
   return rows.map(mapMaterial);
+}
+
+export async function setCompletion(
+  userId: string,
+  materialId: string,
+  completed: boolean,
+): Promise<boolean> {
+  const sql = getDb();
+  const rows = (await sql`
+    UPDATE student_materials
+    SET completed_at = ${completed ? new Date().toISOString() : null}
+    WHERE clerk_user_id = ${userId} AND material_id = ${materialId}::uuid
+    RETURNING clerk_user_id
+  `) as { clerk_user_id: string }[];
+  return rows.length > 0;
 }

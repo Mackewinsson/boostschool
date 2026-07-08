@@ -2,6 +2,8 @@ import type { Locale } from "@/lib/locale";
 
 export type Role = "teacher" | "student";
 
+export type MaterialKind = "video" | "document" | "audio" | "link";
+
 export type Material = {
   id: string;
   title: string;
@@ -9,6 +11,8 @@ export type Material = {
   url: string;
   locale: Locale;
   createdAt: string;
+  assignedAt?: string;
+  completedAt?: string | null;
 };
 
 export type StudentSummary = {
@@ -22,4 +26,5 @@ export type Assignment = {
   clerkUserId: string;
   materialId: string;
   assignedAt: string;
+  completedAt: string | null;
 };

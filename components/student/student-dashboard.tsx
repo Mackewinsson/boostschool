@@ -12,6 +12,7 @@ type StudentDashboardProps = {
 export function StudentDashboard({ copy }: StudentDashboardProps) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -30,6 +31,23 @@ export function StudentDashboard({ copy }: StudentDashboardProps) {
     void load();
   }, []);
 
+  async function handleToggleDone(materialId: string, completed: boolean) {
+    setTogglingId(materialId);
+    try {
+      const response = await fetch("/api/alumno/my-materials", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ materialId, completed }),
+      });
+      if (response.ok) {
+        const data = (await response.json()) as { materials?: Material[] };
+        setMaterials(data.materials ?? []);
+      }
+    } finally {
+      setTogglingId(null);
+    }
+  }
+
   if (loading) {
     return <p className="mt-10 text-sm text-fg-muted">…</p>;
   }
@@ -41,8 +59,14 @@ export function StudentDashboard({ copy }: StudentDashboardProps) {
       <MaterialsGrid
         materials={materials}
         openLabel={copy.openLabel}
+        newBadge={copy.newBadge}
+        markDone={copy.markDone}
+        markUndone={copy.markUndone}
+        doneBadge={copy.doneBadge}
         emptyTitle={copy.emptyTitle}
         emptyBody={copy.emptyBody}
+        onToggleDone={handleToggleDone}
+        togglingId={togglingId}
       />
     </>
   );
