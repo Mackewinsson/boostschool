@@ -25,9 +25,9 @@ export const en: LandingContent = {
   nav: {
     ctaLabel: "Book your trial lesson",
     links: [
-      { label: "About me", href: "#sobre-mi" },
       { label: "Classes", href: "#programas" },
       { label: "Method", href: "#resultados" },
+      { label: "About me", href: "#sobre-mi" },
       { label: "Testimonials", href: "#testimonios" },
       { label: "Pricing", href: "#planes" },
       { label: "FAQ", href: "#faq" },

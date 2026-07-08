@@ -25,9 +25,9 @@ export const pl: LandingContent = {
   nav: {
     ctaLabel: "Zarezerwuj lekcję próbną",
     links: [
-      { label: "O mnie", href: "#sobre-mi" },
       { label: "Lekcje", href: "#programas" },
       { label: "Metoda", href: "#resultados" },
+      { label: "O mnie", href: "#sobre-mi" },
       { label: "Opinie", href: "#testimonios" },
       { label: "Cennik", href: "#planes" },
       { label: "FAQ", href: "#faq" },

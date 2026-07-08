@@ -146,6 +146,80 @@ export function LandingPage({ locale }: LandingPageProps) {
         </div>
       </section>
 
+      {/* ── FEATURES ────────────────────────────────────────────── */}
+      <section
+        id="programas"
+        className="border-y border-section-border bg-section py-20"
+      >
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-10">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
+            {featuresSection.label}
+          </p>
+          <h2 className="mt-3 max-w-2xl text-3xl font-bold sm:text-4xl">
+            {featuresSection.title}
+          </h2>
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {features.map((feature, i) => {
+              const Icon = featureIcons[i];
+              return (
+                <article
+                  key={feature.title}
+                  className="rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-from/25 hover:bg-card-hover"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-from/20 to-brand-to/20 text-accent">
+                    <Icon size={20} />
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-fg-muted">
+                    {feature.description}
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── OUTCOMES ────────────────────────────────────────────── */}
+      <section id="resultados" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-10">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-xl">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent-alt">
+              {outcomesSection.label}
+            </p>
+            <h2 className="mt-3 text-3xl font-bold sm:text-4xl">
+              {outcomesSection.title}
+            </h2>
+          </div>
+          <a
+            href={siteLinks.booking}
+            className="inline-flex shrink-0 items-center justify-center rounded-xl border border-accent-alt/30 bg-brand-to/10 px-5 py-2.5 text-sm font-semibold text-accent-alt transition-all duration-300 hover:bg-brand-to/20"
+            {...bookingLinkProps}
+          >
+            {outcomesSection.linkText}
+          </a>
+        </div>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {outcomes.map((outcome, i) => {
+            const Icon = outcomeIcons[i];
+            return (
+              <article
+                key={outcome.title}
+                className="rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-to/25 hover:bg-card-hover"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-to/20 to-brand-from/20 text-accent-alt">
+                  <Icon size={20} />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold">{outcome.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-fg-muted">
+                  {outcome.description}
+                </p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
       {/* ── ABOUT ───────────────────────────────────────────────── */}
       <section
         id="sobre-mi"
@@ -164,7 +238,6 @@ export function LandingPage({ locale }: LandingPageProps) {
                 width={600}
                 height={600}
                 className="aspect-square w-full object-cover"
-                priority
               />
             </div>
             <div className="space-y-4">
@@ -174,80 +247,6 @@ export function LandingPage({ locale }: LandingPageProps) {
                 </p>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FEATURES ────────────────────────────────────────────── */}
-      <section id="programas" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-10">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
-          {featuresSection.label}
-        </p>
-        <h2 className="mt-3 max-w-2xl text-3xl font-bold sm:text-4xl">
-          {featuresSection.title}
-        </h2>
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {features.map((feature, i) => {
-            const Icon = featureIcons[i];
-            return (
-              <article
-                key={feature.title}
-                className="rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-from/25 hover:bg-card-hover"
-              >
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-from/20 to-brand-to/20 text-accent">
-                  <Icon size={20} />
-                </div>
-                <h3 className="mt-5 text-lg font-semibold">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-fg-muted">
-                  {feature.description}
-                </p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ── OUTCOMES ────────────────────────────────────────────── */}
-      <section
-        id="resultados"
-        className="border-y border-section-border bg-section py-20"
-      >
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-10">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-xl">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent-alt">
-                {outcomesSection.label}
-              </p>
-              <h2 className="mt-3 text-3xl font-bold sm:text-4xl">
-                {outcomesSection.title}
-              </h2>
-            </div>
-            <a
-              href={siteLinks.booking}
-              className="inline-flex shrink-0 items-center justify-center rounded-xl border border-accent-alt/30 bg-brand-to/10 px-5 py-2.5 text-sm font-semibold text-accent-alt transition-all duration-300 hover:bg-brand-to/20"
-              {...bookingLinkProps}
-            >
-              {outcomesSection.linkText}
-            </a>
-          </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {outcomes.map((outcome, i) => {
-              const Icon = outcomeIcons[i];
-              return (
-                <article
-                  key={outcome.title}
-                  className="rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-to/25 hover:bg-card-hover"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-to/20 to-brand-from/20 text-accent-alt">
-                    <Icon size={20} />
-                  </div>
-                  <h3 className="mt-5 text-lg font-semibold">{outcome.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-fg-muted">
-                    {outcome.description}
-                  </p>
-                </article>
-              );
-            })}
           </div>
         </div>
       </section>
@@ -321,10 +320,6 @@ export function LandingPage({ locale }: LandingPageProps) {
         </div>
       </section>
 
-      <LeadMagnetSection locale={locale} />
-
-      <BlogSection locale={locale} />
-
       {/* ── FAQ ─────────────────────────────────────────────────── */}
       <section id="faq" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-10">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
@@ -348,8 +343,10 @@ export function LandingPage({ locale }: LandingPageProps) {
         </div>
       </section>
 
+      <LeadMagnetSection locale={locale} />
+
       {/* ── FINAL CTA BANNER ────────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-10">
+      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-10">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-from/40 via-border to-brand-to/40 p-px">
           <div className="relative overflow-hidden rounded-3xl bg-canvas-up px-8 py-14 text-center sm:px-16">
             <div className="pointer-events-none absolute left-1/2 top-0 h-60 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-from/20 blur-[80px]" />
@@ -386,6 +383,8 @@ export function LandingPage({ locale }: LandingPageProps) {
           </div>
         </div>
       </section>
+
+      <BlogSection locale={locale} />
 
       {/* ── FOOTER ──────────────────────────────────────────────── */}
       <footer className="border-t border-border bg-canvas">
