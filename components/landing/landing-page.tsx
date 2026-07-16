@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
 import { getLandingContent } from "@/lib/landing-content";
 import type { Locale } from "@/lib/locale";
 import {
@@ -262,15 +261,7 @@ export function LandingPage({ locale }: LandingPageProps) {
         <h2 className="mt-3 max-w-2xl text-3xl font-bold sm:text-4xl">
           {testimonialsSection.title}
         </h2>
-        <Suspense
-          fallback={
-            <p className="mt-10 text-center text-sm text-fg-muted">
-              {testimonialsEmbed.fallbackText}
-            </p>
-          }
-        >
-          <GoogleReviewsEmbed embed={testimonialsEmbed} />
-        </Suspense>
+        <GoogleReviewsEmbed embed={testimonialsEmbed} />
       </section>
 
       {/* ── PRICING ─────────────────────────────────────────────── */}
