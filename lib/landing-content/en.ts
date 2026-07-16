@@ -110,6 +110,9 @@ export const en: LandingContent = {
     fallbackText: "Read student reviews on Google Maps.",
     poweredByLabel: "Reviews from Google",
     mapEmbedTitle: "Bilingual Boost on Google Maps",
+    ratingCountLabel: "{count} Google reviews",
+    starsAriaLabel: "{rating} out of 5 stars",
+    reviewAriaLabel: "See {author}'s review on Google Maps",
   },
   plansSection: {
     label: "Classes",

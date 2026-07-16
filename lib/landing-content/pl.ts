@@ -110,6 +110,9 @@ export const pl: LandingContent = {
     fallbackText: "Przeczytaj opinie uczniów w Google Maps.",
     poweredByLabel: "Opinie z Google",
     mapEmbedTitle: "Bilingual Boost w Google Maps",
+    ratingCountLabel: "{count} opinii w Google",
+    starsAriaLabel: "{rating} na 5 gwiazdek",
+    reviewAriaLabel: "Zobacz opinię {author} w Google Maps",
   },
   plansSection: {
     label: "Lekcje",

@@ -1,4 +1,5 @@
 import type { LandingContent } from "@/lib/landing-content/types";
+import type { Locale } from "@/lib/locale";
 import {
   getReviewsPlaceData,
   type StaticReview,
@@ -6,6 +7,7 @@ import {
 import { externalLinkProps, siteLinks } from "@/lib/site-links";
 
 type GoogleReviewsEmbedProps = {
+  locale: Locale;
   embed: LandingContent["testimonialsEmbed"];
 };
 
@@ -20,12 +22,24 @@ const AVATAR_COLORS = [
   "#6d28d9",
 ];
 
-function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
+function formatLabel(template: string, values: Record<string, string | number>) {
+  return Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{${key}}`, String(value)),
+    template,
+  );
+}
+
+function StarRating({
+  rating,
+  size = 14,
+  ariaLabel,
+}: {
+  rating: number;
+  size?: number;
+  ariaLabel: string;
+}) {
   return (
-    <span
-      className="inline-flex gap-0.5"
-      aria-label={`${rating} de 5 estrellas`}
-    >
+    <span className="inline-flex gap-0.5" aria-label={ariaLabel}>
       {[1, 2, 3, 4, 5].map((star) => (
         <svg
           key={star}
@@ -95,14 +109,18 @@ function GoogleMark() {
 function ReviewCard({
   review,
   mapsUrl,
+  ariaLabel,
+  starsAriaLabel,
 }: {
   review: StaticReview;
   mapsUrl: string;
+  ariaLabel: string;
+  starsAriaLabel: string;
 }) {
   return (
     <a
       href={mapsUrl}
-      aria-label={`Ver reseña de ${review.author} en Google Maps`}
+      aria-label={ariaLabel}
       className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-from/25 hover:bg-card-hover sm:p-5"
       {...externalLinkProps(mapsUrl)}
     >
@@ -113,7 +131,11 @@ function ReviewCard({
             {review.author}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-            <StarRating rating={review.rating} size={14} />
+            <StarRating
+              rating={review.rating}
+              size={14}
+              ariaLabel={starsAriaLabel}
+            />
             <span className="text-xs text-fg-faint">{review.relativeTime}</span>
           </div>
         </div>
@@ -130,14 +152,16 @@ function ReviewCard({
 
 function RatingSummary({
   rating,
-  totalReviews,
+  ratingCountText,
   mapsUrl,
   viewAllLabel,
+  starsAriaLabel,
 }: {
   rating: number;
-  totalReviews: number;
+  ratingCountText: string;
   mapsUrl: string;
   viewAllLabel: string;
+  starsAriaLabel: string;
 }) {
   return (
     <div className="flex flex-col items-center gap-4 rounded-2xl border border-brand-from/25 bg-gradient-to-br from-brand-from/20 via-card to-brand-to/20 p-5 text-center sm:flex-row sm:justify-between sm:gap-3 sm:p-6 sm:text-left">
@@ -146,11 +170,13 @@ function RatingSummary({
           {rating.toFixed(1)}
         </p>
         <div className="mt-1 flex justify-center sm:justify-start">
-          <StarRating rating={Math.round(rating)} size={20} />
+          <StarRating
+            rating={Math.round(rating)}
+            size={20}
+            ariaLabel={starsAriaLabel}
+          />
         </div>
-        <p className="mt-1 text-sm text-fg-muted">
-          {totalReviews} reseñas en Google
-        </p>
+        <p className="mt-1 text-sm text-fg-muted">{ratingCountText}</p>
       </div>
       <a
         href={mapsUrl}
@@ -167,7 +193,7 @@ function RatingSummary({
   );
 }
 
-function ReviewsFallback({ embed }: GoogleReviewsEmbedProps) {
+function ReviewsFallback({ embed }: Pick<GoogleReviewsEmbedProps, "embed">) {
   if (siteLinks.googleReviewsUrl) {
     return (
       <div className="mt-10 text-center">
@@ -187,28 +213,42 @@ function ReviewsFallback({ embed }: GoogleReviewsEmbedProps) {
   );
 }
 
-export function GoogleReviewsEmbed({ embed }: GoogleReviewsEmbedProps) {
-  const place = getReviewsPlaceData();
+export function GoogleReviewsEmbed({ locale, embed }: GoogleReviewsEmbedProps) {
+  const place = getReviewsPlaceData(locale);
 
   if (!place) {
     return <ReviewsFallback embed={embed} />;
   }
 
+  const ratingCountText = formatLabel(embed.ratingCountLabel, {
+    count: place.totalReviews,
+  });
+  const summaryStarsLabel = formatLabel(embed.starsAriaLabel, {
+    rating: Math.round(place.rating),
+  });
+
   return (
     <div className="mt-10 space-y-6 sm:space-y-8">
       <RatingSummary
         rating={place.rating}
-        totalReviews={place.totalReviews}
+        ratingCountText={ratingCountText}
         mapsUrl={place.mapsUrl}
         viewAllLabel={embed.viewAllLabel}
+        starsAriaLabel={summaryStarsLabel}
       />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         {place.reviews.map((review) => (
           <ReviewCard
-            key={`${review.author}-${review.relativeTime}`}
+            key={review.author}
             review={review}
             mapsUrl={place.mapsUrl}
+            ariaLabel={formatLabel(embed.reviewAriaLabel, {
+              author: review.author,
+            })}
+            starsAriaLabel={formatLabel(embed.starsAriaLabel, {
+              rating: review.rating,
+            })}
           />
         ))}
       </div>

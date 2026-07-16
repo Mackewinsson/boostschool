@@ -1,5 +1,15 @@
 import reviewsJson from "@/data/google-reviews.json";
+import type { Locale } from "@/lib/locale";
 import { siteLinks } from "@/lib/site-links";
+
+type LocalizedString = Record<Locale, string>;
+
+type RawReview = {
+  author: string;
+  rating: number;
+  relativeTime: LocalizedString;
+  text: LocalizedString;
+};
 
 export type StaticReview = {
   author: string;
@@ -16,18 +26,13 @@ export type ReviewsPlaceData = {
   reviews: StaticReview[];
 };
 
-/** @deprecated Prefer StaticReview / getReviewsPlaceData for the landing cards */
-export type GoogleReview = {
-  id: string;
-  authorName: string;
-  authorPhotoUri?: string;
-  rating: number;
-  text: string;
-  relativeTime: string;
-};
+function pickLocalized(value: LocalizedString, locale: Locale): string {
+  return value[locale] || value.es || value.en || value.pl || "";
+}
 
-export function getReviewsPlaceData(): ReviewsPlaceData | null {
-  if (!reviewsJson.reviews?.length) {
+export function getReviewsPlaceData(locale: Locale): ReviewsPlaceData | null {
+  const reviews = reviewsJson.reviews as RawReview[];
+  if (!reviews?.length) {
     return null;
   }
 
@@ -36,22 +41,11 @@ export function getReviewsPlaceData(): ReviewsPlaceData | null {
     rating: reviewsJson.rating,
     totalReviews: reviewsJson.totalReviews,
     mapsUrl: siteLinks.googleReviewsUrl,
-    reviews: reviewsJson.reviews,
+    reviews: reviews.map((review) => ({
+      author: review.author,
+      rating: review.rating,
+      text: pickLocalized(review.text, locale),
+      relativeTime: pickLocalized(review.relativeTime, locale),
+    })),
   };
-}
-
-/** Kept for optional live Places API use; landing prefers static JSON. */
-export async function fetchGoogleReviews(): Promise<GoogleReview[] | null> {
-  const place = getReviewsPlaceData();
-  if (!place) {
-    return null;
-  }
-
-  return place.reviews.map((review, index) => ({
-    id: `static-${index}`,
-    authorName: review.author,
-    rating: review.rating,
-    text: review.text,
-    relativeTime: review.relativeTime,
-  }));
 }

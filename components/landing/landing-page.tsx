@@ -261,7 +261,7 @@ export function LandingPage({ locale }: LandingPageProps) {
         <h2 className="mt-3 max-w-2xl text-3xl font-bold sm:text-4xl">
           {testimonialsSection.title}
         </h2>
-        <GoogleReviewsEmbed embed={testimonialsEmbed} />
+        <GoogleReviewsEmbed locale={locale} embed={testimonialsEmbed} />
       </section>
 
       {/* ── PRICING ─────────────────────────────────────────────── */}

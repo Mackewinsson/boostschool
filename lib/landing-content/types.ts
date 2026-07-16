@@ -87,6 +87,11 @@ export type TestimonialsEmbed = {
   fallbackText: string;
   poweredByLabel: string;
   mapEmbedTitle: string;
+  /** Use `{count}` placeholder, e.g. "{count} reseñas en Google" */
+  ratingCountLabel: string;
+  starsAriaLabel: string;
+  /** Use `{author}` placeholder */
+  reviewAriaLabel: string;
 };
 
 export type BookingPageSection = {
