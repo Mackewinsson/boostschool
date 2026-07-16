@@ -156,8 +156,10 @@ export const pl: LandingContent = {
       },
       {
         before:
-          "Angielski i hiszpański w grupie (2–3 osoby) — 60 min. Napisz do mnie na WhatsApp lub przez ",
-        link: { label: "formularz kontaktowy", hrefKey: "contact" },
+          "Angielski i hiszpański w grupie (2–3 osoby) — 60 min. ",
+        link: { label: "Napisz do mnie na WhatsApp", hrefKey: "whatsapp" },
+        mid: " lub przez ",
+        link2: { label: "formularz kontaktowy", hrefKey: "contact" },
         after: ", żeby ustalić szczegóły.",
         kind: "group",
       },

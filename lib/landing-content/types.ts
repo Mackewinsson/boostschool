@@ -19,6 +19,8 @@ export type Feature = {
 export type LinkedLine = {
   before?: string;
   link?: { label: string; hrefKey: LinkHrefKey };
+  mid?: string;
+  link2?: { label: string; hrefKey: LinkHrefKey };
   after?: string;
   plain?: string;
   kind?: "duration" | "class" | "business" | "group";

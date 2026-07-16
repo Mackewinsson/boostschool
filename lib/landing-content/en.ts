@@ -156,8 +156,10 @@ export const en: LandingContent = {
       },
       {
         before:
-          "English and Spanish group classes (2–3 people) — 60 min. Message me on WhatsApp or via the ",
-        link: { label: "contact form", hrefKey: "contact" },
+          "English and Spanish group classes (2–3 people) — 60 min. ",
+        link: { label: "Message me on WhatsApp", hrefKey: "whatsapp" },
+        mid: " or via the ",
+        link2: { label: "contact form", hrefKey: "contact" },
         after: " to coordinate.",
         kind: "group",
       },

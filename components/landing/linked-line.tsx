@@ -7,6 +7,21 @@ type LinkedLineProps = {
   linkClassName?: string;
 };
 
+function LineLink({
+  link,
+  className,
+}: {
+  link: NonNullable<LinkedLine["link"]>;
+  className: string;
+}) {
+  const href = resolveHrefKey(link.hrefKey);
+  return (
+    <a href={href} className={className} {...externalLinkProps(href)}>
+      {link.label}
+    </a>
+  );
+}
+
 export function LinkedLineText({
   line,
   className,
@@ -16,21 +31,22 @@ export function LinkedLineText({
     return <span className={className}>{line.plain}</span>;
   }
 
-  const href = line.link ? resolveHrefKey(line.link.hrefKey) : "#";
-
   return (
     <span className={className}>
       {line.before}
-      {line.link && (
-        <a href={href} className={linkClassName} {...externalLinkProps(href)}>
-          {line.link.label}
-        </a>
-      )}
+      {line.link ? <LineLink link={line.link} className={linkClassName} /> : null}
+      {line.mid}
+      {line.link2 ? (
+        <LineLink link={line.link2} className={linkClassName} />
+      ) : null}
       {line.after}
     </span>
   );
 }
 
 export function linkedLineKey(line: LinkedLine, index: number): string {
-  return line.plain ?? `${line.before ?? ""}-${line.link?.label ?? ""}-${index}`;
+  return (
+    line.plain ??
+    `${line.before ?? ""}-${line.link?.label ?? ""}-${line.link2?.label ?? ""}-${index}`
+  );
 }

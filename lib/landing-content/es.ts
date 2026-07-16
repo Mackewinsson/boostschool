@@ -156,8 +156,10 @@ export const es: LandingContent = {
       },
       {
         before:
-          "Clases grupales de inglés y español (2–3 personas) — 60 min. Escríbeme por WhatsApp o usa el ",
-        link: { label: "formulario de contacto", hrefKey: "contact" },
+          "Clases grupales de inglés y español (2–3 personas) — 60 min. ",
+        link: { label: "Escríbeme por WhatsApp", hrefKey: "whatsapp" },
+        mid: " o usa el ",
+        link2: { label: "formulario de contacto", hrefKey: "contact" },
         after: " para coordinar.",
         kind: "group",
       },
