@@ -1,5 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+
 const isTeacherRoute = createRouteMatcher([
   "/alumno/profesor(.*)",
   "/api/alumno/materials(.*)",
@@ -13,7 +15,9 @@ const isStudentRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isTeacherRoute(req)) {
+  if (isAdminRoute(req)) {
+    await auth.protect();
+  } else if (isTeacherRoute(req)) {
     await auth.protect();
   } else if (isStudentRoute(req)) {
     await auth.protect();

@@ -1,21 +1,27 @@
 import { Resend } from "resend";
+import {
+  getEmailTemplate,
+  LEAD_MAGNET_WELCOME_TEMPLATE_ID,
+  renderTemplate,
+  resolveTemplateForLocale,
+} from "@/lib/crm/templates";
+import { upsertLead } from "@/lib/crm/leads";
+import { isDatabaseConfigured } from "@/lib/db/client";
 import { siteUrl } from "@/lib/site-config";
 import type { Locale } from "@/lib/locale";
 import { createLeadMagnetToken } from "./token";
 
 type LeadMagnetEmailCopy = {
   subject: string;
-  preview: string;
   greeting: string;
   body: string;
   buttonLabel: string;
   footer: string;
 };
 
-const emailCopy: Record<Locale, LeadMagnetEmailCopy> = {
+const fallbackCopy: Record<Locale, LeadMagnetEmailCopy> = {
   es: {
     subject: "Tu guía gratis de Bilingual Boost",
-    preview: "Descarga tu guía y empieza a hablar con más confianza.",
     greeting: "¡Hola!",
     body: "Gracias por registrarte. Aquí tienes tu guía gratis para soltarte al hablar y organizar tu aprendizaje.",
     buttonLabel: "Descargar guía PDF",
@@ -23,7 +29,6 @@ const emailCopy: Record<Locale, LeadMagnetEmailCopy> = {
   },
   en: {
     subject: "Your free Bilingual Boost guide",
-    preview: "Download your guide and start speaking with more confidence.",
     greeting: "Hi!",
     body: "Thanks for signing up. Here is your free guide to speak more freely and organize your learning.",
     buttonLabel: "Download PDF guide",
@@ -31,7 +36,6 @@ const emailCopy: Record<Locale, LeadMagnetEmailCopy> = {
   },
   pl: {
     subject: "Twój darmowy przewodnik Bilingual Boost",
-    preview: "Pobierz przewodnik i zacznij mówić z większą pewnością.",
     greeting: "Cześć!",
     body: "Dziękuję za zapis. Oto Twój darmowy przewodnik, który pomoże Ci swobodniej mówić i uporządkować naukę.",
     buttonLabel: "Pobierz przewodnik PDF",
@@ -55,15 +59,76 @@ function getNotifyAddress(): string | null {
   return process.env.LEAD_MAGNET_NOTIFY_EMAIL?.trim() || null;
 }
 
+async function resolveEmailContent(params: {
+  name: string;
+  locale: Locale;
+  downloadUrl: string;
+}): Promise<{ subject: string; html: string; text: string }> {
+  const safeName = escapeHtml(params.name);
+  const vars = {
+    name: safeName,
+    download_url: params.downloadUrl,
+  };
+
+  if (isDatabaseConfigured()) {
+    try {
+      const template = await getEmailTemplate(LEAD_MAGNET_WELCOME_TEMPLATE_ID);
+      if (template) {
+        const resolved = resolveTemplateForLocale(template, params.locale);
+        const html = renderTemplate(resolved.bodyHtml, vars);
+        const subject = renderTemplate(resolved.subject, {
+          name: params.name,
+          download_url: params.downloadUrl,
+        });
+        return {
+          subject,
+          html,
+          text: htmlToText(html),
+        };
+      }
+    } catch (error) {
+      console.error("Failed to load lead magnet email template:", error);
+    }
+  }
+
+  const copy = fallbackCopy[params.locale];
+  const html = `
+    <p>${copy.greeting} ${safeName}</p>
+    <p>${copy.body}</p>
+    <p><a href="${params.downloadUrl}">${copy.buttonLabel}</a></p>
+    <p>${copy.footer}<br /><a href="${params.downloadUrl}">${params.downloadUrl}</a></p>
+  `;
+  return {
+    subject: copy.subject,
+    html,
+    text: `${copy.greeting} ${params.name}\n\n${copy.body}\n\n${params.downloadUrl}`,
+  };
+}
+
 export async function subscribeLeadMagnet(params: {
   name: string;
   email: string;
   locale: Locale;
   downloadToken: string;
-}): Promise<{ emailed: boolean; notified: boolean }> {
+}): Promise<{ emailed: boolean; notified: boolean; persisted: boolean }> {
+  let persisted = false;
+
+  if (isDatabaseConfigured()) {
+    try {
+      await upsertLead({
+        name: params.name,
+        email: params.email,
+        locale: params.locale,
+        source: "lead_magnet",
+      });
+      persisted = true;
+    } catch (error) {
+      console.error("Failed to persist lead:", error);
+    }
+  }
+
   const resend = getResendClient();
   const from = getFromAddress();
-  const copy = emailCopy[params.locale];
   const downloadUrl = `${siteUrl}/api/lead-magnet/download?token=${encodeURIComponent(params.downloadToken)}`;
 
   let emailed = false;
@@ -85,17 +150,18 @@ export async function subscribeLeadMagnet(params: {
         }
       }
 
+      const content = await resolveEmailContent({
+        name: params.name,
+        locale: params.locale,
+        downloadUrl,
+      });
+
       await resend.emails.send({
         from,
         to: params.email,
-        subject: copy.subject,
-        html: `
-        <p>${copy.greeting} ${escapeHtml(params.name)}</p>
-        <p>${copy.body}</p>
-        <p><a href="${downloadUrl}">${copy.buttonLabel}</a></p>
-        <p>${copy.footer}<br /><a href="${downloadUrl}">${downloadUrl}</a></p>
-      `,
-        text: `${copy.greeting} ${params.name}\n\n${copy.body}\n\n${downloadUrl}`,
+        subject: content.subject,
+        html: content.html,
+        text: content.text,
       });
       emailed = true;
 
@@ -114,7 +180,7 @@ export async function subscribeLeadMagnet(params: {
     }
   }
 
-  return { emailed, notified };
+  return { emailed, notified, persisted };
 }
 
 export function buildDownloadUrl(token: string): string {
@@ -131,4 +197,17 @@ function escapeHtml(value: string): string {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function htmlToText(html: string): string {
+  return html
+    .replaceAll(/<br\s*\/?>/gi, "\n")
+    .replaceAll(/<\/p>/gi, "\n\n")
+    .replaceAll(/<[^>]+>/g, "")
+    .replaceAll("&nbsp;", " ")
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .trim();
 }
