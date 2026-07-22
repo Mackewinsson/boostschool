@@ -101,6 +101,14 @@ export const es: LandingContent = {
         "Si quieres hablar con soltura, sentirte escuchado/a y recibir correcciones útiles, aquí tienes tu sitio. Todo está siempre ajustado a cada alumno, con correcciones y consejos personalizados.",
     },
   ],
+  bilingualMind: {
+    title: "La mente bilingüe",
+    paragraphs: [
+      "Durante mis clases, si aprendes español te hablo en español; si aprendes inglés te hablo en inglés. Quiero que te sumerjas en el idioma al 100%.",
+      "Sin embargo, sé que muchas personas ya dominan bien el inglés, o que a veces hace falta apoyarse en el polaco si es tu idioma materno. Pues bien: en vez de traducir al polaco, te lo explico en inglés. Así matas dos pájaros de un tiro — aprendes español, refuerzas tu inglés, y amplías tu vocabulario en ambos idiomas.",
+      "Esta opción no es obligatoria: en clase hacemos como tú prefieras ;)",
+    ],
+  },
   testimonialsSection: {
     label: "Reseñas",
     title: "Lo que dicen mis alumnos en Google",

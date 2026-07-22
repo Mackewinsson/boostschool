@@ -101,6 +101,14 @@ export const en: LandingContent = {
         "If you want to speak fluently, feel heard, and get useful corrections, you're in the right place. Everything is always tailored to each student, with personalized corrections and tips.",
     },
   ],
+  bilingualMind: {
+    title: "The Bilingual Mindset",
+    paragraphs: [
+      "During my classes, if you're learning Spanish, I speak to you in Spanish; if you're learning English, I speak to you in English. I want you to be 100% immersed in the language.",
+      "However, I know many people already speak English well, or sometimes need support in Polish if it's their native language. So instead of translating into Polish, I explain it to you in English. That way you kill two birds with one stone — you learn Spanish, reinforce your English, and expand your vocabulary in both languages.",
+      "This option is completely optional: in class we do whatever works best for you ;)",
+    ],
+  },
   testimonialsSection: {
     label: "Reviews",
     title: "What my students say on Google",

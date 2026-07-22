@@ -101,6 +101,14 @@ export const pl: LandingContent = {
         "Jeśli chcesz mówić płynnie, poprawnie i dostawać przydatne wskazówki — jesteś we właściwym miejscu. Wszystko jest zawsze dopasowane do każdego ucznia, z indywidualnymi podejściem i tipami!",
     },
   ],
+  bilingualMind: {
+    title: "Dwujęzyczny umysł",
+    paragraphs: [
+      "Podczas moich lekcji, jeśli uczysz się hiszpańskiego, rozmawiamy po hiszpańsku; jeśli uczysz się angielskiego — po angielsku. Chcę, abyś w 100% zanurzył(a) się w języku.",
+      "Wiem jednak, że wiele osób dobrze zna już angielski lub czasami potrzebuje wsparcia w języku polskim, jeśli jest to ich język ojczysty. Otóż: zamiast tłumaczyć na polski, wyjaśniam Ci to po angielsku. W ten sposób upieczesz dwie pieczenie na jednym ogniu — uczysz się hiszpańskiego, utrwalasz angielski i poszerzasz słownictwo w obu językach.",
+      "Opcja ta jest całkowicie dobrowolna: na zajęciach robimy tak, jak wolisz ;)",
+    ],
+  },
   testimonialsSection: {
     label: "Opinie",
     title: "Co mówią moi uczniowie w Google",

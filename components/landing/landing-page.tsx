@@ -4,6 +4,7 @@ import {
   Clock,
   Compass,
   MessageSquare,
+  Sparkles,
   Users,
 } from "lucide-react";
 import Image from "next/image";
@@ -37,6 +38,7 @@ type LandingPageProps = {
 export function LandingPage({ locale }: LandingPageProps) {
   const {
     about,
+    bilingualMind,
     brand,
     contact,
     faqSection,
@@ -217,6 +219,25 @@ export function LandingPage({ locale }: LandingPageProps) {
             );
           })}
         </div>
+
+        {/* Card "La mente bilingüe" */}
+        {bilingualMind && (
+          <div className="mt-8 rounded-3xl border border-accent/25 bg-gradient-to-br from-brand-from/10 via-card to-brand-to/10 p-6 sm:p-8 transition-all duration-300 hover:border-accent/40">
+            <div className="flex items-center gap-3 text-accent">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent">
+                <Sparkles size={20} />
+              </div>
+              <h3 className="text-xl font-bold text-fg sm:text-2xl">
+                {bilingualMind.title}
+              </h3>
+            </div>
+            <div className="mt-4 space-y-3 text-sm leading-relaxed text-fg-muted sm:text-base">
+              {bilingualMind.paragraphs.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ── ABOUT ───────────────────────────────────────────────── */}

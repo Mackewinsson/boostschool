@@ -14,9 +14,15 @@ function getLocaleDir(locale: Locale): string {
 
 function parseFrontmatter(slug: string, raw: string): BlogPost | null {
   const { data, content } = matter(raw);
-  const frontmatter = data as Partial<BlogPostFrontmatter>;
+  const frontmatter = data as Partial<BlogPostFrontmatter> & {
+    meta_description?: string;
+    target_keywords?: string[];
+  };
 
-  if (!frontmatter.title || !frontmatter.description || !frontmatter.publishedAt) {
+  const description = frontmatter.description || frontmatter.meta_description;
+  const tags = frontmatter.tags || frontmatter.target_keywords || [];
+
+  if (!frontmatter.title || !description || !frontmatter.publishedAt) {
     return null;
   }
 
@@ -29,11 +35,11 @@ function parseFrontmatter(slug: string, raw: string): BlogPost | null {
   return {
     slug,
     title: frontmatter.title,
-    description: frontmatter.description,
+    description,
     publishedAt: frontmatter.publishedAt,
     updatedAt: frontmatter.updatedAt,
     author: frontmatter.author ?? "Paulina Poloca",
-    tags: frontmatter.tags ?? [],
+    tags,
     draft: frontmatter.draft,
     image: frontmatter.image,
     readingTimeMinutes: Math.max(1, Math.ceil(stats.minutes)),

@@ -195,6 +195,10 @@ export type LandingContent = {
   features: Feature[];
   outcomesSection: SectionHeading & { linkText: string };
   outcomes: Feature[];
+  bilingualMind: {
+    title: string;
+    paragraphs: string[];
+  };
   testimonialsSection: SectionHeading;
   testimonialsEmbed: TestimonialsEmbed;
   plansSection: SectionHeading;
