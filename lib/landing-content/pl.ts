@@ -2,9 +2,9 @@ import type { LandingContent } from "./types";
 
 export const pl: LandingContent = {
   metadata: {
-    title: "Bilingual Boost | Angielski i hiszpański z Pauliną Poloca",
+    title: "Bilingual Boost | Angielski i hiszpański online — darmowa lekcja",
     description:
-      "Rozwijaj się i ucz angielskiego oraz hiszpańskiego z Pauliną. Spersonalizowane lekcje online, rozmowa od pierwszego dnia i darmowa lekcja próbna.",
+      "Lekcje 1:1 online z Pauliną Poloca (Sulejówek / Stara Miłosna). Rozmowa od pierwszego dnia. Zarezerwuj darmową lekcję próbną (30 min).",
   },
   ui: {
     openMenuAria: "Otwórz menu",
@@ -16,6 +16,8 @@ export const pl: LandingContent = {
     signInNavLabel: "Zaloguj się",
     blogLinkLabel: "Blog",
     resourcesLinkLabel: "Darmowy przewodnik",
+    spanishClassesLinkLabel: "Spanish classes",
+    localPlLinkLabel: "Angielski Sulejówek",
   },
   brand: {
     name: "Bilingual Boost",
@@ -38,7 +40,7 @@ export const pl: LandingContent = {
     titleBefore: "Rozwijaj się i ucz ",
     titleHighlight: "angielskiego/hiszpańskiego",
     subtitle:
-      "Spersonalizowane lekcje online z Pauliną — mów płynnie, na chillu i z pewnością siebie!",
+      "Spersonalizowane lekcje online z Pauliną — angielski i hiszpański dla Sulejówka i Starej Miłosnej. Mów płynnie, na chillu i z pewnością siebie!",
     primaryCta: "Zarezerwuj lekcję próbną",
     secondaryCta: "Zobacz lekcje",
   },

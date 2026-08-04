@@ -82,6 +82,8 @@ export type UiStrings = {
   signInNavLabel: string;
   blogLinkLabel: string;
   resourcesLinkLabel: string;
+  spanishClassesLinkLabel: string;
+  localPlLinkLabel: string;
 };
 
 export type TestimonialsEmbed = {

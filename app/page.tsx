@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { LandingPage } from "@/components/landing/landing-page";
+import { JsonLd } from "@/components/seo/json-ld";
 import { getLandingContent } from "@/lib/landing-content";
 import { getLocaleFromCookies } from "@/lib/locale-server";
+import { homeJsonLd } from "@/lib/seo/json-ld";
 import { siteName, siteUrl } from "@/lib/site-config";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -12,6 +14,9 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(siteUrl),
     title: metadata.title,
     description: metadata.description,
+    alternates: {
+      canonical: "/",
+    },
     openGraph: {
       title: metadata.title,
       description: metadata.description,
@@ -31,5 +36,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Home() {
   const locale = await getLocaleFromCookies();
 
-  return <LandingPage locale={locale} />;
+  return (
+    <>
+      <JsonLd data={homeJsonLd()} />
+      <LandingPage locale={locale} />
+    </>
+  );
 }

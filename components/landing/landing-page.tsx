@@ -436,6 +436,18 @@ export function LandingPage({ locale }: LandingPageProps) {
                 {ui.resourcesLinkLabel}
               </Link>
               <Link
+                href={siteLinks.spanishClasses}
+                className="text-sm text-fg-muted transition hover:text-fg"
+              >
+                {ui.spanishClassesLinkLabel}
+              </Link>
+              <Link
+                href={siteLinks.angielskiSulejowek}
+                className="text-sm text-fg-muted transition hover:text-fg"
+              >
+                {ui.localPlLinkLabel}
+              </Link>
+              <Link
                 href="/privacidad"
                 className="text-sm text-fg-muted transition hover:text-fg"
               >

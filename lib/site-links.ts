@@ -18,6 +18,8 @@ export const siteLinks = {
   blog: "/blog",
   resources: "/recursos",
   booking: "/reserva",
+  spanishClasses: "/spanish-classes",
+  angielskiSulejowek: "/angielski-sulejowek",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_URL ?? contactPhone.whatsappUrl,
   contact: "#contacto",
   googleReviewsUrl:

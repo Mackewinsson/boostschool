@@ -2,9 +2,9 @@ import type { LandingContent } from "./types";
 
 export const es: LandingContent = {
   metadata: {
-    title: "Bilingual Boost | Inglés y español con Paulina Poloca",
+    title: "Bilingual Boost | Clases de inglés y español online — prueba gratis",
     description:
-      "Organízate, supérate y aprende inglés y español con Paulina Poloca (English with Paulina Poloca). Clases online personalizadas, conversación desde el primer día, clase de prueba gratis.",
+      "Aprende inglés y español online con Paulina Poloca. Clases 1:1 desde €11. Reserva tu clase de prueba gratis de 30 minutos.",
   },
   ui: {
     openMenuAria: "Abrir menú",
@@ -16,6 +16,8 @@ export const es: LandingContent = {
     signInNavLabel: "Entrar",
     blogLinkLabel: "Blog",
     resourcesLinkLabel: "Guía gratis",
+    spanishClassesLinkLabel: "Spanish classes",
+    localPlLinkLabel: "Angielski Sulejówek",
   },
   brand: {
     name: "Bilingual Boost",
