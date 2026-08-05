@@ -448,6 +448,12 @@ export function LandingPage({ locale }: LandingPageProps) {
                 {ui.localPlLinkLabel}
               </Link>
               <Link
+                href={siteLinks.szkolaJezykowaStaraMilosna}
+                className="text-sm text-fg-muted transition hover:text-fg"
+              >
+                {ui.staraMilosnaLinkLabel}
+              </Link>
+              <Link
                 href="/privacidad"
                 className="text-sm text-fg-muted transition hover:text-fg"
               >

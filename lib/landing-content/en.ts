@@ -18,6 +18,7 @@ export const en: LandingContent = {
     resourcesLinkLabel: "Free guide",
     spanishClassesLinkLabel: "Spanish classes",
     localPlLinkLabel: "English in Sulejówek",
+    staraMilosnaLinkLabel: "Language school Stara Miłosna",
   },
   brand: {
     name: "Bilingual Boost",
@@ -310,7 +311,7 @@ export const en: LandingContent = {
   },
   blogPage: {
     metadata: {
-      title: "Blog | Bilingual Boost",
+      title: "Blog",
       description:
         "Practical tips to learn English and Spanish with confidence, real conversation, and habits that work.",
     },
@@ -329,7 +330,7 @@ export const en: LandingContent = {
   },
   bookingPage: {
     metadata: {
-      title: "Book trial lesson | Bilingual Boost",
+      title: "Book trial lesson",
       description:
         "Book your free 30-minute trial lesson with Paulina Poloca. Pick a day and time online.",
     },

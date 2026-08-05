@@ -1,7 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
-import { getLocaleFromCookies } from "@/lib/locale-server";
+import { getHtmlLang } from "@/lib/locale-server";
 import { siteName, siteUrl } from "@/lib/site-config";
 import "./globals.css";
 
@@ -35,11 +35,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocaleFromCookies();
+  const lang = await getHtmlLang();
 
   return (
     <html
-      lang={locale}
+      lang={lang}
       data-theme="dark"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}

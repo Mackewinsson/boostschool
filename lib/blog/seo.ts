@@ -4,7 +4,9 @@ import type { BlogPostMeta } from "./types";
 
 export function buildPostMetadata(post: BlogPostMeta): Metadata {
   const canonicalPath = `/blog/${post.slug}`;
-  const title = `${post.title} | ${siteName}`;
+  // Root layout's title template already appends "| Bilingual Boost" —
+  // do not add it here or the rendered <title> ends up duplicated.
+  const title = post.title;
 
   return {
     title,
@@ -95,7 +97,8 @@ export function breadcrumbJsonLd(post: BlogPostMeta) {
 
 export function defaultBlogMetadata(title: string, description: string): Metadata {
   return {
-    title: `${title} | ${siteName}`,
+    // Root layout's title template already appends "| Bilingual Boost".
+    title,
     description,
     alternates: {
       canonical: "/blog",

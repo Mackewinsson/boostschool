@@ -2,9 +2,9 @@ import type { StudentContent } from "./types";
 
 export const pl: StudentContent = {
   metadata: {
-    studentTitle: "Moja strefa ucznia | Bilingual Boost",
+    studentTitle: "Moja strefa ucznia",
     studentDescription: "Uzyskaj dostęp do materiałów udostępnionych przez Paulinę.",
-    teacherTitle: "Strefa nauczycielki | Bilingual Boost",
+    teacherTitle: "Strefa nauczycielki",
     teacherDescription: "Zarządzaj materiałami i przypisuj je uczniom.",
   },
   portal: {

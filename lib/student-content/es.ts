@@ -2,9 +2,9 @@ import type { StudentContent } from "./types";
 
 export const es: StudentContent = {
   metadata: {
-    studentTitle: "Mi área de alumno | Bilingual Boost",
+    studentTitle: "Mi área de alumno",
     studentDescription: "Accede a los materiales que Paulina compartió contigo.",
-    teacherTitle: "Área de profesora | Bilingual Boost",
+    teacherTitle: "Área de profesora",
     teacherDescription: "Gestiona materiales y asígnalos a tus alumnos.",
   },
   portal: {

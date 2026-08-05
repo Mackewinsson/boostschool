@@ -84,6 +84,7 @@ export type UiStrings = {
   resourcesLinkLabel: string;
   spanishClassesLinkLabel: string;
   localPlLinkLabel: string;
+  staraMilosnaLinkLabel: string;
 };
 
 export type TestimonialsEmbed = {

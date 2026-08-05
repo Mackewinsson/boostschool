@@ -32,6 +32,11 @@ export type SeoLandingContent = {
     description: string;
     inLanguage: string;
   };
+  /** Optional link to a related local landing page, rendered near the CTA. */
+  relatedLink?: {
+    label: string;
+    href: string;
+  };
 };
 
 export const spanishClassesLanding: SeoLandingContent = {
@@ -39,24 +44,25 @@ export const spanishClassesLanding: SeoLandingContent = {
   htmlLang: "en",
   chromeLocale: "en",
   metadata: {
-    title: "Online Spanish Classes & Tutor | Free Trial | Bilingual Boost",
+    // Root layout's title template appends " | Bilingual Boost" automatically.
+    title: "Spanish Classes & Tutor Near Me (100% Online) | Free Trial",
     description:
-      "1:1 online Spanish classes with Paulina Poloca. Real conversation from day one. Book a free 30-min trial — from €11.",
+      "Searching for a Spanish tutor near you? Bilingual Boost is 100% online, so it's the closest Spanish tutor no matter your city. Free 30-min trial — from €11.",
   },
-  label: "Online Spanish tutor",
-  title: "Online Spanish classes with a real conversation focus",
+  label: "Spanish tutor near me · 100% online",
+  title: "Spanish classes near me? We're online, so we're always close by",
   subtitle:
-    "Personalized 1:1 Spanish lessons online — so you speak with confidence, not just pass grammar tests. Free 30-minute trial.",
+    "Personalized 1:1 Spanish lessons online — the same personal attention as a Spanish tutor near you, without the commute. Free 30-minute trial.",
   paragraphs: [
-    "Looking for Spanish classes or a Spanish tutor near you? Bilingual Boost offers fully online 1:1 Spanish classes you can take from anywhere — with the same personal attention as an in-person tutor.",
+    "Searching for \"Spanish classes near me\" or a \"Spanish tutor near me\"? Bilingual Boost teaches 100% online, so wherever you live, we're effectively your nearest Spanish tutor — no commute, no waiting room, just a video call from your sofa.",
     "Every lesson is tailored to your level and goals: travel Spanish, conversation practice, work meetings, or building confidence from scratch. You speak from day one, with clear corrections and a supportive pace.",
     "Book a free trial lesson to meet Paulina Poloca, map your goals, and see if the fit feels right — no commitment.",
   ],
   highlights: [
     {
-      title: "1:1 online Spanish tutor",
+      title: "Your nearest Spanish tutor, online",
       description:
-        "Private lessons online with a teacher who adapts topics, speed, and feedback to you.",
+        "No physical distance to worry about — private 1:1 lessons come to you, wherever you live.",
     },
     {
       title: "Conversation from day one",
@@ -70,6 +76,11 @@ export const spanishClassesLanding: SeoLandingContent = {
     },
   ],
   faqs: [
+    {
+      question: "Do you have Spanish tutors near me?",
+      answer:
+        "Bilingual Boost teaches 100% online, so there's no \"near me\" distance limit — you get the same 1:1 attention as an in-person tutor from wherever you live, on your schedule.",
+    },
     {
       question: "Are your Spanish classes online?",
       answer:
@@ -106,10 +117,10 @@ export const angielskiSulejowekLanding: SeoLandingContent = {
   htmlLang: "pl",
   chromeLocale: "pl",
   metadata: {
-    title:
-      "Angielski Sulejówek & Stara Miłosna | Lekcje online | Bilingual Boost",
+    // Root layout's title template appends " | Bilingual Boost" automatically.
+    title: "Angielski Sulejówek | Lekcje Online Blisko Ciebie | Darmowa Lekcja",
     description:
-      "Szkoła językowa z Pauliną Poloca: angielski i hiszpański online dla Sulejówka i Starej Miłosnej. Darmowa lekcja próbna 30 min.",
+      "Szukasz angielskiego w Sulejówku? Lekcje 1:1 online z Pauliną Poloca — bez dojazdów, rozmowa od pierwszej lekcji. Darmowa lekcja próbna 30 min.",
   },
   label: "Sulejówek · Stara Miłosna",
   title: "Angielski w Sulejówku i Starej Miłosnej — lekcje online",
@@ -167,9 +178,93 @@ export const angielskiSulejowekLanding: SeoLandingContent = {
       "Spersonalizowane lekcje angielskiego online dla Sulejówka i Starej Miłosnej. Darmowa lekcja próbna 30 min.",
     inLanguage: "pl",
   },
+  relatedLink: {
+    label: "Szukasz szkoły językowej w Starej Miłosnej? Zobacz tę stronę →",
+    href: "/szkola-jezykowa-stara-milosna",
+  },
+};
+
+export const szkolaJezykowaStaraMilosnaLanding: SeoLandingContent = {
+  path: "/szkola-jezykowa-stara-milosna",
+  htmlLang: "pl",
+  chromeLocale: "pl",
+  metadata: {
+    // Root layout's title template appends " | Bilingual Boost" automatically.
+    title:
+      "Szkoła Językowa Stara Miłosna | Angielski i Hiszpański Online | Bezpłatna Lekcja",
+    description:
+      "Szkoła językowa dla Starej Miłosnej: angielski i hiszpański online dla dzieci i dorosłych z Pauliną Poloca. Bez dojazdów. Darmowa lekcja próbna 30 min.",
+  },
+  label: "Szkoła językowa · Stara Miłosna",
+  title: "Szkoła językowa Stara Miłosna — angielski i hiszpański online",
+  subtitle:
+    "Bilingual Boost to szkoła językowa prowadzona przez Paulinę Poloca, z lekcjami online dla mieszkańców Starej Miłosnej: dzieci, młodzieży i dorosłych.",
+  paragraphs: [
+    "Szukasz szkoły językowej w Starej Miłosnej? Zamiast dojeżdżać na stacjonarne zajęcia, umów lekcję online 1:1 — ten sam kontakt z nauczycielem, bez straty czasu w drodze do Sulejówka czy Warszawy.",
+    "Prowadzę zajęcia z angielskiego i hiszpańskiego dla różnych grup wiekowych: dzieci szkolne, nastolatków przygotowujących się do egzaminów oraz dorosłych, którzy chcą mówić pewnie w pracy i podróży.",
+    "Każda lekcja jest dopasowana do ucznia — poziomu, tempa i celu. Zarezerwuj darmową lekcję próbną (30 min) i sprawdź, jak wygląda nauka online w naszej szkole językowej.",
+  ],
+  highlights: [
+    {
+      title: "Szkoła językowa bez dojazdów",
+      description:
+        "Lekcje online dla Starej Miłosnej — oszczędzasz czas dojazdu do Sulejówka czy Warszawy, a jakość zajęć zostaje taka sama.",
+    },
+    {
+      title: "Angielski i hiszpański, każdy wiek",
+      description:
+        "Zajęcia dla dzieci, nastolatków i dorosłych — materiał i tempo dopasowane do ucznia.",
+    },
+    {
+      title: "Darmowa lekcja próbna",
+      description:
+        "30 minut za darmo. Potem lekcje od 11 € (30 min), 16 € (45 min) lub 20 € (60 min).",
+    },
+  ],
+  faqs: [
+    {
+      question: "Czy macie szkołę językową stacjonarną w Starej Miłosnej?",
+      answer:
+        "Zajęcia prowadzę online, co dla mieszkańców Starej Miłosnej oznacza brak dojazdów i pełną elastyczność godzin — kontakt z nauczycielem zostaje taki sam jak na zajęciach stacjonarnych.",
+    },
+    {
+      question: "Czy szkoła językowa jest odpowiednia dla dzieci?",
+      answer:
+        "Tak. Prowadzę lekcje angielskiego i hiszpańskiego dla dzieci, nastolatków i dorosłych, dopasowane do wieku, poziomu i celu nauki.",
+    },
+    {
+      question: "Jak zapisać się do szkoły językowej Bilingual Boost?",
+      answer:
+        "Zarezerwuj darmową lekcję próbną online (30 min). Poznamy poziom i cele ucznia i zaproponujemy plan nauki.",
+    },
+  ],
+  ctaLabel: "Zarezerwuj darmową lekcję próbną",
+  ctaHref: siteLinks.booking,
+  secondaryCtaLabel: "Zobacz cennik",
+  secondaryCtaHref: "/#planes",
+  backLabel: "Wróć do strony głównej",
+  highlightsTitle: "Dlaczego warto",
+  faqTitle: "FAQ",
+  course: {
+    name: "Szkoła językowa — Stara Miłosna / online",
+    description:
+      "Lekcje angielskiego i hiszpańskiego online dla Starej Miłosnej, dla dzieci i dorosłych. Darmowa lekcja próbna 30 min.",
+    inLanguage: "pl",
+  },
+  relatedLink: {
+    label: "Szukasz angielskiego w Sulejówku? Zobacz tę stronę →",
+    href: "/angielski-sulejowek",
+  },
 };
 
 export const seoLandings = {
   spanishClasses: spanishClassesLanding,
   angielskiSulejowek: angielskiSulejowekLanding,
+  szkolaJezykowaStaraMilosna: szkolaJezykowaStaraMilosnaLanding,
 } as const;
+
+/** Maps each fixed-language landing page's path to its `<html lang>` value. */
+export const fixedLocaleLandingPaths: Record<string, "en" | "pl"> =
+  Object.fromEntries(
+    Object.values(seoLandings).map((landing) => [landing.path, landing.htmlLang]),
+  );

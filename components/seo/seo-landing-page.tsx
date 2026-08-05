@@ -140,6 +140,17 @@ export function SeoLandingPage({ content }: SeoLandingPageProps) {
             </a>
           </div>
 
+          {content.relatedLink ? (
+            <p className="mt-6 text-center text-sm text-fg-muted">
+              <Link
+                href={content.relatedLink.href}
+                className="font-medium text-accent transition hover:underline"
+              >
+                {content.relatedLink.label}
+              </Link>
+            </p>
+          ) : null}
+
           <WhatsAppCta whatsapp={contact.whatsapp} />
         </div>
       </main>

@@ -20,6 +20,7 @@ export const siteLinks = {
   booking: "/reserva",
   spanishClasses: "/spanish-classes",
   angielskiSulejowek: "/angielski-sulejowek",
+  szkolaJezykowaStaraMilosna: "/szkola-jezykowa-stara-milosna",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_URL ?? contactPhone.whatsappUrl,
   contact: "#contacto",
   googleReviewsUrl:

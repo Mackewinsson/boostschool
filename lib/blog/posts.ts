@@ -105,6 +105,45 @@ export async function getPostBySlug(
   }
 }
 
+const ALL_LOCALES: Locale[] = ["es", "en", "pl"];
+
+/**
+ * Blog post URLs are flat (`/blog/[slug]`) with no locale segment, but content
+ * lives in per-locale folders. A post's real language is intrinsic to which
+ * folder it lives in, so lookups must not depend on the visitor's locale
+ * cookie (crawlers like Googlebot never send one, which previously caused
+ * every non-default-locale post to 404 for search engines).
+ */
+export async function getPostBySlugAnyLocale(
+  slug: string,
+): Promise<{ locale: Locale; post: BlogPost } | null> {
+  for (const locale of ALL_LOCALES) {
+    const post = await getPostBySlug(locale, slug);
+    if (post) {
+      return { locale, post };
+    }
+  }
+  return null;
+}
+
+/**
+ * Lightweight existence check (no file read/parse) used by the root layout to
+ * pick the correct `<html lang>` for a blog post URL without the cost of a
+ * full frontmatter parse on every request.
+ */
+export async function getPostLocale(slug: string): Promise<Locale | null> {
+  for (const locale of ALL_LOCALES) {
+    const filePath = path.join(getLocaleDir(locale), `${slug}.mdx`);
+    try {
+      await fs.access(filePath);
+      return locale;
+    } catch {
+      // try next locale
+    }
+  }
+  return null;
+}
+
 export async function getAllPostParams(): Promise<{ locale: Locale; slug: string }[]> {
   const locales: Locale[] = ["es", "en", "pl"];
   const params: { locale: Locale; slug: string }[] = [];

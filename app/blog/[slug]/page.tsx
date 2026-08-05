@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogPostView } from "@/components/blog/blog-post-view";
 import { buildPostMetadata } from "@/lib/blog/seo";
-import { getAllPostParams, getPostBySlug } from "@/lib/blog/posts";
-import { getLocaleFromCookies } from "@/lib/locale-server";
+import { getAllPostParams, getPostBySlugAnyLocale } from "@/lib/blog/posts";
 import { siteUrl } from "@/lib/site-config";
 
 type BlogPostPageProps = {
@@ -19,30 +18,29 @@ export async function generateMetadata({
   params,
 }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const locale = await getLocaleFromCookies();
-  const post = await getPostBySlug(locale, slug);
+  const found = await getPostBySlugAnyLocale(slug);
 
-  if (!post) {
+  if (!found) {
     return {
       metadataBase: new URL(siteUrl),
       title: "Post not found",
+      robots: { index: false, follow: false },
     };
   }
 
   return {
     metadataBase: new URL(siteUrl),
-    ...buildPostMetadata(post),
+    ...buildPostMetadata(found.post),
   };
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const locale = await getLocaleFromCookies();
-  const post = await getPostBySlug(locale, slug);
+  const found = await getPostBySlugAnyLocale(slug);
 
-  if (!post) {
+  if (!found) {
     notFound();
   }
 
-  return <BlogPostView locale={locale} post={post} />;
+  return <BlogPostView locale={found.locale} post={found.post} />;
 }

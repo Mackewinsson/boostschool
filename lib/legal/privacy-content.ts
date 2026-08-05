@@ -14,7 +14,7 @@ export type PrivacyContent = {
 const privacyContent: Record<Locale, PrivacyContent> = {
   es: {
     metadata: {
-      title: "Política de privacidad | Bilingual Boost",
+      title: "Política de privacidad",
       description:
         "Cómo Bilingual Boost recopila, usa y protege tus datos personales al descargar recursos o contactarnos.",
     },
@@ -34,7 +34,7 @@ const privacyContent: Record<Locale, PrivacyContent> = {
   },
   en: {
     metadata: {
-      title: "Privacy policy | Bilingual Boost",
+      title: "Privacy policy",
       description:
         "How Bilingual Boost collects, uses, and protects your personal data when you download resources or contact us.",
     },
@@ -54,7 +54,7 @@ const privacyContent: Record<Locale, PrivacyContent> = {
   },
   pl: {
     metadata: {
-      title: "Polityka prywatności | Bilingual Boost",
+      title: "Polityka prywatności",
       description:
         "Jak Bilingual Boost zbiera, wykorzystuje i chroni Twoje dane osobowe przy pobieraniu materiałów lub kontakcie z nami.",
     },
