@@ -2,9 +2,9 @@ import type { LandingContent } from "./types";
 
 export const es: LandingContent = {
   metadata: {
-    title: "Bilingual Boost | Clases de inglés y español online — prueba gratis",
+    title: "Clases de inglés y español online — prueba gratis",
     description:
-      "Aprende inglés y español online con Paulina Poloca. Clases 1:1 desde €11. Reserva tu clase de prueba gratis de 30 minutos.",
+      "Aprende inglés y español online con Paulina Poloca (Bilingual Boost). Clases 1:1 desde €11. Reserva tu clase de prueba gratis de 30 minutos.",
   },
   ui: {
     openMenuAria: "Abrir menú",

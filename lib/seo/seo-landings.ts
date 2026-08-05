@@ -45,9 +45,9 @@ export const spanishClassesLanding: SeoLandingContent = {
   chromeLocale: "en",
   metadata: {
     // Root layout's title template appends " | Bilingual Boost" automatically.
-    title: "Spanish Classes & Tutor Near Me (100% Online) | Free Trial",
+    title: "Spanish Classes Near Me | Online Tutor + Free Trial",
     description:
-      "Searching for a Spanish tutor near you? Bilingual Boost is 100% online, so it's the closest Spanish tutor no matter your city. Free 30-min trial — from €11.",
+      "Looking for Spanish classes near me or Spanish tutors near me? Bilingual Boost is 100% online — your nearest Spanish tutor from anywhere. Free 30-min trial from €11.",
   },
   label: "Spanish tutor near me · 100% online",
   title: "Spanish classes near me? We're online, so we're always close by",
@@ -118,9 +118,9 @@ export const angielskiSulejowekLanding: SeoLandingContent = {
   chromeLocale: "pl",
   metadata: {
     // Root layout's title template appends " | Bilingual Boost" automatically.
-    title: "Angielski Sulejówek | Lekcje Online Blisko Ciebie | Darmowa Lekcja",
+    title: "Angielski Sulejówek | Lekcje Online 1:1 | Darmowa Próba",
     description:
-      "Szukasz angielskiego w Sulejówku? Lekcje 1:1 online z Pauliną Poloca — bez dojazdów, rozmowa od pierwszej lekcji. Darmowa lekcja próbna 30 min.",
+      "Angielski Sulejówek: lekcje 1:1 online z Pauliną Poloca — bez dojazdów, rozmowa od pierwszej lekcji. Także Stara Miłosna. Darmowa lekcja próbna 30 min.",
   },
   label: "Sulejówek · Stara Miłosna",
   title: "Angielski w Sulejówku i Starej Miłosnej — lekcje online",
@@ -190,10 +190,9 @@ export const szkolaJezykowaStaraMilosnaLanding: SeoLandingContent = {
   chromeLocale: "pl",
   metadata: {
     // Root layout's title template appends " | Bilingual Boost" automatically.
-    title:
-      "Szkoła Językowa Stara Miłosna | Angielski i Hiszpański Online | Bezpłatna Lekcja",
+    title: "Szkoła Językowa Stara Miłosna | Angielski i Hiszpański Online",
     description:
-      "Szkoła językowa dla Starej Miłosnej: angielski i hiszpański online dla dzieci i dorosłych z Pauliną Poloca. Bez dojazdów. Darmowa lekcja próbna 30 min.",
+      "Szkoła językowa Stara Miłosna: angielski i hiszpański online dla dzieci i dorosłych z Pauliną Poloca. Bez dojazdów. Darmowa lekcja próbna 30 min.",
   },
   label: "Szkoła językowa · Stara Miłosna",
   title: "Szkoła językowa Stara Miłosna — angielski i hiszpański online",

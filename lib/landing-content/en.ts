@@ -2,9 +2,9 @@ import type { LandingContent } from "./types";
 
 export const en: LandingContent = {
   metadata: {
-    title: "Bilingual Boost | Online English & Spanish Classes — Free Trial",
+    title: "Spanish Classes Near Me Online — Free Trial",
     description:
-      "Personalized online English and Spanish classes with Paulina Poloca. Speak from day one. Book a free 30-minute trial.",
+      "Looking for Spanish classes or Spanish tutors near you? Online 1:1 Spanish & English with Paulina Poloca (Bilingual Boost). Free 30-min trial.",
   },
   ui: {
     openMenuAria: "Open menu",

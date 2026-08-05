@@ -2,9 +2,9 @@ import type { LandingContent } from "./types";
 
 export const pl: LandingContent = {
   metadata: {
-    title: "Bilingual Boost | Angielski i hiszpański online — darmowa lekcja",
+    title: "Angielski i hiszpański online — Sulejówek / Stara Miłosna",
     description:
-      "Lekcje 1:1 online z Pauliną Poloca (Sulejówek / Stara Miłosna). Rozmowa od pierwszego dnia. Zarezerwuj darmową lekcję próbną (30 min).",
+      "Szkoła językowa Bilingual Boost: angielski i hiszpański 1:1 online z Pauliną Poloca (Sulejówek / Stara Miłosna). Darmowa lekcja próbna 30 min.",
   },
   ui: {
     openMenuAria: "Otwórz menu",

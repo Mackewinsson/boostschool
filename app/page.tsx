@@ -12,13 +12,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL(siteUrl),
-    title: metadata.title,
+    // Absolute avoids double brand from root title template (`%s | Bilingual Boost`).
+    title: { absolute: `${metadata.title} | ${siteName}` },
     description: metadata.description,
     alternates: {
       canonical: "/",
     },
     openGraph: {
-      title: metadata.title,
+      title: `${metadata.title} | ${siteName}`,
       description: metadata.description,
       url: "/",
       siteName,
@@ -27,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: metadata.title,
+      title: `${metadata.title} | ${siteName}`,
       description: metadata.description,
     },
   };
