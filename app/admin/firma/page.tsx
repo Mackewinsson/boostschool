@@ -10,7 +10,7 @@ export default function AdminFirmaPage() {
         className="admin-muted"
         style={{ marginTop: "-0.75rem", marginBottom: "1.25rem" }}
       >
-        Firma lista para pegar en Gmail. Cópiala desde aquí; no hace falta
+        Firma lista para pegar en Gmail. Copiala desde aqui; no hace falta
         editar HTML.
       </p>
       <GmailSignatureCard />

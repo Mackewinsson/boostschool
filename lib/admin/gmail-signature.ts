@@ -1,9 +1,12 @@
 import { siteUrl } from "@/lib/site-config";
 import { contactPhone } from "@/lib/site-links";
 
+const NAME = "Paulina \u0141aczma\u0144ska";
+const NAME_HTML = "Paulina &#321;aczma&#324;ska";
+
 export const GMAIL_SIGNATURE = {
-  name: "Paulina ?aczma?ska",
-  nameHtml: "Paulina &#321;aczma&#324;ska",
+  name: NAME,
+  nameHtml: NAME_HTML,
   title: "CEO",
   siteLabel: "BilingualBoost.online",
   siteUrl,

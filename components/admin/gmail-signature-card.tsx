@@ -58,8 +58,8 @@ export function GmailSignatureCard() {
     <div className="admin-card">
       <h2 className="admin-section-title">Vista previa</h2>
       <p className="admin-muted" style={{ marginBottom: "1rem" }}>
-        Pulsa copiar y pégala en Gmail ? Ajustes ? Ver todos los ajustes ?
-        General ? Firma.
+        Pulsa copiar y pegala en Gmail: Ajustes, Ver todos los ajustes, General,
+        Firma.
       </p>
 
       <div
@@ -82,7 +82,7 @@ export function GmailSignatureCard() {
         </AdminButton>
         {state === "copied" ? (
           <p className="admin-muted" style={{ margin: 0 }}>
-            Copiada. Pégala en Gmail.
+            Copiada. Pegala en Gmail.
           </p>
         ) : null}
         {state === "error" ? (
