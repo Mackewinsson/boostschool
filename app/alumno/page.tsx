@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { StudentDashboard } from "@/components/student/student-dashboard";
+import { canAccessTeacherWorkspace } from "@/lib/admin/auth";
 import { getAuthContext } from "@/lib/materials/auth";
 import { getStudentContent } from "@/lib/student-content";
 import { getLocaleFromCookies } from "@/lib/locale-server";
@@ -20,7 +22,8 @@ export default async function AlumnoPage() {
   const locale = await getLocaleFromCookies();
   const context = await getAuthContext();
 
-  if (context?.role === "teacher") {
+  const user = await currentUser();
+  if (canAccessTeacherWorkspace(user) || context?.role === "teacher") {
     redirect("/alumno/profesor");
   }
 

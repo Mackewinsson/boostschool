@@ -51,5 +51,10 @@ export const es: StudentContent = {
     errorGeneric: "No pudimos completar la acción. Inténtalo de nuevo.",
     errorUrl: "El enlace debe empezar con https://",
     errorTitle: "Escribe un título de al menos 2 caracteres.",
+    navMaterials: "Materiales",
+    navLeads: "Leads",
+    navContacts: "Contactos",
+    navEmails: "Emails",
+    navSignature: "Firma",
   },
 };

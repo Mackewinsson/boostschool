@@ -51,5 +51,10 @@ export const pl: StudentContent = {
     errorGeneric: "Nie udało się wykonać operacji. Spróbuj ponownie.",
     errorUrl: "Link musi zaczynać się od https://",
     errorTitle: "Wpisz tytuł o długości co najmniej 2 znaków.",
+    navMaterials: "Materialy",
+    navLeads: "Leady",
+    navContacts: "Wiadomosci",
+    navEmails: "E-maile",
+    navSignature: "Podpis",
   },
 };

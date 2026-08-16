@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AdminButton } from "@/components/admin/admin-button";
 import { isDatabaseConfigured } from "@/lib/db/client";
 import { listLeads } from "@/lib/crm/leads";
+import { teacherPaths } from "@/lib/teacher/paths";
 import { createLeadAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -13,12 +14,16 @@ function formatDate(value: string): string {
   });
 }
 
-export default async function AdminLeadsPage() {
+export default async function TeacherLeadsPage() {
   if (!isDatabaseConfigured()) {
     return (
       <div>
-        <h1 className="admin-page-title">Leads</h1>
-        <p className="admin-muted">DATABASE_URL no está configurada.</p>
+        <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+          Leads
+        </h1>
+        <p className="mt-3 text-base text-fg-muted">
+          DATABASE_URL no esta configurada.
+        </p>
       </div>
     );
   }
@@ -27,9 +32,14 @@ export default async function AdminLeadsPage() {
 
   return (
     <div>
-      <h1 className="admin-page-title">Leads</h1>
+      <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+        Leads
+      </h1>
+      <p className="mt-3 max-w-3xl text-base text-fg-muted">
+        Personas que pidieron la guia o que agregaste a mano.
+      </p>
 
-      <div className="admin-grid">
+      <div className="admin-grid mt-8">
         <div className="admin-card admin-card--flush">
           <div style={{ padding: "1.25rem 1.5rem" }}>
             <h2 className="admin-section-title" style={{ marginBottom: 0 }}>
@@ -53,7 +63,7 @@ export default async function AdminLeadsPage() {
               {leads.length === 0 ? (
                 <tr>
                   <td colSpan={4} style={{ textAlign: "center", color: "var(--fg-muted)" }}>
-                    Todavía no hay leads.
+                    Todavia no hay leads.
                   </td>
                 </tr>
               ) : (
@@ -61,7 +71,7 @@ export default async function AdminLeadsPage() {
                   <tr key={lead.id} className="admin-row-clickable">
                     <td colSpan={4} style={{ padding: 0 }}>
                       <Link
-                        href={`/admin/leads/${lead.id}`}
+                        href={teacherPaths.lead(lead.id)}
                         style={{
                           display: "grid",
                           gridTemplateColumns: "1.2fr 1.4fr 0.6fr 1fr",

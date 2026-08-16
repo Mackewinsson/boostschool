@@ -1,4 +1,5 @@
 import { auth, currentUser, type User } from "@clerk/nextjs/server";
+import { getRoleFromMetadata } from "@/lib/materials/auth";
 
 function getAdminAllowlistEmails(): Set<string> {
   const raw = process.env.CLERK_ADMIN_EMAILS?.trim();
@@ -35,6 +36,18 @@ export function isAdminUser(user: User | null | undefined): boolean {
   );
 }
 
+export function canAccessTeacherWorkspace(
+  user: User | null | undefined,
+): boolean {
+  if (!user) {
+    return false;
+  }
+  if (isAdminUser(user)) {
+    return true;
+  }
+  return getRoleFromMetadata(user.id, user.publicMetadata) === "teacher";
+}
+
 export async function getAdminContext() {
   const session = await auth();
   if (!session.userId) {
@@ -42,7 +55,7 @@ export async function getAdminContext() {
   }
 
   const user = await currentUser();
-  if (!isAdminUser(user)) {
+  if (!canAccessTeacherWorkspace(user)) {
     return null;
   }
 

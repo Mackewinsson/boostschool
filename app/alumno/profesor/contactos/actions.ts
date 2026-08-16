@@ -7,6 +7,7 @@ import {
   deleteContactMessage,
   markContactMessageRead,
 } from "@/lib/crm/contacts";
+import { teacherPaths } from "@/lib/teacher/paths";
 
 function readString(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -19,9 +20,9 @@ export async function markContactReadAction(formData: FormData) {
     return;
   }
   await markContactMessageRead(id);
-  revalidatePath("/admin");
-  revalidatePath("/admin/contacts");
-  revalidatePath(`/admin/contacts/${id}`);
+  revalidatePath(teacherPaths.home);
+  revalidatePath(teacherPaths.contacts);
+  revalidatePath(teacherPaths.contact(id));
 }
 
 export async function deleteContactAction(formData: FormData) {
@@ -31,7 +32,7 @@ export async function deleteContactAction(formData: FormData) {
     return;
   }
   await deleteContactMessage(id);
-  revalidatePath("/admin");
-  revalidatePath("/admin/contacts");
-  redirect("/admin/contacts");
+  revalidatePath(teacherPaths.home);
+  revalidatePath(teacherPaths.contacts);
+  redirect(teacherPaths.contacts);
 }

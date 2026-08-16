@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { isDatabaseConfigured } from "@/lib/db/client";
 import { listContactMessages } from "@/lib/crm/contacts";
+import { teacherPaths } from "@/lib/teacher/paths";
 
 export const dynamic = "force-dynamic";
 
@@ -13,15 +14,19 @@ function formatDate(value: string): string {
 
 function previewMessage(message: string): string {
   const compact = message.replaceAll(/\s+/g, " ").trim();
-  return compact.length > 80 ? `${compact.slice(0, 80)}…` : compact;
+  return compact.length > 80 ? `${compact.slice(0, 80)}...` : compact;
 }
 
-export default async function AdminContactsPage() {
+export default async function TeacherContactsPage() {
   if (!isDatabaseConfigured()) {
     return (
       <div>
-        <h1 className="admin-page-title">Contactos</h1>
-        <p className="admin-muted">DATABASE_URL no está configurada.</p>
+        <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+          Contactos
+        </h1>
+        <p className="mt-3 text-base text-fg-muted">
+          DATABASE_URL no esta configurada.
+        </p>
       </div>
     );
   }
@@ -30,12 +35,14 @@ export default async function AdminContactsPage() {
 
   return (
     <div>
-      <h1 className="admin-page-title">Contactos</h1>
-      <p className="admin-muted" style={{ marginTop: "-0.75rem", marginBottom: "1.25rem" }}>
+      <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+        Contactos
+      </h1>
+      <p className="mt-3 max-w-3xl text-base text-fg-muted">
         Mensajes del formulario de contacto ({messages.length})
       </p>
 
-      <div className="admin-card admin-card--flush">
+      <div className="admin-card admin-card--flush mt-8">
         <table className="admin-table">
           <thead>
             <tr>
@@ -52,7 +59,7 @@ export default async function AdminContactsPage() {
                   colSpan={4}
                   style={{ textAlign: "center", color: "var(--fg-muted)" }}
                 >
-                  Todavía no hay mensajes.
+                  Todavia no hay mensajes.
                 </td>
               </tr>
             ) : (
@@ -60,7 +67,7 @@ export default async function AdminContactsPage() {
                 <tr key={item.id} className="admin-row-clickable">
                   <td colSpan={4} style={{ padding: 0 }}>
                     <Link
-                      href={`/admin/contacts/${item.id}`}
+                      href={teacherPaths.contact(item.id)}
                       style={{
                         display: "grid",
                         gridTemplateColumns: "0.7fr 1fr 1.8fr 1fr",
@@ -72,7 +79,7 @@ export default async function AdminContactsPage() {
                       <span style={{ padding: "0.85rem 1rem" }}>
                         {item.readAt ? (
                           <span className="admin-badge admin-badge--muted">
-                            Leído
+                            Leido
                           </span>
                         ) : (
                           <span className="admin-badge admin-badge--active">

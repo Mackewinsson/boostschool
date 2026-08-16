@@ -49,5 +49,10 @@ export type StudentContent = {
     errorGeneric: string;
     errorUrl: string;
     errorTitle: string;
+    navMaterials: string;
+    navLeads: string;
+    navContacts: string;
+    navEmails: string;
+    navSignature: string;
   };
 };

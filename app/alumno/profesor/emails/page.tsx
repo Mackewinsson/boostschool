@@ -8,12 +8,16 @@ import { updateEmailTemplateAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminEmailsPage() {
+export default async function TeacherEmailsPage() {
   if (!isDatabaseConfigured()) {
     return (
       <div>
-        <h1 className="admin-page-title">Emails</h1>
-        <p className="admin-muted">DATABASE_URL no está configurada.</p>
+        <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+          Emails
+        </h1>
+        <p className="mt-3 text-base text-fg-muted">
+          DATABASE_URL no esta configurada.
+        </p>
       </div>
     );
   }
@@ -23,8 +27,10 @@ export default async function AdminEmailsPage() {
   if (!template) {
     return (
       <div>
-        <h1 className="admin-page-title">Emails</h1>
-        <p className="admin-muted">
+        <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+          Emails
+        </h1>
+        <p className="mt-3 text-base text-fg-muted">
           No hay plantillas. Ejecuta `npm run db:migrate`.
         </p>
       </div>
@@ -33,14 +39,16 @@ export default async function AdminEmailsPage() {
 
   return (
     <div>
-      <h1 className="admin-page-title">Emails</h1>
-      <p className="admin-muted" style={{ marginTop: "-0.75rem", marginBottom: "1.25rem" }}>
+      <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+        Emails
+      </h1>
+      <p className="mt-3 max-w-3xl text-base text-fg-muted">
         Plantilla de bienvenida del lead magnet. Variables:{" "}
         <code>{"{{name}}"}</code>, <code>{"{{download_url}}"}</code>
       </p>
 
-      <div className="admin-card">
-        <h2 className="admin-section-title">Bienvenida — guía gratis</h2>
+      <div className="admin-card mt-8">
+        <h2 className="admin-section-title">Bienvenida - guia gratis</h2>
         <form action={updateEmailTemplateAction} className="admin-form">
           <input type="hidden" name="id" value={template.id} />
 
@@ -146,7 +154,7 @@ export default async function AdminEmailsPage() {
               </div>
               <div className="admin-field">
                 <label className="admin-label" htmlFor="body_html_pl">
-                  Treść HTML
+                  Tresc HTML
                 </label>
                 <textarea
                   id="body_html_pl"

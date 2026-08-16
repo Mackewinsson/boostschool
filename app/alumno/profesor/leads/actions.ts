@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin/auth";
 import { createLead, deleteLead, updateLead } from "@/lib/crm/leads";
 import { isLocale, type Locale } from "@/lib/locale";
+import { teacherPaths } from "@/lib/teacher/paths";
 
 function readString(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -13,6 +14,14 @@ function readString(formData: FormData, key: string): string {
 function readLocale(formData: FormData): Locale {
   const value = readString(formData, "locale");
   return isLocale(value) ? value : "es";
+}
+
+function revalidateLeadPaths(id?: string) {
+  revalidatePath(teacherPaths.home);
+  revalidatePath(teacherPaths.leads);
+  if (id) {
+    revalidatePath(teacherPaths.lead(id));
+  }
 }
 
 export async function createLeadAction(formData: FormData) {
@@ -35,9 +44,8 @@ export async function createLeadAction(formData: FormData) {
     notes: notes || undefined,
   });
 
-  revalidatePath("/admin");
-  revalidatePath("/admin/leads");
-  redirect(`/admin/leads/${lead.id}`);
+  revalidateLeadPaths(lead.id);
+  redirect(teacherPaths.lead(lead.id));
 }
 
 export async function updateLeadAction(formData: FormData) {
@@ -53,9 +61,7 @@ export async function updateLeadAction(formData: FormData) {
   }
 
   await updateLead(id, { name, locale, notes: notes || undefined });
-  revalidatePath("/admin");
-  revalidatePath("/admin/leads");
-  revalidatePath(`/admin/leads/${id}`);
+  revalidateLeadPaths(id);
 }
 
 export async function deleteLeadAction(formData: FormData) {
@@ -67,7 +73,6 @@ export async function deleteLeadAction(formData: FormData) {
   }
 
   await deleteLead(id);
-  revalidatePath("/admin");
-  revalidatePath("/admin/leads");
-  redirect("/admin/leads");
+  revalidateLeadPaths();
+  redirect(teacherPaths.leads);
 }

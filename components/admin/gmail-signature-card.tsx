@@ -55,9 +55,9 @@ export function GmailSignatureCard() {
   }
 
   return (
-    <div className="admin-card">
-      <h2 className="admin-section-title">Vista previa</h2>
-      <p className="admin-muted" style={{ marginBottom: "1rem" }}>
+    <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+      <h2 className="text-xl font-bold text-fg">Vista previa</h2>
+      <p className="mt-2 mb-4 text-sm text-fg-muted">
         Pulsa copiar y pegala en Gmail: Ajustes, Ver todos los ajustes, General,
         Firma.
       </p>
@@ -81,12 +81,10 @@ export function GmailSignatureCard() {
           Copiar firma
         </AdminButton>
         {state === "copied" ? (
-          <p className="admin-muted" style={{ margin: 0 }}>
-            Copiada. Pegala en Gmail.
-          </p>
+          <p className="m-0 text-sm text-accent">Copiada. Pegala en Gmail.</p>
         ) : null}
         {state === "error" ? (
-          <p className="admin-muted" style={{ margin: 0 }}>
+          <p className="m-0 text-sm text-red-400">
             No se pudo copiar. Selecciona la firma y copia a mano.
           </p>
         ) : null}

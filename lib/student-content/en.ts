@@ -51,5 +51,10 @@ export const en: StudentContent = {
     errorGeneric: "We couldn't complete that action. Please try again.",
     errorUrl: "The link must start with https://",
     errorTitle: "Enter a title with at least 2 characters.",
+    navMaterials: "Materials",
+    navLeads: "Leads",
+    navContacts: "Contacts",
+    navEmails: "Emails",
+    navSignature: "Signature",
   },
 };

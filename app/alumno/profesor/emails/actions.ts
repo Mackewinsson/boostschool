@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/auth";
 import { updateEmailTemplate } from "@/lib/crm/templates";
+import { teacherPaths } from "@/lib/teacher/paths";
 
 function readString(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -25,5 +26,5 @@ export async function updateEmailTemplateAction(formData: FormData) {
     bodyHtmlPl: readString(formData, "body_html_pl"),
   });
 
-  revalidatePath("/admin/emails");
+  revalidatePath(teacherPaths.emails);
 }
