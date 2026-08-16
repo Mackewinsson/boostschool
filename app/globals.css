@@ -535,3 +535,10 @@ html {
   color: var(--fg-soft);
   margin: 0;
 }
+
+.admin-signature-preview {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  overflow-x: auto;
+}

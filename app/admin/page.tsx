@@ -60,6 +60,9 @@ export default async function AdminDashboardPage() {
             <Link href="/admin/emails" className="admin-btn admin-btn--quiet">
               Plantillas de email
             </Link>
+            <Link href="/admin/firma" className="admin-btn admin-btn--quiet">
+              Firma de Gmail
+            </Link>
           </div>
         </div>
       </div>

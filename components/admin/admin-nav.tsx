@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Mail,
   MessageSquare,
+  PenLine,
   Users,
 } from "lucide-react";
 
@@ -21,6 +22,7 @@ const NAV: NavItem[] = [
   { href: "/admin/leads", label: "Leads", icon: Users },
   { href: "/admin/contacts", label: "Contactos", icon: MessageSquare },
   { href: "/admin/emails", label: "Emails", icon: Mail },
+  { href: "/admin/firma", label: "Firma", icon: PenLine },
 ];
 
 export function AdminNav() {
