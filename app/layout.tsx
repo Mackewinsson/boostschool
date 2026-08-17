@@ -21,6 +21,11 @@ export const metadata: Metadata = {
     default: siteName,
     template: `%s | ${siteName}`,
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   openGraph: {
     siteName,
     type: "website",

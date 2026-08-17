@@ -15,6 +15,13 @@ const isStudentRoute = createRouteMatcher([
   "/api/alumno/my-materials(.*)",
 ]);
 
+const isPrivateRoute = createRouteMatcher([
+  "/admin(.*)",
+  "/alumno(.*)",
+  "/sign-in(.*)",
+  "/api/(.*)",
+]);
+
 export default clerkMiddleware(async (auth, req) => {
   if (isAdminRoute(req)) {
     await auth.protect();
@@ -29,6 +36,13 @@ export default clerkMiddleware(async (auth, req) => {
   // set the correct `<html lang>` for fixed-language SEO landing pages.
   const response = NextResponse.next();
   response.headers.set("x-pathname", req.nextUrl.pathname);
+  // Clerk development instances inject X-Robots-Tag: noindex on every
+  // response. Public marketing URLs must stay indexable (GSC previously
+  // excluded www.bilingualboost.online as "Excluded by noindex tag").
+  if (!isPrivateRoute(req)) {
+    response.headers.delete("X-Robots-Tag");
+    response.headers.set("X-Robots-Tag", "index, follow");
+  }
   return response;
 });
 

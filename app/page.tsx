@@ -18,6 +18,11 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: "/",
     },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true },
+    },
     openGraph: {
       title: `${metadata.title} | ${siteName}`,
       description: metadata.description,

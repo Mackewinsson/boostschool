@@ -9,5 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       disallow: ["/admin", "/admin/", "/alumno", "/alumno/", "/api/"],
     },
     sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl,
   };
 }

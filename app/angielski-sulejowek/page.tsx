@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: angielskiSulejowekLanding.path,
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   openGraph: {
     title: angielskiSulejowekLanding.metadata.title,
     description: angielskiSulejowekLanding.metadata.description,

@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: szkolaJezykowaStaraMilosnaLanding.path,
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   openGraph: {
     title: szkolaJezykowaStaraMilosnaLanding.metadata.title,
     description: szkolaJezykowaStaraMilosnaLanding.metadata.description,

@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: spanishClassesLanding.path,
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   openGraph: {
     title: spanishClassesLanding.metadata.title,
     description: spanishClassesLanding.metadata.description,
