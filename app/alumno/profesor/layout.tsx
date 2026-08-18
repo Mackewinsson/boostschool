@@ -1,4 +1,3 @@
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { TeacherNav } from "@/components/student/teacher-nav";
 import { canAccessTeacherWorkspace } from "@/lib/admin/auth";
@@ -12,13 +11,12 @@ export default async function TeacherWorkspaceLayout({
   children: React.ReactNode;
 }) {
   const context = await getAuthContext();
-  const user = await currentUser();
 
   if (!context) {
     redirect("/sign-in");
   }
 
-  if (!canAccessTeacherWorkspace(user)) {
+  if (!canAccessTeacherWorkspace(context.role)) {
     redirect("/alumno");
   }
 

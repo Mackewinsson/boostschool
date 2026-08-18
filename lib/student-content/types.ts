@@ -11,6 +11,11 @@ export type StudentContent = {
     teacherArea: string;
     signInTitle: string;
     signInSubtitle: string;
+    emailLabel: string;
+    passwordLabel: string;
+    signInButton: string;
+    signInError: string;
+    logoutLabel: string;
   };
   student: {
     title: string;
@@ -44,6 +49,18 @@ export type StudentContent = {
     assignAllLabel: string;
     completedLabel: string;
     noStudents: string;
+    createStudentTitle: string;
+    studentNameLabel: string;
+    studentNamePlaceholder: string;
+    studentEmailLabel: string;
+    studentEmailPlaceholder: string;
+    studentPasswordLabel: string;
+    studentPasswordPlaceholder: string;
+    createStudentButton: string;
+    successStudentCreated: string;
+    errorStudentName: string;
+    errorStudentEmail: string;
+    errorStudentPassword: string;
     successAdded: string;
     successAssigned: string;
     errorGeneric: string;

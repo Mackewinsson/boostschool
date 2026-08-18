@@ -1,68 +1,25 @@
-import { auth, currentUser, type User } from "@clerk/nextjs/server";
-import { getRoleFromMetadata } from "@/lib/materials/auth";
+import { canAccessTeacherRole, requireAuth } from "@/lib/materials/auth";
 
-function getAdminAllowlistEmails(): Set<string> {
-  const raw = process.env.CLERK_ADMIN_EMAILS?.trim();
-  if (!raw) {
-    return new Set();
-  }
-  return new Set(
-    raw
-      .split(",")
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean),
-  );
-}
-
-export function isAdminUser(user: User | null | undefined): boolean {
-  if (!user) {
-    return false;
-  }
-
-  if (
-    user.publicMetadata?.role === "admin" ||
-    user.publicMetadata?.admin === true
-  ) {
-    return true;
-  }
-
-  const allowlist = getAdminAllowlistEmails();
-  if (allowlist.size === 0) {
-    return false;
-  }
-
-  return user.emailAddresses.some((entry) =>
-    allowlist.has(entry.emailAddress.toLowerCase()),
-  );
+export function isAdminUser(role: string | null | undefined): boolean {
+  return role === "admin";
 }
 
 export function canAccessTeacherWorkspace(
-  user: User | null | undefined,
+  role: string | null | undefined,
 ): boolean {
-  if (!user) {
-    return false;
-  }
-  if (isAdminUser(user)) {
-    return true;
-  }
-  return getRoleFromMetadata(user.id, user.publicMetadata) === "teacher";
+  return role === "admin" || role === "teacher";
 }
 
 export async function getAdminContext() {
-  const session = await auth();
-  if (!session.userId) {
-    return null;
-  }
-
-  const user = await currentUser();
-  if (!canAccessTeacherWorkspace(user)) {
+  const context = await requireAuth().catch(() => null);
+  if (!context || !canAccessTeacherRole(context.role)) {
     return null;
   }
 
   return {
-    userId: session.userId,
-    email: user?.emailAddresses[0]?.emailAddress ?? null,
-    firstName: user?.firstName ?? null,
+    userId: context.userId,
+    email: context.email,
+    firstName: context.firstName,
   };
 }
 

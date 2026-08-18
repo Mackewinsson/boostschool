@@ -1,49 +1,48 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { findUserById } from "@/lib/auth/users";
+import {
+  SESSION_COOKIE,
+  type UserRole,
+  verifySessionToken,
+} from "@/lib/auth/session";
 import type { Role } from "./types";
 
-function getTeacherAllowlist(): Set<string> {
-  const raw = process.env.CLERK_TEACHER_USER_IDS?.trim();
-  if (!raw) {
-    return new Set();
-  }
-  return new Set(
-    raw
-      .split(",")
-      .map((id) => id.trim())
-      .filter(Boolean),
-  );
-}
-
 export function getRoleFromMetadata(
-  userId: string,
+  _userId: string,
   publicMetadata: Record<string, unknown> | undefined,
 ): Role {
   const role = publicMetadata?.role;
-  if (role === "teacher" || role === "student") {
+  if (role === "admin" || role === "teacher" || role === "student") {
     return role;
-  }
-  if (getTeacherAllowlist().has(userId)) {
-    return "teacher";
   }
   return "student";
 }
 
 export async function getAuthContext() {
-  const session = await auth();
-  const userId = session.userId;
-  if (!userId) {
+  const jar = await cookies();
+  const token = jar.get(SESSION_COOKIE)?.value;
+  if (!token) {
     return null;
   }
 
-  const user = await currentUser();
-  const role = getRoleFromMetadata(userId, user?.publicMetadata);
+  const session = await verifySessionToken(token);
+  if (!session) {
+    return null;
+  }
+
+  const user = await findUserById(session.sub);
+  if (!user || !user.active) {
+    return null;
+  }
+
+  const [firstName, ...lastNameParts] = user.name.trim().split(/\s+/);
 
   return {
-    userId,
-    role,
-    email: user?.emailAddresses[0]?.emailAddress ?? null,
-    firstName: user?.firstName ?? null,
-    lastName: user?.lastName ?? null,
+    userId: user.id,
+    role: user.role,
+    email: user.email,
+    firstName: firstName ?? null,
+    lastName: lastNameParts.length > 0 ? lastNameParts.join(" ") : null,
   };
 }
 
@@ -57,7 +56,7 @@ export async function requireAuth() {
 
 export async function requireTeacher() {
   const context = await requireAuth();
-  if (context.role !== "teacher") {
+  if (context.role !== "teacher" && context.role !== "admin") {
     throw new Error("FORBIDDEN");
   }
   return context;
@@ -71,6 +70,10 @@ export async function requireStudent() {
   return context;
 }
 
+export function canAccessTeacherRole(role: UserRole): boolean {
+  return role === "teacher" || role === "admin";
+}
+
 export function getPortalPathForRole(role: Role): string {
-  return role === "teacher" ? "/alumno/profesor" : "/alumno";
+  return canAccessTeacherRole(role) ? "/alumno/profesor" : "/alumno";
 }

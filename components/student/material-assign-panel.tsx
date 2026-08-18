@@ -42,7 +42,7 @@ export function MaterialAssignPanel({
   const allAssigned = students.every((student) =>
     assignments.some(
       (assignment) =>
-        assignment.materialId === materialId && assignment.clerkUserId === student.id,
+        assignment.materialId === materialId && assignment.userId === student.id,
     ),
   );
 
@@ -66,7 +66,7 @@ export function MaterialAssignPanel({
       <ul className="mt-3 space-y-1.5">
         {students.map((student) => {
           const assignment = assignments.find(
-            (item) => item.materialId === materialId && item.clerkUserId === student.id,
+            (item) => item.materialId === materialId && item.userId === student.id,
           );
           const assigned = Boolean(assignment);
           const completed = Boolean(assignment?.completedAt);

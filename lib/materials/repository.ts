@@ -14,7 +14,7 @@ type MaterialRow = {
 };
 
 type AssignmentRow = {
-  clerk_user_id: string;
+  user_id: string;
   material_id: string;
   assigned_at: string;
   completed_at: string | null;
@@ -70,19 +70,19 @@ export async function listAssignments(userId?: string): Promise<Assignment[]> {
   const sql = getDb();
   const rows = (userId
     ? await sql`
-        SELECT clerk_user_id, material_id, assigned_at, completed_at
+        SELECT user_id, material_id, assigned_at, completed_at
         FROM student_materials
-        WHERE clerk_user_id = ${userId}
+        WHERE user_id = ${userId}::uuid
         ORDER BY assigned_at DESC
       `
     : await sql`
-        SELECT clerk_user_id, material_id, assigned_at, completed_at
+        SELECT user_id, material_id, assigned_at, completed_at
         FROM student_materials
         ORDER BY assigned_at DESC
       `) as AssignmentRow[];
 
   return rows.map((row) => ({
-    clerkUserId: row.clerk_user_id,
+    userId: row.user_id,
     materialId: row.material_id,
     assignedAt: row.assigned_at,
     completedAt: row.completed_at,
@@ -95,9 +95,9 @@ export async function assignMaterial(
 ): Promise<void> {
   const sql = getDb();
   await sql`
-    INSERT INTO student_materials (clerk_user_id, material_id)
-    VALUES (${userId}, ${materialId}::uuid)
-    ON CONFLICT (clerk_user_id, material_id) DO NOTHING
+    INSERT INTO student_materials (user_id, material_id)
+    VALUES (${userId}::uuid, ${materialId}::uuid)
+    ON CONFLICT (user_id, material_id) DO NOTHING
   `;
 }
 
@@ -108,9 +108,9 @@ export async function unassignMaterial(
   const sql = getDb();
   const rows = (await sql`
     DELETE FROM student_materials
-    WHERE clerk_user_id = ${userId} AND material_id = ${materialId}::uuid
-    RETURNING clerk_user_id
-  `) as { clerk_user_id: string }[];
+    WHERE user_id = ${userId}::uuid AND material_id = ${materialId}::uuid
+    RETURNING user_id
+  `) as { user_id: string }[];
   return rows.length > 0;
 }
 
@@ -121,7 +121,7 @@ export async function listMaterialsForStudent(userId: string): Promise<Material[
            sm.assigned_at, sm.completed_at
     FROM materials m
     INNER JOIN student_materials sm ON sm.material_id = m.id
-    WHERE sm.clerk_user_id = ${userId}
+    WHERE sm.user_id = ${userId}::uuid
     ORDER BY sm.assigned_at DESC
   `) as MaterialRow[];
   return rows.map(mapMaterial);
@@ -136,8 +136,8 @@ export async function setCompletion(
   const rows = (await sql`
     UPDATE student_materials
     SET completed_at = ${completed ? new Date().toISOString() : null}
-    WHERE clerk_user_id = ${userId} AND material_id = ${materialId}::uuid
-    RETURNING clerk_user_id
-  `) as { clerk_user_id: string }[];
+    WHERE user_id = ${userId}::uuid AND material_id = ${materialId}::uuid
+    RETURNING user_id
+  `) as { user_id: string }[];
   return rows.length > 0;
 }

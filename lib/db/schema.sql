@@ -7,8 +7,21 @@ CREATE TABLE IF NOT EXISTS materials (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('admin', 'teacher', 'student')),
+  clerk_user_id TEXT UNIQUE,
+  active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS student_materials (
   clerk_user_id TEXT NOT NULL,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   material_id UUID NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
   assigned_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   completed_at TIMESTAMPTZ,
@@ -18,8 +31,21 @@ CREATE TABLE IF NOT EXISTS student_materials (
 CREATE INDEX IF NOT EXISTS idx_student_materials_user
   ON student_materials (clerk_user_id);
 
+CREATE INDEX IF NOT EXISTS idx_student_materials_user_id
+  ON student_materials (user_id);
+
 ALTER TABLE student_materials
   ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
+
+ALTER TABLE student_materials
+  ADD COLUMN IF NOT EXISTS user_id UUID;
+
+ALTER TABLE student_materials
+  DROP CONSTRAINT IF EXISTS student_materials_user_id_fkey;
+
+ALTER TABLE student_materials
+  ADD CONSTRAINT student_materials_user_id_fkey
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS leads (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

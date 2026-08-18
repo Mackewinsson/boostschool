@@ -78,7 +78,6 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
             <NavLink key={`${link.href}-${link.label}`} href={link.href} label={link.label} />
           ))}
           <PortalNavLink
-            portalLabel={ui.portalNavLabel}
             signInLabel={ui.signInNavLabel}
             className={navLinkClass}
           />
@@ -149,7 +148,6 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
               />
             ))}
             <PortalNavLink
-              portalLabel={ui.portalNavLabel}
               signInLabel={ui.signInNavLabel}
               className="rounded-lg px-3 py-2.5 text-sm font-medium text-fg-soft transition hover:bg-card hover:text-fg"
               onClick={() => setOpen(false)}

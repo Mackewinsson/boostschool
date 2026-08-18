@@ -18,6 +18,9 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [expandedMaterialId, setExpandedMaterialId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [studentName, setStudentName] = useState("");
+  const [studentEmail, setStudentEmail] = useState("");
+  const [studentPassword, setStudentPassword] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
@@ -105,6 +108,53 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
       cancelled = true;
     };
   }, []);
+
+  async function handleCreateStudent(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+
+    if (studentName.trim().length < 2) {
+      setError(copy.errorStudentName);
+      return;
+    }
+    if (!studentEmail.trim() || !studentEmail.includes("@")) {
+      setError(copy.errorStudentEmail);
+      return;
+    }
+    if (studentPassword.length < 8) {
+      setError(copy.errorStudentPassword);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch("/api/alumno/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: studentName,
+          email: studentEmail,
+          password: studentPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        setError(copy.errorGeneric);
+        return;
+      }
+
+      setStudentName("");
+      setStudentEmail("");
+      setStudentPassword("");
+      setMessage(copy.successStudentCreated);
+      await loadData();
+    } catch {
+      setError(copy.errorGeneric);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function handleAddMaterial(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -203,8 +253,7 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
         (student) =>
           !assignments.some(
             (assignment) =>
-              assignment.materialId === materialId &&
-              assignment.clerkUserId === student.id,
+              assignment.materialId === materialId && assignment.userId === student.id,
           ),
       );
       await Promise.all(
@@ -237,6 +286,59 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
     <>
       <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">{copy.title}</h1>
       <p className="mt-3 max-w-3xl text-base text-fg-muted">{copy.subtitle}</p>
+
+      <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
+        <h2 className="text-xl font-bold text-fg">{copy.createStudentTitle}</h2>
+        <form onSubmit={handleCreateStudent} className="mt-5 grid gap-4 md:grid-cols-3">
+          <div>
+            <label htmlFor="student-name" className="block text-sm font-medium text-fg">
+              {copy.studentNameLabel}
+            </label>
+            <input
+              id="student-name"
+              value={studentName}
+              onChange={(event) => setStudentName(event.target.value)}
+              placeholder={copy.studentNamePlaceholder}
+              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="student-email" className="block text-sm font-medium text-fg">
+              {copy.studentEmailLabel}
+            </label>
+            <input
+              id="student-email"
+              type="email"
+              value={studentEmail}
+              onChange={(event) => setStudentEmail(event.target.value)}
+              placeholder={copy.studentEmailPlaceholder}
+              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="student-password" className="block text-sm font-medium text-fg">
+              {copy.studentPasswordLabel}
+            </label>
+            <input
+              id="student-password"
+              type="password"
+              value={studentPassword}
+              onChange={(event) => setStudentPassword(event.target.value)}
+              placeholder={copy.studentPasswordPlaceholder}
+              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+            />
+          </div>
+          <div className="md:col-span-3">
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] disabled:opacity-70"
+            >
+              {copy.createStudentButton}
+            </button>
+          </div>
+        </form>
+      </section>
 
       <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
         <h2 className="text-xl font-bold text-fg">{copy.addTitle}</h2>

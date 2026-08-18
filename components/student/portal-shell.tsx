@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
 import type { ReactNode } from "react";
+import { logoutAction } from "@/lib/actions/auth";
 import type { StudentContent } from "@/lib/student-content/types";
 
 type PortalShellProps = {
@@ -29,7 +29,14 @@ export function PortalShell({ copy, children, teacherLink = false }: PortalShell
                 {copy.teacherArea}
               </Link>
             ) : null}
-            <UserButton />
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="text-sm font-medium text-fg-muted transition hover:text-accent"
+              >
+                {copy.logoutLabel}
+              </button>
+            </form>
           </div>
         </div>
       </header>

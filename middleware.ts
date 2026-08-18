@@ -1,50 +1,93 @@
 import { NextResponse } from "next/server";
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import type { NextRequest } from "next/server";
+import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+function isTeacherRoute(pathname: string) {
+  return (
+    pathname.startsWith("/alumno/profesor") ||
+    pathname.startsWith("/api/alumno/materials") ||
+    pathname.startsWith("/api/alumno/assignments") ||
+    pathname.startsWith("/api/alumno/students")
+  );
+}
 
-const isTeacherRoute = createRouteMatcher([
-  "/alumno/profesor(.*)",
-  "/api/alumno/materials(.*)",
-  "/api/alumno/assignments(.*)",
-  "/api/alumno/students(.*)",
-]);
+function isStudentRoute(pathname: string) {
+  return pathname.startsWith("/alumno") || pathname.startsWith("/api/alumno/my-materials");
+}
 
-const isStudentRoute = createRouteMatcher([
-  "/alumno(.*)",
-  "/api/alumno/my-materials(.*)",
-]);
+function isPrivateRoute(pathname: string) {
+  return (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/alumno") ||
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/api/")
+  );
+}
 
-const isPrivateRoute = createRouteMatcher([
-  "/admin(.*)",
-  "/alumno(.*)",
-  "/sign-in(.*)",
-  "/api/(.*)",
-]);
+function unauthorizedApiResponse() {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isAdminRoute(req)) {
-    await auth.protect();
-  } else if (isTeacherRoute(req)) {
-    await auth.protect();
-  } else if (isStudentRoute(req)) {
-    await auth.protect();
-  }
+export default async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-  // Exposes the current pathname to Server Components (e.g. the root layout)
-  // via `headers()`, since Next.js has no other way to read it there. Used to
-  // set the correct `<html lang>` for fixed-language SEO landing pages.
   const response = NextResponse.next();
-  response.headers.set("x-pathname", req.nextUrl.pathname);
-  // Clerk development instances inject X-Robots-Tag: noindex on every
-  // response. Public marketing URLs must stay indexable (GSC previously
-  // excluded www.bilingualboost.online as "Excluded by noindex tag").
-  if (!isPrivateRoute(req)) {
+  response.headers.set("x-pathname", pathname);
+
+  if (!isPrivateRoute(pathname)) {
     response.headers.delete("X-Robots-Tag");
     response.headers.set("X-Robots-Tag", "index, follow");
+    return response;
   }
+
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
+  const session = token ? await verifySessionToken(token) : null;
+
+  if (pathname.startsWith("/sign-in")) {
+    if (session) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/alumno/redirect";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+    return response;
+  }
+
+  if (pathname.startsWith("/api/alumno/")) {
+    if (!session) {
+      return unauthorizedApiResponse();
+    }
+    if (isTeacherRoute(pathname) && session.role !== "teacher" && session.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return response;
+  }
+
+  if (pathname.startsWith("/admin") || pathname.startsWith("/alumno")) {
+    if (!session) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/sign-in";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+
+    if (isTeacherRoute(pathname) && session.role !== "teacher" && session.role !== "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/alumno";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+
+    if (isStudentRoute(pathname) && !pathname.startsWith("/alumno/profesor") && session.role !== "student") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/alumno/profesor";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return response;
-});
+}
 
 export const config = {
   matcher: [

@@ -1,6 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import type { Metadata } from "next";
-import { Providers } from "@/components/providers";
 import { getHtmlLang } from "@/lib/locale-server";
 import { siteName, siteUrl } from "@/lib/site-config";
 import "./globals.css";
@@ -56,9 +55,7 @@ export default async function RootLayout({
             __html: `try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);var l=localStorage.getItem("locale");if(l==="es"||l==="en"||l==="pl")document.documentElement.setAttribute("lang",l)}catch(e){}`,
           }}
         />
-        <Providers>
         {children}
-      </Providers>
       </body>
     </html>
   );

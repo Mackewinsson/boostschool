@@ -1,6 +1,7 @@
+import type { UserRole } from "@/lib/auth/constants";
 import type { Locale } from "@/lib/locale";
 
-export type Role = "teacher" | "student";
+export type Role = UserRole;
 
 export type MaterialKind = "video" | "document" | "audio" | "link";
 
@@ -18,12 +19,13 @@ export type Material = {
 export type StudentSummary = {
   id: string;
   email: string;
+  name?: string;
   firstName: string | null;
   lastName: string | null;
 };
 
 export type Assignment = {
-  clerkUserId: string;
+  userId: string;
   materialId: string;
   assignedAt: string;
   completedAt: string | null;

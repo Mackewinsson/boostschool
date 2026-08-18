@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SignIn } from "@clerk/nextjs";
+import { SignInForm } from "@/components/student/sign-in-form";
 import { getStudentContent } from "@/lib/student-content";
 import { getLocaleFromCookies } from "@/lib/locale-server";
 
@@ -23,13 +23,7 @@ export default async function SignInPage() {
         <h1 className="text-3xl font-extrabold tracking-tight">{portal.signInTitle}</h1>
         <p className="mt-2 text-sm text-fg-muted">{portal.signInSubtitle}</p>
       </div>
-      <SignIn
-        routing="path"
-        path="/sign-in"
-        signUpUrl="/sign-in"
-        forceRedirectUrl="/alumno/redirect"
-        fallbackRedirectUrl="/alumno/redirect"
-      />
+      <SignInForm copy={portal} />
     </div>
   );
 }
