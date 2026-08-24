@@ -84,6 +84,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS student_materials_user_material_uidx
   ON student_materials (user_id, material_id)
   WHERE user_id IS NOT NULL;
 
+-- Finish legacy clerk_user_id → user_id PK migration when possible
+ALTER TABLE student_materials
+  ALTER COLUMN clerk_user_id DROP NOT NULL;
+
 ALTER TABLE users
   DROP CONSTRAINT IF EXISTS users_role_check;
 
