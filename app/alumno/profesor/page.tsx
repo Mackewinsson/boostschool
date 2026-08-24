@@ -17,5 +17,5 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function TeacherPage() {
   const locale = await getLocaleFromCookies();
   const { teacher } = getStudentContent(locale);
-  return <TeacherDashboard copy={teacher} />;
+  return <TeacherDashboard copy={teacher} locale={locale} />;
 }

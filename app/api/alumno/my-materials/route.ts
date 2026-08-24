@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-error";
 import { isDatabaseConfigured } from "@/lib/db/client";
-import { requireAuth } from "@/lib/materials/auth";
+import {
+  getEffectiveStudentId,
+  getLinkedStudentName,
+  requireAuth,
+  requireStudent,
+} from "@/lib/materials/auth";
 import {
   listMaterialsForStudent,
-  setCompletion,
+  setStudentNotes,
 } from "@/lib/materials/repository";
 
 export async function GET() {
@@ -12,17 +17,28 @@ export async function GET() {
     if (!isDatabaseConfigured()) {
       return NextResponse.json({ error: "Database not configured" }, { status: 503 });
     }
-    const { userId } = await requireAuth();
-    const materials = await listMaterialsForStudent(userId);
-    return NextResponse.json({ materials });
+    const context = await requireAuth();
+    const studentId = await getEffectiveStudentId(context);
+    if (!studentId) {
+      return NextResponse.json({ error: "No linked student" }, { status: 403 });
+    }
+
+    const materials = await listMaterialsForStudent(studentId);
+    const linkedStudentName = await getLinkedStudentName(context);
+
+    return NextResponse.json({
+      materials,
+      readOnly: context.role === "parent",
+      linkedStudentName,
+    });
   } catch (error) {
     return apiError(error);
   }
 }
 
-type CompletionPayload = {
+type NotesPayload = {
   materialId?: string;
-  completed?: boolean;
+  notes?: string;
 };
 
 export async function PATCH(request: Request) {
@@ -30,21 +46,22 @@ export async function PATCH(request: Request) {
     if (!isDatabaseConfigured()) {
       return NextResponse.json({ error: "Database not configured" }, { status: 503 });
     }
-    const { userId } = await requireAuth();
-    const body = (await request.json()) as CompletionPayload;
+    const context = await requireStudent();
+    const body = (await request.json()) as NotesPayload;
     const materialId = body.materialId?.trim() ?? "";
+    const notes = body.notes ?? "";
 
     if (!materialId) {
       return NextResponse.json({ error: "materialId is required" }, { status: 400 });
     }
 
-    const updated = await setCompletion(userId, materialId, Boolean(body.completed));
+    const updated = await setStudentNotes(context.userId, materialId, notes);
     if (!updated) {
       return NextResponse.json({ error: "Material not found" }, { status: 404 });
     }
 
-    const materials = await listMaterialsForStudent(userId);
-    return NextResponse.json({ materials });
+    const materials = await listMaterialsForStudent(context.userId);
+    return NextResponse.json({ materials, readOnly: false, linkedStudentName: null });
   } catch (error) {
     return apiError(error);
   }

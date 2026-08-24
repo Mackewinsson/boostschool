@@ -18,7 +18,12 @@ function getSecretKey() {
 }
 
 function parseRole(value: unknown): UserRole {
-  if (value === "admin" || value === "teacher" || value === "student") {
+  if (
+    value === "admin" ||
+    value === "teacher" ||
+    value === "student" ||
+    value === "parent"
+  ) {
     return value;
   }
   return "student";

@@ -5,8 +5,10 @@ import { requireTeacher } from "@/lib/materials/auth";
 import {
   assignMaterial,
   listAssignments,
+  setCompletionStatus,
   unassignMaterial,
 } from "@/lib/materials/repository";
+import type { CompletionStatus } from "@/lib/materials/types";
 
 export async function GET(request: Request) {
   try {
@@ -67,6 +69,48 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
     }
     return NextResponse.json({ ok: true });
+  } catch (error) {
+    return apiError(error);
+  }
+}
+
+type StatusPayload = {
+  userId?: string;
+  materialId?: string;
+  completionStatus?: CompletionStatus | null;
+};
+
+export async function PATCH(request: Request) {
+  try {
+    if (!isDatabaseConfigured()) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 503 });
+    }
+    await requireTeacher();
+    const body = (await request.json()) as StatusPayload;
+    const userId = body.userId?.trim() ?? "";
+    const materialId = body.materialId?.trim() ?? "";
+    const status = body.completionStatus ?? null;
+
+    if (!userId || !materialId) {
+      return NextResponse.json({ error: "userId and materialId are required" }, { status: 400 });
+    }
+
+    if (
+      status !== null &&
+      status !== "done" &&
+      status !== "not_done" &&
+      status !== "partial"
+    ) {
+      return NextResponse.json({ error: "Invalid completion status" }, { status: 400 });
+    }
+
+    const updated = await setCompletionStatus(userId, materialId, status);
+    if (!updated) {
+      return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
+    }
+
+    const assignments = await listAssignments();
+    return NextResponse.json({ assignments });
   } catch (error) {
     return apiError(error);
   }

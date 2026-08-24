@@ -23,6 +23,8 @@ type CreatePayload = {
   description?: string;
   url?: string;
   locale?: string;
+  scheduledAt?: string;
+  meetUrl?: string;
 };
 
 export async function POST(request: Request) {
@@ -36,6 +38,8 @@ export async function POST(request: Request) {
     const title = body.title?.trim() ?? "";
     const description = body.description?.trim() ?? "";
     const url = body.url?.trim() ?? "";
+    const meetUrl = body.meetUrl?.trim() ?? "";
+    const scheduledAtRaw = body.scheduledAt?.trim() ?? "";
 
     if (title.length < 2) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -43,12 +47,26 @@ export async function POST(request: Request) {
     if (!isValidHttpsUrl(url)) {
       return NextResponse.json({ error: "Valid https URL is required" }, { status: 400 });
     }
+    if (meetUrl && !isValidHttpsUrl(meetUrl)) {
+      return NextResponse.json({ error: "Valid https Meet URL is required" }, { status: 400 });
+    }
+
+    let scheduledAt: string | null = null;
+    if (scheduledAtRaw) {
+      const parsed = new Date(scheduledAtRaw);
+      if (Number.isNaN(parsed.getTime())) {
+        return NextResponse.json({ error: "Invalid scheduled date" }, { status: 400 });
+      }
+      scheduledAt = parsed.toISOString();
+    }
 
     const material = await createMaterial({
       title,
       description: description || undefined,
       url,
       locale: parseLocale(body.locale),
+      scheduledAt,
+      meetUrl: meetUrl || null,
     });
 
     return NextResponse.json({ material });

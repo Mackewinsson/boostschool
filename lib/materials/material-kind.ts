@@ -44,8 +44,11 @@ export function getMaterialKindIcon(kind: MaterialKind): LucideIcon {
   }
 }
 
-export function isMaterialNew(assignedAt: string | undefined, completedAt: string | null | undefined): boolean {
-  if (!assignedAt || completedAt) {
+export function isMaterialNew(
+  assignedAt: string | undefined,
+  completionStatus: string | null | undefined,
+): boolean {
+  if (!assignedAt || completionStatus) {
     return false;
   }
   const assigned = new Date(assignedAt).getTime();

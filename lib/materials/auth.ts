@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { getLinkedStudentForParent } from "@/lib/auth/parents";
 import { findUserById } from "@/lib/auth/users";
 import {
   SESSION_COOKIE,
@@ -12,7 +13,12 @@ export function getRoleFromMetadata(
   publicMetadata: Record<string, unknown> | undefined,
 ): Role {
   const role = publicMetadata?.role;
-  if (role === "admin" || role === "teacher" || role === "student") {
+  if (
+    role === "admin" ||
+    role === "teacher" ||
+    role === "student" ||
+    role === "parent"
+  ) {
     return role;
   }
   return "student";
@@ -41,9 +47,35 @@ export async function getAuthContext() {
     userId: user.id,
     role: user.role,
     email: user.email,
+    name: user.name,
     firstName: firstName ?? null,
     lastName: lastNameParts.length > 0 ? lastNameParts.join(" ") : null,
   };
+}
+
+export async function getEffectiveStudentId(
+  context: NonNullable<Awaited<ReturnType<typeof getAuthContext>>>,
+): Promise<string | null> {
+  if (context.role === "student") {
+    return context.userId;
+  }
+
+  if (context.role === "parent") {
+    const linked = await getLinkedStudentForParent(context.userId);
+    return linked?.id ?? null;
+  }
+
+  return null;
+}
+
+export async function getLinkedStudentName(
+  context: NonNullable<Awaited<ReturnType<typeof getAuthContext>>>,
+): Promise<string | null> {
+  if (context.role !== "parent") {
+    return null;
+  }
+  const linked = await getLinkedStudentForParent(context.userId);
+  return linked?.name ?? null;
 }
 
 export async function requireAuth() {
@@ -62,6 +94,14 @@ export async function requireTeacher() {
   return context;
 }
 
+export async function requireStudentOrParent() {
+  const context = await requireAuth();
+  if (context.role !== "student" && context.role !== "parent") {
+    throw new Error("FORBIDDEN");
+  }
+  return context;
+}
+
 export async function requireStudent() {
   const context = await requireAuth();
   if (context.role !== "student") {
@@ -72,6 +112,10 @@ export async function requireStudent() {
 
 export function canAccessTeacherRole(role: UserRole): boolean {
   return role === "teacher" || role === "admin";
+}
+
+export function isParentRole(role: UserRole): boolean {
+  return role === "parent";
 }
 
 export function getPortalPathForRole(role: Role): string {

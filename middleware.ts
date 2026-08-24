@@ -7,12 +7,17 @@ function isTeacherRoute(pathname: string) {
     pathname.startsWith("/alumno/profesor") ||
     pathname.startsWith("/api/alumno/materials") ||
     pathname.startsWith("/api/alumno/assignments") ||
-    pathname.startsWith("/api/alumno/students")
+    pathname.startsWith("/api/alumno/students") ||
+    pathname.startsWith("/api/alumno/parents")
   );
 }
 
-function isStudentRoute(pathname: string) {
-  return pathname.startsWith("/alumno") || pathname.startsWith("/api/alumno/my-materials");
+function isStudentPortalRoute(pathname: string) {
+  return (
+    pathname === "/alumno" ||
+    pathname.startsWith("/alumno/redirect") ||
+    pathname.startsWith("/api/alumno/my-materials")
+  );
 }
 
 function isPrivateRoute(pathname: string) {
@@ -60,6 +65,13 @@ export default async function middleware(request: NextRequest) {
     if (isTeacherRoute(pathname) && session.role !== "teacher" && session.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    if (
+      pathname.startsWith("/api/alumno/my-materials") &&
+      request.method === "PATCH" &&
+      session.role === "parent"
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     return response;
   }
 
@@ -78,7 +90,12 @@ export default async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (isStudentRoute(pathname) && !pathname.startsWith("/alumno/profesor") && session.role !== "student") {
+    if (
+      isStudentPortalRoute(pathname) &&
+      session.role !== "student" &&
+      session.role !== "parent" &&
+      !pathname.startsWith("/alumno/profesor")
+    ) {
       const url = request.nextUrl.clone();
       url.pathname = "/alumno/profesor";
       url.search = "";

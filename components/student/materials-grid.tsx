@@ -1,30 +1,47 @@
+import type { Locale } from "@/lib/locale";
 import type { Material } from "@/lib/materials/types";
 import { MaterialCard } from "./material-card";
 
 type MaterialsGridProps = {
   materials: Material[];
+  locale: Locale;
   openLabel: string;
   newBadge: string;
-  markDone: string;
-  markUndone: string;
-  doneBadge: string;
+  scheduledLabel: string;
+  joinMeetLabel: string;
+  statusLabel: string;
+  statusPending: string;
+  statusDone: string;
+  statusNotDone: string;
+  statusPartial: string;
+  notesLabel: string;
+  notesPlaceholder: string;
+  notesSaved: string;
   emptyTitle: string;
   emptyBody: string;
-  onToggleDone?: (materialId: string, completed: boolean) => void;
-  togglingId?: string | null;
+  readOnly: boolean;
+  onSaveNotes?: (materialId: string, notes: string) => Promise<void>;
 };
 
 export function MaterialsGrid({
   materials,
+  locale,
   openLabel,
   newBadge,
-  markDone,
-  markUndone,
-  doneBadge,
+  scheduledLabel,
+  joinMeetLabel,
+  statusLabel,
+  statusPending,
+  statusDone,
+  statusNotDone,
+  statusPartial,
+  notesLabel,
+  notesPlaceholder,
+  notesSaved,
   emptyTitle,
   emptyBody,
-  onToggleDone,
-  togglingId = null,
+  readOnly,
+  onSaveNotes,
 }: MaterialsGridProps) {
   if (materials.length === 0) {
     return (
@@ -36,18 +53,26 @@ export function MaterialsGrid({
   }
 
   return (
-    <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {materials.map((material) => (
         <MaterialCard
           key={material.id}
           material={material}
+          locale={locale}
           openLabel={openLabel}
           newBadge={newBadge}
-          markDone={markDone}
-          markUndone={markUndone}
-          doneBadge={doneBadge}
-          onToggleDone={onToggleDone}
-          toggling={togglingId === material.id}
+          scheduledLabel={scheduledLabel}
+          joinMeetLabel={joinMeetLabel}
+          statusLabel={statusLabel}
+          statusPending={statusPending}
+          statusDone={statusDone}
+          statusNotDone={statusNotDone}
+          statusPartial={statusPartial}
+          notesLabel={notesLabel}
+          notesPlaceholder={notesPlaceholder}
+          notesSaved={notesSaved}
+          readOnly={readOnly}
+          onSaveNotes={onSaveNotes}
         />
       ))}
     </div>

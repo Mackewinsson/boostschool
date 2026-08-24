@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS materials (
   description TEXT,
   url TEXT NOT NULL,
   locale TEXT NOT NULL DEFAULT 'es',
+  scheduled_at TIMESTAMPTZ,
+  meet_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -12,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   password_hash TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('admin', 'teacher', 'student')),
+  role TEXT NOT NULL CHECK (role IN ('admin', 'teacher', 'student', 'parent')),
   clerk_user_id TEXT UNIQUE,
   active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -20,19 +22,21 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS student_materials (
-  clerk_user_id TEXT NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   material_id UUID NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
   assigned_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   completed_at TIMESTAMPTZ,
-  PRIMARY KEY (clerk_user_id, material_id)
+  completion_status TEXT,
+  reviewed_at TIMESTAMPTZ,
+  notes TEXT,
+  PRIMARY KEY (user_id, material_id),
+  CONSTRAINT student_materials_completion_status_check
+    CHECK (completion_status IS NULL OR completion_status IN ('done', 'not_done', 'partial'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_student_materials_user
-  ON student_materials (clerk_user_id);
-
-CREATE INDEX IF NOT EXISTS idx_student_materials_user_id
-  ON student_materials (user_id);
+-- Legacy clerk_user_id column (safe no-ops on already-migrated DBs)
+ALTER TABLE student_materials
+  ADD COLUMN IF NOT EXISTS clerk_user_id TEXT;
 
 ALTER TABLE student_materials
   ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
@@ -46,6 +50,52 @@ ALTER TABLE student_materials
 ALTER TABLE student_materials
   ADD CONSTRAINT student_materials_user_id_fkey
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+CREATE INDEX IF NOT EXISTS idx_student_materials_user_id
+  ON student_materials (user_id);
+
+ALTER TABLE materials
+  ADD COLUMN IF NOT EXISTS scheduled_at TIMESTAMPTZ;
+
+ALTER TABLE materials
+  ADD COLUMN IF NOT EXISTS meet_url TEXT;
+
+ALTER TABLE student_materials
+  ADD COLUMN IF NOT EXISTS completion_status TEXT;
+
+ALTER TABLE student_materials
+  ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
+
+ALTER TABLE student_materials
+  ADD COLUMN IF NOT EXISTS notes TEXT;
+
+ALTER TABLE student_materials
+  DROP CONSTRAINT IF EXISTS student_materials_completion_status_check;
+
+ALTER TABLE student_materials
+  ADD CONSTRAINT student_materials_completion_status_check
+  CHECK (completion_status IS NULL OR completion_status IN ('done', 'not_done', 'partial'));
+
+UPDATE student_materials
+SET completion_status = 'done'
+WHERE completed_at IS NOT NULL AND completion_status IS NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS student_materials_user_material_uidx
+  ON student_materials (user_id, material_id)
+  WHERE user_id IS NOT NULL;
+
+ALTER TABLE users
+  DROP CONSTRAINT IF EXISTS users_role_check;
+
+ALTER TABLE users
+  ADD CONSTRAINT users_role_check
+  CHECK (role IN ('admin', 'teacher', 'student', 'parent'));
+
+CREATE TABLE IF NOT EXISTS parent_students (
+  parent_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  student_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  PRIMARY KEY (parent_user_id, student_user_id)
+);
 
 CREATE TABLE IF NOT EXISTS leads (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

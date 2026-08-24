@@ -1,38 +1,95 @@
 "use client";
 
-import { Check, ExternalLink } from "lucide-react";
-import type { Material } from "@/lib/materials/types";
+import { Check, ExternalLink, Video } from "lucide-react";
+import { useState } from "react";
+import type { Locale } from "@/lib/locale";
+import type { CompletionStatus, Material } from "@/lib/materials/types";
 import {
   detectMaterialKind,
   isMaterialNew,
 } from "@/lib/materials/material-kind";
+import {
+  completionStatusLabel,
+  formatScheduledAt,
+} from "@/lib/materials/schedule-groups";
 import { externalLinkProps } from "@/lib/site-links";
 import { MaterialKindIcon } from "./material-kind-icon";
 
 type MaterialCardProps = {
   material: Material;
+  locale: Locale;
   openLabel: string;
   newBadge: string;
-  markDone: string;
-  markUndone: string;
-  doneBadge: string;
-  onToggleDone?: (materialId: string, completed: boolean) => void;
-  toggling?: boolean;
+  scheduledLabel: string;
+  joinMeetLabel: string;
+  statusLabel: string;
+  statusPending: string;
+  statusDone: string;
+  statusNotDone: string;
+  statusPartial: string;
+  notesLabel: string;
+  notesPlaceholder: string;
+  notesSaved: string;
+  readOnly: boolean;
+  onSaveNotes?: (materialId: string, notes: string) => Promise<void>;
 };
+
+function statusBadgeClass(status: CompletionStatus | null | undefined) {
+  if (status === "done") return "border-accent/30 text-accent bg-accent/10";
+  if (status === "partial") return "border-amber-400/30 text-amber-200 bg-amber-400/10";
+  if (status === "not_done") return "border-red-400/30 text-red-200 bg-red-400/10";
+  return "border-border text-fg-muted bg-canvas";
+}
 
 export function MaterialCard({
   material,
+  locale,
   openLabel,
   newBadge,
-  markDone,
-  markUndone,
-  doneBadge,
-  onToggleDone,
-  toggling = false,
+  scheduledLabel,
+  joinMeetLabel,
+  statusLabel,
+  statusPending,
+  statusDone,
+  statusNotDone,
+  statusPartial,
+  notesLabel,
+  notesPlaceholder,
+  notesSaved,
+  readOnly,
+  onSaveNotes,
 }: MaterialCardProps) {
   const kind = detectMaterialKind(material.url);
-  const isDone = Boolean(material.completedAt);
-  const isNew = isMaterialNew(material.assignedAt, material.completedAt);
+  const status = material.completionStatus ?? null;
+  const isDone = status === "done";
+  const isNew = isMaterialNew(material.assignedAt, status);
+  const scheduledLabelText = formatScheduledAt(material.scheduledAt, locale);
+  const [notes, setNotes] = useState(material.notes ?? "");
+  const [notesMaterialId, setNotesMaterialId] = useState(material.id);
+  const [savingNotes, setSavingNotes] = useState(false);
+  const [notesJustSaved, setNotesJustSaved] = useState(false);
+
+  if (material.id !== notesMaterialId) {
+    setNotesMaterialId(material.id);
+    setNotes(material.notes ?? "");
+  }
+
+  async function handleBlur() {
+    if (readOnly || !onSaveNotes) {
+      return;
+    }
+    if ((material.notes ?? "") === notes) {
+      return;
+    }
+    setSavingNotes(true);
+    try {
+      await onSaveNotes(material.id, notes);
+      setNotesJustSaved(true);
+      window.setTimeout(() => setNotesJustSaved(false), 1500);
+    } finally {
+      setSavingNotes(false);
+    }
+  }
 
   return (
     <article
@@ -60,15 +117,26 @@ export function MaterialCard({
               {newBadge}
             </span>
           ) : null}
-          {isDone ? (
-            <span className="rounded-full border border-accent/30 px-2.5 py-0.5 text-xs font-medium text-accent">
-              {doneBadge}
-            </span>
-          ) : null}
+          <span
+            className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusBadgeClass(status)}`}
+          >
+            {statusLabel}:{" "}
+            {completionStatusLabel(status, {
+              pending: statusPending,
+              done: statusDone,
+              notDone: statusNotDone,
+              partial: statusPartial,
+            })}
+          </span>
         </div>
       </div>
 
       <h3 className="mt-4 text-lg font-semibold text-fg">{material.title}</h3>
+      {scheduledLabelText ? (
+        <p className="mt-2 text-sm font-medium text-accent">
+          {scheduledLabel}: {scheduledLabelText}
+        </p>
+      ) : null}
       {material.description ? (
         <p className="mt-2 flex-1 text-sm leading-relaxed text-fg-muted">
           {material.description}
@@ -86,17 +154,39 @@ export function MaterialCard({
           {openLabel}
           <ExternalLink size={16} aria-hidden="true" />
         </a>
-        {onToggleDone ? (
-          <button
-            type="button"
-            disabled={toggling}
-            onClick={() => onToggleDone(material.id, !isDone)}
-            className="inline-flex items-center justify-center rounded-xl border border-border px-4 py-3 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent disabled:opacity-60"
+        {material.meetUrl ? (
+          <a
+            href={material.meetUrl}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent"
+            {...externalLinkProps(material.meetUrl)}
           >
-            {isDone ? markUndone : markDone}
-          </button>
+            <Video size={16} aria-hidden="true" />
+            {joinMeetLabel}
+          </a>
         ) : null}
       </div>
+
+      {!readOnly ? (
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-fg" htmlFor={`notes-${material.id}`}>
+            {notesLabel}
+          </label>
+          <textarea
+            id={`notes-${material.id}`}
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+            onBlur={() => void handleBlur()}
+            rows={3}
+            placeholder={notesPlaceholder}
+            className="mt-1.5 w-full resize-y rounded-xl border border-border bg-canvas px-3 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+          />
+          {savingNotes || notesJustSaved ? (
+            <p className="mt-1 text-xs text-accent">
+              {notesJustSaved ? notesSaved : "…"}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </article>
   );
 }

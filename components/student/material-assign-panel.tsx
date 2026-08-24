@@ -2,7 +2,7 @@
 
 import { Check, Users } from "lucide-react";
 import type { StudentContent } from "@/lib/student-content/types";
-import type { Assignment, StudentSummary } from "@/lib/materials/types";
+import type { Assignment, CompletionStatus, StudentSummary } from "@/lib/materials/types";
 
 type MaterialAssignPanelProps = {
   materialId: string;
@@ -11,10 +11,22 @@ type MaterialAssignPanelProps = {
   saving: boolean;
   copy: Pick<
     StudentContent["teacher"],
-    "assignHint" | "assignAllLabel" | "completedLabel" | "noStudents"
+    | "assignHint"
+    | "assignAllLabel"
+    | "homeworkStatusLabel"
+    | "statusPending"
+    | "statusDone"
+    | "statusNotDone"
+    | "statusPartial"
+    | "noStudents"
   >;
   onToggle: (materialId: string, studentId: string, assigned: boolean) => void;
   onAssignAll: (materialId: string) => void;
+  onStatusChange: (
+    materialId: string,
+    studentId: string,
+    status: CompletionStatus | null,
+  ) => void;
 };
 
 function studentDisplayName(student: StudentSummary): string {
@@ -30,6 +42,7 @@ export function MaterialAssignPanel({
   copy,
   onToggle,
   onAssignAll,
+  onStatusChange,
 }: MaterialAssignPanelProps) {
   if (students.length === 0) {
     return (
@@ -63,53 +76,75 @@ export function MaterialAssignPanel({
         ) : null}
       </div>
 
-      <ul className="mt-3 space-y-1.5">
+      <ul className="mt-3 space-y-2">
         {students.map((student) => {
           const assignment = assignments.find(
             (item) => item.materialId === materialId && item.userId === student.id,
           );
           const assigned = Boolean(assignment);
-          const completed = Boolean(assignment?.completedAt);
           const name = studentDisplayName(student);
 
           return (
-            <li key={student.id}>
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => onToggle(materialId, student.id, assigned)}
-                aria-pressed={assigned}
-                className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition disabled:opacity-60 ${
-                  assigned
-                    ? "border-accent/40 bg-accent/10 text-fg"
-                    : "border-border text-fg-muted hover:border-brand-from/30"
-                }`}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition ${
-                    assigned
-                      ? "border-accent bg-accent text-canvas"
-                      : "border-border bg-transparent"
-                  }`}
+            <li
+              key={student.id}
+              className={`rounded-lg border px-3 py-2.5 ${
+                assigned
+                  ? "border-accent/40 bg-accent/10"
+                  : "border-border"
+              }`}
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => onToggle(materialId, student.id, assigned)}
+                  aria-pressed={assigned}
+                  className="flex min-w-0 flex-1 items-center gap-3 text-left text-sm transition disabled:opacity-60"
                 >
-                  {assigned ? <Check size={13} strokeWidth={3} /> : null}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium">{name}</span>
-                  {name !== student.email ? (
-                    <span className="block truncate text-xs text-fg-faint">
-                      {student.email}
-                    </span>
-                  ) : null}
-                </span>
-                {completed ? (
-                  <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-accent">
-                    <Check size={13} aria-hidden="true" />
-                    {copy.completedLabel}
+                  <span
+                    aria-hidden="true"
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition ${
+                      assigned
+                        ? "border-accent bg-accent text-canvas"
+                        : "border-border bg-transparent"
+                    }`}
+                  >
+                    {assigned ? <Check size={13} strokeWidth={3} /> : null}
                   </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium text-fg">{name}</span>
+                    {name !== student.email ? (
+                      <span className="block truncate text-xs text-fg-faint">
+                        {student.email}
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+
+                {assigned ? (
+                  <label className="flex items-center gap-2 text-xs text-fg-muted">
+                    <span className="whitespace-nowrap">{copy.homeworkStatusLabel}</span>
+                    <select
+                      value={assignment?.completionStatus ?? ""}
+                      disabled={saving}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        const status =
+                          value === ""
+                            ? null
+                            : (value as CompletionStatus);
+                        onStatusChange(materialId, student.id, status);
+                      }}
+                      className="rounded-lg border border-border bg-canvas px-2 py-1.5 text-xs text-fg focus:border-accent/50 focus:outline-none"
+                    >
+                      <option value="">{copy.statusPending}</option>
+                      <option value="done">{copy.statusDone}</option>
+                      <option value="not_done">{copy.statusNotDone}</option>
+                      <option value="partial">{copy.statusPartial}</option>
+                    </select>
+                  </label>
                 ) : null}
-              </button>
+              </div>
             </li>
           );
         })}

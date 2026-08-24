@@ -4,15 +4,22 @@ import { ChevronDown, Search, UserPlus } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { StudentContent } from "@/lib/student-content/types";
 import { detectMaterialKind } from "@/lib/materials/material-kind";
-import type { Assignment, Material, StudentSummary } from "@/lib/materials/types";
+import { formatScheduledAt } from "@/lib/materials/schedule-groups";
+import type {
+  Assignment,
+  CompletionStatus,
+  Material,
+  StudentSummary,
+} from "@/lib/materials/types";
 import { MaterialAssignPanel } from "./material-assign-panel";
 import { MaterialKindIcon } from "./material-kind-icon";
 
 type TeacherDashboardProps = {
   copy: StudentContent["teacher"];
+  locale: string;
 };
 
-export function TeacherDashboard({ copy }: TeacherDashboardProps) {
+export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -21,9 +28,15 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
   const [studentName, setStudentName] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
+  const [parentName, setParentName] = useState("");
+  const [parentEmail, setParentEmail] = useState("");
+  const [parentPassword, setParentPassword] = useState("");
+  const [parentStudentId, setParentStudentId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [meetUrl, setMeetUrl] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -156,6 +169,58 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
     }
   }
 
+  async function handleCreateParent(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+
+    if (parentName.trim().length < 2) {
+      setError(copy.errorParentName);
+      return;
+    }
+    if (!parentEmail.trim() || !parentEmail.includes("@")) {
+      setError(copy.errorParentEmail);
+      return;
+    }
+    if (parentPassword.length < 8) {
+      setError(copy.errorParentPassword);
+      return;
+    }
+    if (!parentStudentId) {
+      setError(copy.errorParentStudent);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch("/api/alumno/parents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: parentName,
+          email: parentEmail,
+          password: parentPassword,
+          studentId: parentStudentId,
+        }),
+      });
+
+      if (!response.ok) {
+        setError(copy.errorGeneric);
+        return;
+      }
+
+      setParentName("");
+      setParentEmail("");
+      setParentPassword("");
+      setParentStudentId("");
+      setMessage(copy.successParentCreated);
+    } catch {
+      setError(copy.errorGeneric);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleAddMaterial(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -169,13 +234,23 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
       setError(copy.errorUrl);
       return;
     }
+    if (meetUrl.trim() && !meetUrl.trim().startsWith("https://")) {
+      setError(copy.errorUrl);
+      return;
+    }
 
     setSaving(true);
     try {
       const response = await fetch("/api/alumno/materials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, url }),
+        body: JSON.stringify({
+          title,
+          description,
+          url,
+          scheduledAt: scheduledAt || undefined,
+          meetUrl: meetUrl || undefined,
+        }),
       });
       if (!response.ok) {
         setError(copy.errorGeneric);
@@ -185,11 +260,11 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
       setTitle("");
       setDescription("");
       setUrl("");
+      setScheduledAt("");
+      setMeetUrl("");
       setSearchQuery("");
       setMessage(copy.successAdded);
       await loadData();
-      // Open the assignment panel of the just-created material so the next
-      // step (assigning it) is obvious.
       if (data.material) {
         setExpandedMaterialId(data.material.id);
         requestAnimationFrame(() => {
@@ -274,6 +349,42 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
     }
   }
 
+  async function updateCompletionStatus(
+    materialId: string,
+    studentId: string,
+    status: CompletionStatus | null,
+  ) {
+    setSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const response = await fetch("/api/alumno/assignments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: studentId,
+          materialId,
+          completionStatus: status,
+        }),
+      });
+      if (!response.ok) {
+        setError(copy.errorGeneric);
+        return;
+      }
+      const data = (await response.json()) as { assignments?: Assignment[] };
+      if (data.assignments) {
+        setAssignments(data.assignments);
+      } else {
+        await refreshAssignments();
+      }
+      setMessage(copy.successAssigned);
+    } catch {
+      setError(copy.errorGeneric);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function assignedCount(materialId: string): number {
     return assignments.filter((assignment) => assignment.materialId === materialId).length;
   }
@@ -341,7 +452,79 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
       </section>
 
       <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
+        <h2 className="text-xl font-bold text-fg">{copy.createParentTitle}</h2>
+        <form onSubmit={handleCreateParent} className="mt-5 grid gap-4 md:grid-cols-2">
+          <div>
+            <label htmlFor="parent-name" className="block text-sm font-medium text-fg">
+              {copy.parentNameLabel}
+            </label>
+            <input
+              id="parent-name"
+              value={parentName}
+              onChange={(event) => setParentName(event.target.value)}
+              placeholder={copy.parentNamePlaceholder}
+              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="parent-email" className="block text-sm font-medium text-fg">
+              {copy.parentEmailLabel}
+            </label>
+            <input
+              id="parent-email"
+              type="email"
+              value={parentEmail}
+              onChange={(event) => setParentEmail(event.target.value)}
+              placeholder={copy.parentEmailPlaceholder}
+              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="parent-password" className="block text-sm font-medium text-fg">
+              {copy.parentPasswordLabel}
+            </label>
+            <input
+              id="parent-password"
+              type="password"
+              value={parentPassword}
+              onChange={(event) => setParentPassword(event.target.value)}
+              placeholder={copy.parentPasswordPlaceholder}
+              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="parent-student" className="block text-sm font-medium text-fg">
+              {copy.parentStudentLabel}
+            </label>
+            <select
+              id="parent-student"
+              value={parentStudentId}
+              onChange={(event) => setParentStudentId(event.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg focus:border-accent/50 focus:outline-none"
+            >
+              <option value="">{copy.parentStudentLabel}</option>
+              {students.map((student) => (
+                <option key={student.id} value={student.id}>
+                  {student.name || student.email}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <button
+              type="submit"
+              disabled={saving || students.length === 0}
+              className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] disabled:opacity-70"
+            >
+              {copy.createParentButton}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
         <h2 className="text-xl font-bold text-fg">{copy.addTitle}</h2>
+        <p className="mt-2 text-sm text-fg-muted">{copy.urlHint}</p>
         <form onSubmit={handleAddMaterial} className="mt-5 space-y-4">
           <div>
             <label htmlFor="material-title" className="block text-sm font-medium text-fg">
@@ -380,6 +563,33 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
               placeholder={copy.urlPlaceholder}
               className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
             />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="material-scheduled" className="block text-sm font-medium text-fg">
+                {copy.scheduledAtLabel}
+              </label>
+              <input
+                id="material-scheduled"
+                type="datetime-local"
+                value={scheduledAt}
+                onChange={(event) => setScheduledAt(event.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg focus:border-accent/50 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label htmlFor="material-meet" className="block text-sm font-medium text-fg">
+                {copy.meetUrlLabel}
+              </label>
+              <input
+                id="material-meet"
+                type="url"
+                value={meetUrl}
+                onChange={(event) => setMeetUrl(event.target.value)}
+                placeholder={copy.meetUrlPlaceholder}
+                className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+              />
+            </div>
           </div>
           <button
             type="submit"
@@ -436,10 +646,18 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-fg">{material.title}</p>
+                        {material.scheduledAt ? (
+                          <p className="mt-1 text-sm font-medium text-accent">
+                            {formatScheduledAt(material.scheduledAt, locale)}
+                          </p>
+                        ) : null}
                         {material.description ? (
                           <p className="mt-1 text-sm text-fg-muted">{material.description}</p>
                         ) : null}
                         <p className="mt-1 truncate text-xs text-fg-faint">{material.url}</p>
+                        {material.meetUrl ? (
+                          <p className="mt-1 truncate text-xs text-fg-faint">{material.meetUrl}</p>
+                        ) : null}
                       </div>
                     </div>
                     <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -492,6 +710,9 @@ export function TeacherDashboard({ copy }: TeacherDashboardProps) {
                         void toggleAssignment(materialId, studentId, assigned)
                       }
                       onAssignAll={(materialId) => void assignToAll(materialId)}
+                      onStatusChange={(materialId, studentId, status) =>
+                        void updateCompletionStatus(materialId, studentId, status)
+                      }
                     />
                   ) : null}
                 </li>

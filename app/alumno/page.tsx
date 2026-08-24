@@ -25,5 +25,5 @@ export default async function AlumnoPage() {
   }
 
   const { student } = getStudentContent(locale);
-  return <StudentDashboard copy={student} />;
+  return <StudentDashboard copy={student} locale={locale} />;
 }
