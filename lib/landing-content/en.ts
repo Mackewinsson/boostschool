@@ -29,6 +29,7 @@ export const en: LandingContent = {
     ctaLabel: "Book your trial lesson",
     links: [
       { label: "Classes", href: "#programas" },
+      { label: "Spanish classes", href: "/spanish-classes" },
       { label: "Method", href: "#resultados" },
       { label: "About me", href: "#sobre-mi" },
       { label: "Testimonials", href: "#testimonios" },

@@ -29,6 +29,7 @@ export const es: LandingContent = {
     ctaLabel: "Reserva tu clase de prueba",
     links: [
       { label: "Clases", href: "#programas" },
+      { label: "Spanish classes", href: "/spanish-classes" },
       { label: "Metodología", href: "#resultados" },
       { label: "Sobre mí", href: "#sobre-mi" },
       { label: "Testimonios", href: "#testimonios" },

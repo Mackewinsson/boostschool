@@ -29,6 +29,7 @@ export const pl: LandingContent = {
     ctaLabel: "Zarezerwuj lekcję próbną",
     links: [
       { label: "Lekcje", href: "#programas" },
+      { label: "Angielski Sulejówek", href: "/angielski-sulejowek" },
       { label: "Metoda", href: "#resultados" },
       { label: "O mnie", href: "#sobre-mi" },
       { label: "Opinie", href: "#testimonios" },
