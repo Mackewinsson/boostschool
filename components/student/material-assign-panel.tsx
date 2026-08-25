@@ -125,6 +125,7 @@ export function MaterialAssignPanel({
                   <label className="flex items-center gap-2 text-xs text-fg-muted">
                     <span className="whitespace-nowrap">{copy.homeworkStatusLabel}</span>
                     <select
+                      data-testid="homework-status"
                       value={assignment?.completionStatus ?? ""}
                       disabled={saving}
                       onChange={(event) => {

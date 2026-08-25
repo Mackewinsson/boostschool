@@ -173,6 +173,7 @@ export function MaterialCard({
           </label>
           <textarea
             id={`notes-${material.id}`}
+            data-testid="class-notes"
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
             onBlur={() => void handleBlur()}
