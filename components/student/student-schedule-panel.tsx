@@ -93,12 +93,13 @@ function ScheduleRowForm({
         event.preventDefault();
         const form = event.currentTarget;
         const data = new FormData(form);
+        const activeInput = form.querySelector<HTMLInputElement>('input[name="active"]');
         void onSave({
           studentUserId: studentId,
           weekday: Number(data.get("weekday")),
           timeLocal: String(data.get("timeLocal") ?? ""),
           meetUrl: String(data.get("meetUrl") ?? ""),
-          active: data.get("active") === "on",
+          active: activeInput?.checked ?? true,
         });
       }}
     >

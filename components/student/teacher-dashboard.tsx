@@ -52,8 +52,6 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
-  const [scheduledAt, setScheduledAt] = useState("");
-  const [meetUrl, setMeetUrl] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -241,10 +239,6 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       setError(copy.errorUrl);
       return;
     }
-    if (meetUrl.trim() && !meetUrl.trim().startsWith("https://")) {
-      setError(copy.errorUrl);
-      return;
-    }
 
     setSaving(true);
     try {
@@ -255,8 +249,6 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
           title,
           description,
           url: url.trim() || undefined,
-          scheduledAt: scheduledAt || undefined,
-          meetUrl: meetUrl || undefined,
         }),
       });
       if (!response.ok) {
@@ -267,8 +259,6 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       setTitle("");
       setDescription("");
       setUrl("");
-      setScheduledAt("");
-      setMeetUrl("");
       setSearchQuery("");
       setMessage(copy.successAdded);
       await loadData();
@@ -404,6 +394,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       }
       setMessage(copy.successAssigned);
       await refreshAssignments();
+      await loadData();
     } catch {
       setError(copy.errorGeneric);
     } finally {
@@ -434,6 +425,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       );
       setMessage(copy.successAssigned);
       await refreshAssignments();
+      await loadData();
     } catch {
       setError(copy.errorGeneric);
     } finally {
@@ -661,33 +653,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
             />
             <p className="mt-1 text-xs text-fg-faint">{copy.urlOptionalHint}</p>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label htmlFor="material-scheduled" className="block text-sm font-medium text-fg">
-                {copy.scheduledAtLabel}
-              </label>
-              <input
-                id="material-scheduled"
-                type="datetime-local"
-                value={scheduledAt}
-                onChange={(event) => setScheduledAt(event.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg focus:border-accent/50 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label htmlFor="material-meet" className="block text-sm font-medium text-fg">
-                {copy.meetUrlLabel}
-              </label>
-              <input
-                id="material-meet"
-                type="url"
-                value={meetUrl}
-                onChange={(event) => setMeetUrl(event.target.value)}
-                placeholder={copy.meetUrlPlaceholder}
-                className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-              />
-            </div>
-          </div>
+          <p className="text-sm text-fg-muted">{copy.nextClassHint}</p>
           <button
             type="submit"
             disabled={saving}

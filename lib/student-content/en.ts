@@ -45,7 +45,7 @@ export const en: StudentContent = {
   teacher: {
     title: "Homework and classes",
     subtitle:
-      "Paste the exercise in the description (or an optional link), set the date, and assign it.",
+      "Paste the exercise, assign it to the student, and date/Meet come from their fixed next-class schedule.",
     urlHint:
       "Paste the full exercise in the description, or note book and page. An external link is optional.",
     addTitle: "New homework",
@@ -56,6 +56,8 @@ export const en: StudentContent = {
     urlLabel: "External link (optional)",
     urlPlaceholder: "https://drive.google.com/...",
     urlOptionalHint: "Only if there is a PDF or online resource. Not required to assign.",
+    nextClassHint:
+      "Date and Meet are filled automatically from the student’s fixed schedule when you assign (always for the upcoming class). Use Edit if you need to change one session.",
     scheduledAtLabel: "Class date and time",
     meetUrlLabel: "Google Meet link (optional)",
     meetUrlPlaceholder: "https://meet.google.com/...",

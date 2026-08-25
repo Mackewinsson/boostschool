@@ -45,7 +45,7 @@ export const es: StudentContent = {
   teacher: {
     title: "Deberes y clases",
     subtitle:
-      "Pega el ejercicio en la descripción (o un enlace opcional), programa la fecha y asígnalo a cada alumno.",
+      "Pega el ejercicio, asígnalo al alumno y la fecha/Meet salen del horario fijo de la próxima clase.",
     urlHint:
       "Puedes pegar el ejercicio completo en la descripción, o indicar libro y página. El enlace externo es opcional.",
     addTitle: "Nuevo deber",
@@ -57,6 +57,8 @@ export const es: StudentContent = {
     urlLabel: "Enlace externo (opcional)",
     urlPlaceholder: "https://drive.google.com/...",
     urlOptionalHint: "Solo si hay PDF o recurso online. No hace falta para asignar.",
+    nextClassHint:
+      "La fecha y el Meet se toman solos del horario fijo del alumno al asignar (siempre para la clase que viene). Si hace falta cambiar una sesión, usa Editar.",
     scheduledAtLabel: "Fecha y hora de clase",
     meetUrlLabel: "Enlace a Google Meet (opcional)",
     meetUrlPlaceholder: "https://meet.google.com/...",

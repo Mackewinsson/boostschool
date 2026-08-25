@@ -45,7 +45,7 @@ export const pl: StudentContent = {
   teacher: {
     title: "Zadania i zajęcia",
     subtitle:
-      "Wklej ćwiczenie w opisie (lub opcjonalny link), ustaw datę i przypisz uczniom.",
+      "Wklej ćwiczenie, przypisz uczniowi — data i Meet biorą się ze stałego harmonogramu kolejnych zajęć.",
     urlHint:
       "Możesz wkleić całe ćwiczenie w opisie albo podać podręcznik i stronę. Link zewnętrzny jest opcjonalny.",
     addTitle: "Nowe zadanie",
@@ -56,6 +56,8 @@ export const pl: StudentContent = {
     urlLabel: "Link zewnętrzny (opcjonalnie)",
     urlPlaceholder: "https://drive.google.com/...",
     urlOptionalHint: "Tylko jeśli jest PDF lub materiał online. Nie jest wymagany do przypisania.",
+    nextClassHint:
+      "Data i Meet uzupełniają się same ze stałego harmonogramu ucznia przy przypisaniu (zawsze na kolejne zajęcia). Aby zmienić jedną sesję, użyj Edytuj.",
     scheduledAtLabel: "Data i godzina zajęć",
     meetUrlLabel: "Link Google Meet (opcjonalnie)",
     meetUrlPlaceholder: "https://meet.google.com/...",

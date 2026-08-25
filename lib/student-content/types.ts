@@ -52,6 +52,7 @@ export type StudentContent = {
     urlLabel: string;
     urlPlaceholder: string;
     urlOptionalHint: string;
+    nextClassHint: string;
     scheduledAtLabel: string;
     meetUrlLabel: string;
     meetUrlPlaceholder: string;

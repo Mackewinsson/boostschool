@@ -3,7 +3,9 @@ import { getDb } from "@/lib/db/client";
 import {
   assignMaterial,
   createMaterial,
+  getMaterial,
   listClassSchedules,
+  patchMaterialClassDetails,
 } from "./repository";
 import type { StudentClassSchedule } from "./types";
 
@@ -192,4 +194,37 @@ export async function generateSessionsForAllSchedules(
     total += await generateSessionsForSchedule(schedule, locale);
   }
   return total;
+}
+
+/**
+ * If a homework material has no class date yet, fill scheduled_at + meet_url
+ * from the student's next fixed weekly class.
+ */
+export async function applyNextClassDetailsToMaterial(
+  materialId: string,
+  studentUserId: string,
+): Promise<boolean> {
+  const material = await getMaterial(materialId);
+  if (!material || material.scheduledAt) {
+    return false;
+  }
+
+  const schedules = await listClassSchedules();
+  const schedule = schedules.find(
+    (item) => item.studentUserId === studentUserId && item.active,
+  );
+  if (!schedule) {
+    return false;
+  }
+
+  const next = upcomingOccurrences(schedule)[0];
+  if (!next) {
+    return false;
+  }
+
+  await patchMaterialClassDetails(materialId, {
+    scheduledAt: next.toISOString(),
+    meetUrl: schedule.meetUrl ?? material.meetUrl,
+  });
+  return true;
 }

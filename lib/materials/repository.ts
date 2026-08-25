@@ -92,6 +92,36 @@ export async function listMaterials(): Promise<Material[]> {
   return rows.map(mapMaterial);
 }
 
+export async function getMaterial(id: string): Promise<Material | null> {
+  const sql = getDb();
+  const rows = (await sql`
+    SELECT id, title, description, url, locale, scheduled_at, meet_url, schedule_id, created_at
+    FROM materials
+    WHERE id = ${id}::uuid
+    LIMIT 1
+  `) as MaterialRow[];
+  return rows[0] ? mapMaterial(rows[0]) : null;
+}
+
+export async function patchMaterialClassDetails(
+  id: string,
+  input: {
+    scheduledAt: string | null;
+    meetUrl: string | null;
+  },
+): Promise<Material | null> {
+  const sql = getDb();
+  const rows = (await sql`
+    UPDATE materials
+    SET
+      scheduled_at = ${input.scheduledAt},
+      meet_url = ${input.meetUrl}
+    WHERE id = ${id}::uuid
+    RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id, created_at
+  `) as MaterialRow[];
+  return rows[0] ? mapMaterial(rows[0]) : null;
+}
+
 export async function createMaterial(input: {
   title: string;
   description?: string | null;

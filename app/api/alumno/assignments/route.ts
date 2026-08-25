@@ -8,6 +8,7 @@ import {
   setCompletionStatus,
   unassignMaterial,
 } from "@/lib/materials/repository";
+import { applyNextClassDetailsToMaterial } from "@/lib/materials/schedule-generate";
 import type { CompletionStatus } from "@/lib/materials/types";
 
 export async function GET(request: Request) {
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
     }
 
     await assignMaterial(userId, materialId);
+    await applyNextClassDetailsToMaterial(materialId, userId);
     return NextResponse.json({ ok: true });
   } catch (error) {
     return apiError(error);
