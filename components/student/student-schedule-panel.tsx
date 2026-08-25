@@ -40,10 +40,6 @@ export function StudentSchedulePanel({
   const [mode, setMode] = useState<"weekly" | "adhoc">(
     initialWeekly ? "weekly" : "adhoc",
   );
-  const [weekday, setWeekday] = useState(schedule?.weekday ?? 1);
-  const [timeLocal, setTimeLocal] = useState(schedule?.timeLocal ?? "18:00");
-  const [meetUrl, setMeetUrl] = useState(schedule?.meetUrl ?? "");
-  const [active, setActive] = useState(schedule?.active ?? true);
 
   return (
     <section className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
@@ -79,12 +75,15 @@ export function StudentSchedulePanel({
         className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end"
         onSubmit={(event) => {
           event.preventDefault();
+          const form = event.currentTarget;
+          const data = new FormData(form);
+          const activeInput = form.querySelector<HTMLInputElement>('input[name="active"]');
           void onSave({
             studentUserId: studentId,
-            weekday: mode === "weekly" ? weekday : null,
-            timeLocal: mode === "weekly" ? timeLocal : null,
-            meetUrl,
-            active: mode === "weekly" ? active : false,
+            weekday: mode === "weekly" ? Number(data.get("weekday")) : null,
+            timeLocal: mode === "weekly" ? String(data.get("timeLocal") ?? "") : null,
+            meetUrl: String(data.get("meetUrl") ?? ""),
+            active: mode === "weekly" ? (activeInput?.checked ?? true) : false,
           });
         }}
       >
@@ -94,8 +93,7 @@ export function StudentSchedulePanel({
               <span className="font-medium text-fg">{copy.scheduleWeekdayLabel}</span>
               <select
                 name="weekday"
-                value={weekday}
-                onChange={(event) => setWeekday(Number(event.target.value))}
+                defaultValue={schedule?.weekday ?? 1}
                 className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
               >
                 {WEEKDAYS.map((key, index) => (
@@ -111,8 +109,7 @@ export function StudentSchedulePanel({
                 name="timeLocal"
                 type="time"
                 required
-                value={timeLocal}
-                onChange={(event) => setTimeLocal(event.target.value)}
+                defaultValue={schedule?.timeLocal ?? "18:00"}
                 className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
               />
             </label>
@@ -124,8 +121,7 @@ export function StudentSchedulePanel({
           <input
             name="meetUrl"
             type="url"
-            value={meetUrl}
-            onChange={(event) => setMeetUrl(event.target.value)}
+            defaultValue={schedule?.meetUrl ?? ""}
             placeholder={copy.meetUrlPlaceholder}
             className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
           />
@@ -136,8 +132,13 @@ export function StudentSchedulePanel({
             <input
               name="active"
               type="checkbox"
-              checked={active}
-              onChange={(event) => setActive(event.target.checked)}
+              // Ad-hoc saves store active=false; switching back to weekly must
+              // start active so "Guardar horario" realigns class times.
+              defaultChecked={
+                schedule?.weekday != null && Boolean(schedule.timeLocal)
+                  ? Boolean(schedule.active)
+                  : true
+              }
               className="rounded border-border"
             />
             {copy.scheduleActiveLabel}

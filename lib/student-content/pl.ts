@@ -98,7 +98,7 @@ export const pl: StudentContent = {
     noStudents: "Nie ma jeszcze uczniów. Utwórz ich powyżej.",
     scheduleSectionTitle: "Harmonogram i Meet",
     scheduleSectionHint:
-      "Stały termin: system tworzy kolejne zajęcia. Z lekcji na lekcję: zapisujesz Meet i dodajesz każdą datę. Link jest zawsze ten sam.",
+      "Stały termin: zapis aktualizuje wszystkie nadchodzące zajęcia ucznia do tego dnia i godziny (zadania zostają). Z lekcji na lekcję: zapisujesz Meet i dodajesz każdą datę. Link jest zawsze ten sam.",
     scheduleModeWeekly: "Stały harmonogram tygodniowy",
     scheduleModeAdhoc: "Z lekcji na lekcję",
     scheduleWeekdayLabel: "Dzień",
@@ -106,7 +106,7 @@ export const pl: StudentContent = {
     scheduleMeetLabel: "Meet (ten sam link zawsze)",
     scheduleSaveLabel: "Zapisz harmonogram",
     scheduleActiveLabel: "Generuj nadchodzące zajęcia",
-    scheduleSaved: "Harmonogram zapisany. Zaktualizowano nadchodzące zajęcia.",
+    scheduleSaved: "Harmonogram zapisany. Wszystkie nadchodzące zajęcia mają ten dzień i godzinę.",
     weekdaySunday: "Niedziela",
     weekdayMonday: "Poniedziałek",
     weekdayTuesday: "Wtorek",

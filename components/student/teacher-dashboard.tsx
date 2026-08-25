@@ -256,8 +256,10 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
         setError(copy.errorGeneric);
         return;
       }
-      setMessage(copy.scheduleSaved);
+      // Refresh before toast so class times match the new schedule when the
+      // success message appears (e2e and teachers both wait on that message).
       await loadData();
+      setMessage(copy.scheduleSaved);
     } catch {
       setError(copy.errorGeneric);
     } finally {
@@ -600,7 +602,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
           {selectedStudentId ? (
             <>
               <StudentSchedulePanel
-                key={selectedStudentId}
+                key={`${selectedStudentId}-${selectedSchedule?.weekday ?? "x"}-${selectedSchedule?.timeLocal ?? "none"}-${selectedSchedule?.active ? "1" : "0"}`}
                 studentId={selectedStudentId}
                 schedule={selectedSchedule}
                 saving={saving}

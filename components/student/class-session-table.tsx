@@ -168,6 +168,8 @@ function SessionRow({
 
   const dateLabel = formatScheduledAt(session.scheduledAt, locale, timeZone);
   const status = session.completionStatus ?? null;
+  const homeworkText = (session.description ?? "").trim();
+  const hasHomework = Boolean(homeworkText);
 
   async function handleNotesBlur() {
     if (!allowNotes || !onSaveNotes) return;
@@ -211,39 +213,41 @@ function SessionRow({
           ) : null}
         </div>
 
-        <div className="sm:text-right">
-          <p className="text-xs font-medium text-fg-faint">{copy.statusLabel}</p>
-          {mode === "teacher" && onStatusChange ? (
-            <select
-              data-testid="homework-status"
-              value={status ?? ""}
-              disabled={saving}
-              onChange={(event) => {
-                const value = event.target.value;
-                const next = value === "" ? null : (value as CompletionStatus);
-                void onStatusChange(session.id, next);
-              }}
-              className="mt-1 rounded-lg border border-border bg-canvas px-2.5 py-1.5 text-sm text-fg focus:border-accent/50 focus:outline-none"
-            >
-              <option value="">{copy.statusPending}</option>
-              <option value="done">{copy.statusDone}</option>
-              <option value="not_done">{copy.statusNotDone}</option>
-              <option value="partial">{copy.statusPartial}</option>
-            </select>
-          ) : (
-            <p
-              data-testid="homework-status-badge"
-              className="mt-1 text-sm font-medium text-fg"
-            >
-              {completionStatusLabel(status, {
-                pending: copy.statusPending,
-                done: copy.statusDone,
-                notDone: copy.statusNotDone,
-                partial: copy.statusPartial,
-              })}
-            </p>
-          )}
-        </div>
+        {mode === "teacher" || hasHomework ? (
+          <div className="sm:text-right">
+            <p className="text-xs font-medium text-fg-faint">{copy.statusLabel}</p>
+            {mode === "teacher" && onStatusChange ? (
+              <select
+                data-testid="homework-status"
+                value={status ?? ""}
+                disabled={saving}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  const next = value === "" ? null : (value as CompletionStatus);
+                  void onStatusChange(session.id, next);
+                }}
+                className="mt-1 rounded-lg border border-border bg-canvas px-2.5 py-1.5 text-sm text-fg focus:border-accent/50 focus:outline-none"
+              >
+                <option value="">{copy.statusPending}</option>
+                <option value="done">{copy.statusDone}</option>
+                <option value="not_done">{copy.statusNotDone}</option>
+                <option value="partial">{copy.statusPartial}</option>
+              </select>
+            ) : (
+              <p
+                data-testid="homework-status-badge"
+                className="mt-1 text-sm font-medium text-fg"
+              >
+                {completionStatusLabel(status, {
+                  pending: copy.statusPending,
+                  done: copy.statusDone,
+                  notDone: copy.statusNotDone,
+                  partial: copy.statusPartial,
+                })}
+              </p>
+            )}
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-4">
@@ -271,12 +275,12 @@ function SessionRow({
               {copy.saveHomeworkButton}
             </button>
           </>
-        ) : session.description ? (
+        ) : hasHomework ? (
           <p
             data-testid="session-homework-text"
             className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-fg-muted"
           >
-            {session.description}
+            {homeworkText}
           </p>
         ) : (
           <p className="mt-1.5 text-sm text-fg-faint">{copy.homeworkEmpty}</p>

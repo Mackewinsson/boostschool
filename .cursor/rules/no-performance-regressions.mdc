@@ -1,0 +1,38 @@
+---
+description: Never ship changes that make the app load slower — mandatory performance guardrail
+alwaysApply: true
+---
+
+# No slower loads (mandatory)
+
+Performance is a hard requirement. Do **not** apply code that makes first paint, LCP, TTI, or route navigations slower.
+
+## Before any change that touches pages, layouts, data fetching, images, or third-party scripts
+
+1. Ask: will this block first paint or compete with LCP?
+2. If yes, redesign so critical UI streams/renders first; defer the slow work.
+3. Prefer measuring (local Network/Lighthouse or known cold-start paths) over assuming.
+
+## Never do
+
+- Block the full page shell on cold DB / remote API (e.g. await Neon/Postgres in the root page/layout without Suspense)
+- Mount auth SDKs (Clerk, etc.), analytics, chat widgets, or heavy client libs on marketing/public routes that do not need them
+- Fetch uncached remote data on every request for above-the-fold content when ISR/`unstable_cache`/`revalidate` is enough
+- Ship huge unoptimized images (multi‑MB PNG/hero) competing with LCP; use next/image (or equivalent) with sensible `quality`, sized assets, and priority only on true LCP
+- Add synchronous third-party scripts in `<head>` or root layout without defer/lazy
+- Waterfall: layout waits on A, then page waits on B, when A and B could stream in parallel or be cached
+
+## Prefer
+
+- Stream non-critical sections with `Suspense` + boundaries so hero/nav paint immediately
+- Cache read-mostly data (`unstable_cache`, `revalidate`, edge/CDN) instead of hitting the DB on every cold page
+- Dynamic-import below-fold client components (`ssr: false` / `next/dynamic` only when needed)
+- Keep public/marketing bundles lean; confine admin/auth weight to `/admin` (or gated routes)
+
+## If a feature needs slow data
+
+Isolate it: skeleton/placeholder in the critical path, fetch inside a child that Suspense can stream. Never make the whole route wait.
+
+## When unsure
+
+Choose the faster architecture. If a change might regress load time, stop and propose a non-blocking design before applying it.

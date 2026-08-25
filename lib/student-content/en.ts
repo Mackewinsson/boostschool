@@ -98,7 +98,7 @@ export const en: StudentContent = {
     noStudents: "No students yet. Create them above to get started.",
     scheduleSectionTitle: "Schedule and Meet",
     scheduleSectionHint:
-      "Fixed schedule: upcoming classes are generated. Class by class: save Meet only and add each date. The link stays the same.",
+      "Fixed schedule: saving updates all upcoming classes for this student to that day and time (homework is kept). Class by class: save Meet only and add each date. The link stays the same.",
     scheduleModeWeekly: "Fixed weekly schedule",
     scheduleModeAdhoc: "Class by class",
     scheduleWeekdayLabel: "Day",
@@ -106,7 +106,7 @@ export const en: StudentContent = {
     scheduleMeetLabel: "Meet (same link every time)",
     scheduleSaveLabel: "Save schedule",
     scheduleActiveLabel: "Generate upcoming classes",
-    scheduleSaved: "Schedule saved. Upcoming classes updated.",
+    scheduleSaved: "Schedule saved. All upcoming classes now use that day and time.",
     weekdaySunday: "Sunday",
     weekdayMonday: "Monday",
     weekdayTuesday: "Tuesday",

@@ -209,11 +209,9 @@ type FutureSessionRow = {
 };
 
 /**
- * When the weekly day/time changes:
- * - future sessions on the correct weekday → move to the new time (keep homework)
- * - future empty sessions on other days → delete
- * - future sessions with homework on other days → keep as one-offs at the new clock time
- * - then generate any missing horizon slots
+ * Rebuild upcoming class slots for a student from their fixed weekly schedule.
+ * Keeps homework text (oldest homework → next occurrence), deletes empty
+ * leftovers (including one-offs), then fills the horizon.
  */
 export async function realignFutureSessionsForSchedule(
   schedule: StudentClassSchedule,
@@ -231,46 +229,56 @@ export async function realignFutureSessionsForSchedule(
   }
 
   const sql = getDb();
+  // Include weekly shells AND detached one-offs assigned to this student
   const future = (await sql`
-    SELECT id, description, scheduled_at
-    FROM materials
-    WHERE schedule_id = ${schedule.id}::uuid
-      AND scheduled_at >= now()
-    ORDER BY scheduled_at ASC
+    SELECT m.id, m.description, m.scheduled_at
+    FROM materials m
+    INNER JOIN student_materials sm ON sm.material_id = m.id
+    WHERE sm.user_id = ${schedule.studentUserId}::uuid
+      AND m.scheduled_at >= now()
+    ORDER BY m.scheduled_at ASC
   `) as FutureSessionRow[];
 
+  const withHomework = future.filter((row) => Boolean(row.description?.trim()));
+  const empty = future.filter((row) => !row.description?.trim());
+  const occurrences = upcomingOccurrences(schedule);
+
+  // Detach everything so unique (schedule_id, scheduled_at) cannot block moves
   for (const row of future) {
+    await sql`
+      UPDATE materials
+      SET schedule_id = NULL
+      WHERE id = ${row.id}::uuid
+    `;
+  }
+
+  // Empty future classes are regenerated cleanly from the schedule
+  for (const row of empty) {
+    await deleteMaterial(row.id);
+  }
+
+  const pairCount = Math.min(withHomework.length, occurrences.length);
+  for (let i = 0; i < pairCount; i += 1) {
+    const row = withHomework[i];
+    const occurrence = occurrences[i];
+    const scheduledAt = occurrence.toISOString();
+    const dateLabel = formatTitleDate(occurrence, locale, schedule.timezone);
+    const title = `${schedule.titleTemplate} — ${dateLabel}`;
+    await sql`
+      UPDATE materials
+      SET
+        schedule_id = ${schedule.id}::uuid,
+        scheduled_at = ${scheduledAt}::timestamptz,
+        meet_url = ${schedule.meetUrl},
+        title = ${title}
+      WHERE id = ${row.id}::uuid
+    `;
+  }
+
+  // Extra homework beyond the horizon: keep text, snap clock to new time on same day
+  for (let i = pairCount; i < withHomework.length; i += 1) {
+    const row = withHomework[i];
     const parts = partsInZone(new Date(row.scheduled_at), schedule.timezone);
-    const hasHomework = Boolean(row.description?.trim());
-
-    if (parts.weekday === schedule.weekday) {
-      const occurrence = wallTimeInZoneToUtc(
-        parts.year,
-        parts.month,
-        parts.day,
-        hour,
-        minute,
-        schedule.timezone,
-      );
-      const dateLabel = formatTitleDate(occurrence, locale, schedule.timezone);
-      const title = `${schedule.titleTemplate} — ${dateLabel}`;
-      await sql`
-        UPDATE materials
-        SET
-          scheduled_at = ${occurrence.toISOString()}::timestamptz,
-          meet_url = ${schedule.meetUrl},
-          title = ${title}
-        WHERE id = ${row.id}::uuid
-      `;
-      continue;
-    }
-
-    if (!hasHomework) {
-      await deleteMaterial(row.id);
-      continue;
-    }
-
-    // Homework on a different weekday: keep the text, apply new clock time, detach from weekly series
     const occurrence = wallTimeInZoneToUtc(
       parts.year,
       parts.month,

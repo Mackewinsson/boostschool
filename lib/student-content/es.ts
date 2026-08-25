@@ -98,7 +98,7 @@ export const es: StudentContent = {
     noStudents: "Todavía no hay alumnos. Créalos arriba para empezar.",
     scheduleSectionTitle: "Horario y Meet",
     scheduleSectionHint:
-      "Horario fijo: se generan las próximas clases. Clase a clase: solo guardas el Meet y añades cada fecha. El enlace es siempre el mismo.",
+      "Horario fijo: al guardar, todas las clases futuras de este alumno pasan a ese día y hora (los deberes se conservan). Clase a clase: solo guardas el Meet y añades cada fecha. El enlace es siempre el mismo.",
     scheduleModeWeekly: "Horario fijo (cada semana)",
     scheduleModeAdhoc: "Clase a clase",
     scheduleWeekdayLabel: "Día",
@@ -106,7 +106,7 @@ export const es: StudentContent = {
     scheduleMeetLabel: "Meet (mismo enlace siempre)",
     scheduleSaveLabel: "Guardar horario",
     scheduleActiveLabel: "Generar próximas clases",
-    scheduleSaved: "Horario guardado. Clases futuras actualizadas.",
+    scheduleSaved: "Horario guardado. Todas las clases futuras quedaron con ese día y hora.",
     weekdaySunday: "Domingo",
     weekdayMonday: "Lunes",
     weekdayTuesday: "Martes",
