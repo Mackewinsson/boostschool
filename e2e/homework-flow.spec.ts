@@ -1,93 +1,140 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import {
   e2eCreds,
   login,
   logout,
-  materialCard,
-  materialRow,
+  uniqueFutureScheduledLocal,
   uniqueTitle,
 } from "./helpers";
 
 const STUDENT_LABEL = /Ana Alumna|alumno@bilingualboost\.test/;
 const MEET_URL = "https://meet.google.com/e2e-test-room";
 
+async function selectStudent(page: Page, label: RegExp) {
+  const select = page.getByTestId("selected-student");
+  const option = select.locator("option").filter({ hasText: label }).first();
+  const value = await option.getAttribute("value");
+  expect(value).toBeTruthy();
+  await select.selectOption(value!);
+}
+
 test.describe("homework flow teacher → student → parent", () => {
-  test("create text-only homework, assign, mark Sí; student notes; parent read-only", async ({
+  test("class table: homework + status; student notes; parent read-only", async ({
     page,
   }) => {
-    const title = uniqueTitle();
+    const marker = `e2e-${Date.now()}`;
     const exercise = [
-      "Completa con la forma correcta:",
+      `Completa (${marker}):`,
       "Ella __ una oferta. (recibir)",
       "Nosotros __ ir al abogado. (querer)",
     ].join("\n");
-    const notes = `Apunte e2e ${Date.now()}`;
+    const notes = `Apunte ${marker}`;
+    const extraTitle = uniqueTitle("E2E extra");
 
     await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
 
-    // Fixed schedule so assign auto-fills next class date + Meet
-    const scheduleSection = page
-      .locator("section")
-      .filter({ hasText: "Horario fijo por alumno" });
-    const scheduleCard = scheduleSection.locator("li").filter({ hasText: STUDENT_LABEL });
-    await expect(scheduleCard).toBeVisible();
-    await scheduleCard.locator('select[name="weekday"]').selectOption("1");
-    await scheduleCard.locator('input[name="timeLocal"]').fill("18:00");
-    await scheduleCard.locator('input[name="meetUrl"]').fill(MEET_URL);
-    await scheduleCard.getByRole("button", { name: "Guardar horario" }).click();
-    await expect(page.getByText("Horario guardado. Próximas clases generadas.")).toBeVisible({
+    await selectStudent(page, STUDENT_LABEL);
+
+    await page.getByRole("button", { name: "Horario fijo (cada semana)" }).click();
+    await page.locator('select[name="weekday"]').selectOption("1");
+    await page.locator('input[name="timeLocal"]').fill("18:00");
+    await page.locator('input[name="meetUrl"]').fill(MEET_URL);
+    await page.getByRole("button", { name: "Guardar horario" }).click();
+    await expect(page.getByText("Horario guardado.")).toBeVisible({
       timeout: 15_000,
     });
 
-    await page.locator("#material-title").fill(title);
-    await page.locator("#material-description").fill(exercise);
-    await expect(page.locator("#material-scheduled")).toHaveCount(0);
-    await expect(page.locator("#material-meet")).toHaveCount(0);
-    await page.getByRole("button", { name: "Guardar deber" }).click();
+    const table = page.getByTestId("class-session-table");
+    await expect(table).toBeVisible();
+    const firstRow = table.getByTestId("class-session-row").first();
+    await expect(firstRow).toBeVisible({ timeout: 15_000 });
 
-    const row = await materialRow(page, title);
-    await expect(row.getByText(/0\s*\/\s*\d+/)).toHaveCount(0);
+    const rowWithMeet = table
+      .getByTestId("class-session-row")
+      .filter({ has: page.getByRole("link", { name: /Meet|Google Meet/i }) })
+      .first();
+    const homeworkRow = (await rowWithMeet.count()) > 0 ? rowWithMeet : firstRow;
 
-    const assignToggle = row.locator("button[aria-expanded]");
-    if ((await assignToggle.getAttribute("aria-expanded")) !== "true") {
-      await assignToggle.click();
-    }
-    await expect(assignToggle).toHaveAttribute("aria-expanded", "true");
+    await homeworkRow.getByTestId("session-homework").fill(exercise);
+    await homeworkRow.getByRole("button", { name: "Guardar deberes" }).click();
+    await expect(page.getByText("Cambios guardados.")).toBeVisible({
+      timeout: 15_000,
+    });
 
-    const studentButton = row.getByRole("button").filter({ hasText: STUDENT_LABEL });
-    await expect(studentButton).toBeVisible();
-    await studentButton.click();
-
-    await expect(row.getByText(/\d{1,2}.+\d{4}/)).toBeVisible({ timeout: 15_000 });
-
-    const statusSelect = row.getByTestId("homework-status");
-    await expect(statusSelect).toBeVisible({ timeout: 15_000 });
+    const statusSelect = homeworkRow.getByTestId("homework-status");
     await statusSelect.selectOption("done");
     await expect(statusSelect).toHaveValue("done");
+
+    await page.locator("#material-title").fill(extraTitle);
+    await page.locator("#material-description").fill("Recurso extra e2e");
+    await page.getByRole("button", { name: "Guardar y asignar" }).click();
+    await expect(page.getByText("Material guardado y asignado.")).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(
+      page.locator("section").filter({ hasText: "Materiales extra" }).getByText(extraTitle),
+    ).toBeVisible();
+    await expect(table.getByText(extraTitle)).toHaveCount(0);
 
     await logout(page);
 
     await login(page, e2eCreds.student, /\/alumno\/?$/);
-    const studentCard = await materialCard(page, title);
-    await expect(studentCard.getByText("Ella __ una oferta.")).toBeVisible();
-    await expect(studentCard.getByRole("link", { name: /Abrir/ })).toHaveCount(0);
-    await expect(studentCard.getByText(/Estado.*Sí|Sí|Deber:\s*Sí/)).toBeVisible();
+    const studentTable = page.getByTestId("class-session-table");
+    const studentRow = studentTable
+      .getByTestId("class-session-row")
+      .filter({ hasText: marker })
+      .first();
+    await expect(studentRow).toBeVisible({ timeout: 15_000 });
+    await expect(studentRow.getByTestId("homework-status-badge")).toContainText(/Sí/);
+    await expect(studentRow.getByRole("link", { name: /Unirse a Meet/i })).toBeVisible();
 
-    const notesBox = studentCard.getByTestId("class-notes");
+    const notesBox = studentRow.getByTestId("class-notes");
     await expect(notesBox).toBeVisible();
     await notesBox.fill(notes);
     await notesBox.blur();
-    await expect(studentCard.getByText("Apuntes guardados")).toBeVisible({
+    await expect(page.getByText("Apuntes guardados")).toBeVisible({
       timeout: 15_000,
     });
+
+    await expect(page.getByText(extraTitle)).toBeVisible();
+    await expect(studentTable.getByText(extraTitle)).toHaveCount(0);
 
     await logout(page);
 
     await login(page, e2eCreds.parent, /\/alumno\/?$/);
-    const parentCard = await materialCard(page, title);
-    await expect(parentCard.getByText("Ella __ una oferta.")).toBeVisible();
-    await expect(parentCard.getByText(/Estado.*Sí|Sí|Deber:\s*Sí/)).toBeVisible();
-    await expect(parentCard.getByTestId("class-notes")).toHaveCount(0);
-    await expect(parentCard.getByLabel("Apuntes de clase")).toHaveCount(0);
+    const parentTable = page.getByTestId("class-session-table");
+    const parentRow = parentTable
+      .getByTestId("class-session-row")
+      .filter({ hasText: marker })
+      .first();
+    await expect(parentRow).toBeVisible({ timeout: 15_000 });
+    await expect(parentRow.getByTestId("homework-status-badge")).toContainText(/Sí/);
+    await expect(parentRow.getByTestId("class-notes")).toHaveCount(0);
+    await expect(parentTable.getByLabel("Apuntes de clase")).toHaveCount(0);
+  });
+
+  test("class-by-class: add session with shared Meet", async ({ page }) => {
+    await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
+    await selectStudent(page, STUDENT_LABEL);
+
+    await page.getByRole("button", { name: "Clase a clase" }).click();
+    await page.locator('input[name="meetUrl"]').fill(MEET_URL);
+    await page.getByRole("button", { name: "Guardar horario" }).click();
+    await expect(page.getByText("Horario guardado.")).toBeVisible({
+      timeout: 15_000,
+    });
+
+    const when = uniqueFutureScheduledLocal();
+    await page.getByTestId("add-class-datetime").fill(when);
+    await page.getByRole("button", { name: "Crear clase" }).click();
+    await expect(page.getByText("Clase añadida.")).toBeVisible({
+      timeout: 15_000,
+    });
+
+    const row = page
+      .getByTestId("class-session-row")
+      .filter({ has: page.getByRole("link", { name: /Meet|Google Meet/i }) })
+      .first();
+    await expect(row).toBeVisible();
   });
 });

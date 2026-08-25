@@ -23,12 +23,12 @@ export type Material = {
   notes?: string | null;
 };
 
-/** weekday: 0 = Sunday … 6 = Saturday (JS Date.getDay) */
+/** weekday: 0 = Sunday … 6 = Saturday (JS Date.getDay). Null = class-by-class (Meet only). */
 export type StudentClassSchedule = {
   id: string;
   studentUserId: string;
-  weekday: number;
-  timeLocal: string;
+  weekday: number | null;
+  timeLocal: string | null;
   timezone: string;
   meetUrl: string | null;
   titleTemplate: string;

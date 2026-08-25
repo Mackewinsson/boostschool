@@ -4,6 +4,7 @@ import { isDatabaseConfigured } from "@/lib/db/client";
 import { requireTeacher } from "@/lib/materials/auth";
 import {
   listClassSchedules,
+  syncMeetUrlForSchedule,
   upsertClassSchedule,
 } from "@/lib/materials/repository";
 import { generateSessionsForSchedule } from "@/lib/materials/schedule-generate";
@@ -24,8 +25,8 @@ export async function GET() {
 
 type UpsertPayload = {
   studentUserId?: string;
-  weekday?: number;
-  timeLocal?: string;
+  weekday?: number | null;
+  timeLocal?: string | null;
   timezone?: string;
   meetUrl?: string;
   titleTemplate?: string;
@@ -42,27 +43,39 @@ export async function POST(request: Request) {
 
     const body = (await request.json()) as UpsertPayload;
     const studentUserId = body.studentUserId?.trim() ?? "";
-    const weekday = Number(body.weekday);
-    const timeLocal = body.timeLocal?.trim() ?? "";
     const meetUrl = body.meetUrl?.trim() ?? "";
+    const timeLocalRaw = body.timeLocal?.trim() ?? "";
+    const hasWeekday =
+      body.weekday !== undefined && body.weekday !== null && body.weekday !== ("" as unknown);
+    const weekday = hasWeekday ? Number(body.weekday) : null;
 
     if (!studentUserId) {
       return NextResponse.json({ error: "Student is required" }, { status: 400 });
     }
-    if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) {
-      return NextResponse.json({ error: "Invalid weekday" }, { status: 400 });
+
+    const hasFixedSlot = weekday != null && Boolean(timeLocalRaw);
+    if (hasFixedSlot) {
+      if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) {
+        return NextResponse.json({ error: "Invalid weekday" }, { status: 400 });
+      }
+      if (!/^\d{2}:\d{2}$/.test(timeLocalRaw)) {
+        return NextResponse.json({ error: "Invalid time" }, { status: 400 });
+      }
+    } else if (weekday != null || timeLocalRaw) {
+      return NextResponse.json(
+        { error: "Weekday and time are both required for a fixed schedule" },
+        { status: 400 },
+      );
     }
-    if (!/^\d{2}:\d{2}$/.test(timeLocal)) {
-      return NextResponse.json({ error: "Invalid time" }, { status: 400 });
-    }
+
     if (meetUrl && !isValidHttpsUrl(meetUrl)) {
       return NextResponse.json({ error: "Valid https Meet URL is required" }, { status: 400 });
     }
 
     const schedule = await upsertClassSchedule({
       studentUserId,
-      weekday,
-      timeLocal,
+      weekday: hasFixedSlot ? weekday : null,
+      timeLocal: hasFixedSlot ? timeLocalRaw : null,
       timezone: body.timezone?.trim() || "Europe/Warsaw",
       meetUrl: meetUrl || null,
       titleTemplate: body.titleTemplate?.trim() || "Clase",
@@ -70,6 +83,7 @@ export async function POST(request: Request) {
       active: body.active ?? true,
     });
 
+    await syncMeetUrlForSchedule(schedule.id, schedule.meetUrl);
     await generateSessionsForSchedule(schedule, "es");
 
     return NextResponse.json({ schedule });

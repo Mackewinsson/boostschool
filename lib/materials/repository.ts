@@ -35,8 +35,8 @@ type AssignmentRow = {
 type ScheduleRow = {
   id: string;
   student_user_id: string;
-  weekday: number;
-  time_local: string;
+  weekday: number | null;
+  time_local: string | null;
   timezone: string;
   meet_url: string | null;
   title_template: string;
@@ -66,13 +66,15 @@ function mapMaterial(row: MaterialRow): Material {
 
 function mapSchedule(row: ScheduleRow): StudentClassSchedule {
   const timeLocal =
-    typeof row.time_local === "string"
-      ? row.time_local.slice(0, 5)
-      : String(row.time_local).slice(0, 5);
+    row.time_local == null
+      ? null
+      : typeof row.time_local === "string"
+        ? row.time_local.slice(0, 5)
+        : String(row.time_local).slice(0, 5);
   return {
     id: row.id,
     studentUserId: row.student_user_id,
-    weekday: Number(row.weekday),
+    weekday: row.weekday == null ? null : Number(row.weekday),
     timeLocal,
     timezone: row.timezone,
     meetUrl: row.meet_url,
@@ -289,8 +291,8 @@ export async function listClassSchedules(): Promise<StudentClassSchedule[]> {
 
 export async function upsertClassSchedule(input: {
   studentUserId: string;
-  weekday: number;
-  timeLocal: string;
+  weekday?: number | null;
+  timeLocal?: string | null;
   timezone?: string;
   meetUrl?: string | null;
   titleTemplate?: string;
@@ -303,6 +305,8 @@ export async function upsertClassSchedule(input: {
   const horizonWeeks = input.horizonWeeks ?? 6;
   const active = input.active ?? true;
   const meetUrl = input.meetUrl?.trim() || null;
+  const weekday = input.weekday ?? null;
+  const timeLocal = input.timeLocal?.trim() || null;
 
   const rows = (await sql`
     INSERT INTO student_class_schedules (
@@ -311,8 +315,8 @@ export async function upsertClassSchedule(input: {
     )
     VALUES (
       ${input.studentUserId}::uuid,
-      ${input.weekday},
-      ${input.timeLocal}::time,
+      ${weekday},
+      ${timeLocal}::time,
       ${timezone},
       ${meetUrl},
       ${titleTemplate},
@@ -333,4 +337,17 @@ export async function upsertClassSchedule(input: {
               title_template, horizon_weeks, active
   `) as ScheduleRow[];
   return mapSchedule(rows[0]);
+}
+
+/** Copy the schedule Meet link onto all sessions generated from that schedule. */
+export async function syncMeetUrlForSchedule(
+  scheduleId: string,
+  meetUrl: string | null,
+): Promise<void> {
+  const sql = getDb();
+  await sql`
+    UPDATE materials
+    SET meet_url = ${meetUrl}
+    WHERE schedule_id = ${scheduleId}::uuid
+  `;
 }

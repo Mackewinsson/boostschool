@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Locale } from "@/lib/locale";
 import type { Material } from "@/lib/materials/types";
-import { groupMaterialsBySchedule } from "@/lib/materials/schedule-groups";
+import { splitSessionsAndExtras } from "@/lib/materials/schedule-groups";
 import type { StudentContent } from "@/lib/student-content/types";
+import { ClassSessionTable } from "./class-session-table";
 import { MaterialsGrid } from "./materials-grid";
 
 type StudentDashboardProps = {
@@ -41,7 +42,10 @@ export function StudentDashboard({ copy, locale }: StudentDashboardProps) {
     void load();
   }, []);
 
-  const groups = useMemo(() => groupMaterialsBySchedule(materials), [materials]);
+  const { sessions, extras } = useMemo(
+    () => splitSessionsAndExtras(materials),
+    [materials],
+  );
 
   async function handleSaveNotes(materialId: string, notes: string) {
     const response = await fetch("/api/alumno/my-materials", {
@@ -60,9 +64,10 @@ export function StudentDashboard({ copy, locale }: StudentDashboardProps) {
     return <p className="mt-10 text-sm text-fg-muted">…</p>;
   }
 
-  const subtitle = readOnly && linkedStudentName
-    ? copy.parentSubtitle.replace("{name}", linkedStudentName)
-    : copy.subtitle;
+  const subtitle =
+    readOnly && linkedStudentName
+      ? copy.parentSubtitle.replace("{name}", linkedStudentName)
+      : copy.subtitle;
 
   const sharedGridProps = {
     locale,
@@ -86,29 +91,42 @@ export function StudentDashboard({ copy, locale }: StudentDashboardProps) {
 
   return (
     <>
-      <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">{copy.title}</h1>
+      <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
+        {copy.title}
+      </h1>
       <p className="mt-3 max-w-2xl text-base text-fg-muted">{subtitle}</p>
 
-      {materials.length === 0 ? (
+      {sessions.length === 0 && extras.length === 0 ? (
         <MaterialsGrid materials={[]} {...sharedGridProps} />
       ) : (
         <>
-          {groups.upcoming.length > 0 ? (
-            <section className="mt-10">
-              <h2 className="text-xl font-bold text-fg">{copy.upcomingTitle}</h2>
-              <MaterialsGrid materials={groups.upcoming} {...sharedGridProps} />
-            </section>
-          ) : null}
-          {groups.past.length > 0 ? (
-            <section className="mt-10">
-              <h2 className="text-xl font-bold text-fg">{copy.pastTitle}</h2>
-              <MaterialsGrid materials={groups.past} {...sharedGridProps} />
-            </section>
-          ) : null}
-          {groups.undated.length > 0 ? (
+          <ClassSessionTable
+            sessions={sessions}
+            locale={locale}
+            mode="readonly"
+            allowNotes={!readOnly}
+            onSaveNotes={readOnly ? undefined : handleSaveNotes}
+            copy={{
+              classesTitle: copy.classesTitle,
+              classesEmpty: copy.emptyBody,
+              homeworkLabel: copy.homeworkLabel,
+              homeworkEmpty: copy.homeworkEmpty,
+              joinMeetLabel: copy.joinMeetLabel,
+              statusLabel: copy.statusLabel,
+              statusPending: copy.statusPending,
+              statusDone: copy.statusDone,
+              statusNotDone: copy.statusNotDone,
+              statusPartial: copy.statusPartial,
+              notesLabel: copy.notesLabel,
+              notesPlaceholder: copy.notesPlaceholder,
+              notesSaved: copy.notesSaved,
+            }}
+          />
+
+          {extras.length > 0 ? (
             <section className="mt-10">
               <h2 className="text-xl font-bold text-fg">{copy.undatedTitle}</h2>
-              <MaterialsGrid materials={groups.undated} {...sharedGridProps} />
+              <MaterialsGrid materials={extras} {...sharedGridProps} />
             </section>
           ) : null}
         </>

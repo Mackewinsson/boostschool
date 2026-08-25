@@ -30,7 +30,16 @@ export function uniqueTitle(prefix = "E2E deber") {
 export function futureScheduledLocal(): string {
   const date = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T10:00`;
+  // Include seconds-derived minutes so repeated e2e runs do not collide
+  const minute = date.getMinutes() % 60;
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(minute)}`;
+}
+
+/** Unique datetime-local a few days ahead (avoids duplicate class sessions across runs). */
+export function uniqueFutureScheduledLocal(): string {
+  const date = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + (Date.now() % 50_000));
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 export async function login(

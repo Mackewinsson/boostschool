@@ -3,11 +3,9 @@ import { getDb } from "@/lib/db/client";
 import {
   assignMaterial,
   createMaterial,
-  getMaterial,
   listClassSchedules,
-  patchMaterialClassDetails,
 } from "./repository";
-import type { StudentClassSchedule } from "./types";
+import type { Material, StudentClassSchedule } from "./types";
 
 /**
  * Convert a wall-clock date/time in `timeZone` to a UTC Date.
@@ -94,10 +92,22 @@ function partsInZone(date: Date, timeZone: string) {
   };
 }
 
+export function hasFixedWeeklySlot(schedule: StudentClassSchedule): boolean {
+  return (
+    schedule.weekday != null &&
+    Boolean(schedule.timeLocal) &&
+    /^\d{2}:\d{2}$/.test(schedule.timeLocal ?? "")
+  );
+}
+
 export function upcomingOccurrences(
   schedule: StudentClassSchedule,
   from: Date = new Date(),
 ): Date[] {
+  if (!hasFixedWeeklySlot(schedule) || !schedule.timeLocal) {
+    return [];
+  }
+
   const [hourStr, minuteStr] = schedule.timeLocal.split(":");
   const hour = Number(hourStr);
   const minute = Number(minuteStr);
@@ -157,7 +167,7 @@ export async function generateSessionsForSchedule(
   schedule: StudentClassSchedule,
   locale: Locale = "es",
 ): Promise<number> {
-  if (!schedule.active) {
+  if (!schedule.active || !hasFixedWeeklySlot(schedule)) {
     return 0;
   }
 
@@ -196,35 +206,30 @@ export async function generateSessionsForAllSchedules(
   return total;
 }
 
-/**
- * If a homework material has no class date yet, fill scheduled_at + meet_url
- * from the student's next fixed weekly class.
- */
-export async function applyNextClassDetailsToMaterial(
-  materialId: string,
-  studentUserId: string,
-): Promise<boolean> {
-  const material = await getMaterial(materialId);
-  if (!material || material.scheduledAt) {
-    return false;
-  }
-
+/** Create one class session for a student (weekly or class-by-class). */
+export async function createClassSessionForStudent(input: {
+  studentUserId: string;
+  scheduledAt: Date;
+  locale?: Locale;
+}): Promise<Material> {
+  const locale = input.locale ?? "es";
   const schedules = await listClassSchedules();
-  const schedule = schedules.find(
-    (item) => item.studentUserId === studentUserId && item.active,
-  );
-  if (!schedule) {
-    return false;
-  }
+  const schedule = schedules.find((item) => item.studentUserId === input.studentUserId);
+  const timezone = schedule?.timezone ?? "Europe/Warsaw";
+  const titleTemplate = schedule?.titleTemplate ?? "Clase";
+  const meetUrl = schedule?.meetUrl ?? null;
+  const dateLabel = formatTitleDate(input.scheduledAt, locale, timezone);
 
-  const next = upcomingOccurrences(schedule)[0];
-  if (!next) {
-    return false;
-  }
-
-  await patchMaterialClassDetails(materialId, {
-    scheduledAt: next.toISOString(),
-    meetUrl: schedule.meetUrl ?? material.meetUrl,
+  const material = await createMaterial({
+    title: `${titleTemplate} — ${dateLabel}`,
+    description: null,
+    url: null,
+    locale,
+    scheduledAt: input.scheduledAt.toISOString(),
+    meetUrl,
+    // Manual sessions stay outside the weekly unique (schedule_id, scheduled_at) index
+    scheduleId: null,
   });
-  return true;
+  await assignMaterial(input.studentUserId, material.id);
+  return material;
 }

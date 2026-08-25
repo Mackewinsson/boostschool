@@ -1,10 +1,10 @@
-import type { CompletionStatus } from "./types";
+import type { CompletionStatus, Material } from "./types";
 
-export function groupMaterialsBySchedule(materials: import("./types").Material[]) {
+export function groupMaterialsBySchedule(materials: Material[]) {
   const now = Date.now();
-  const upcoming: import("./types").Material[] = [];
-  const past: import("./types").Material[] = [];
-  const undated: import("./types").Material[] = [];
+  const upcoming: Material[] = [];
+  const past: Material[] = [];
+  const undated: Material[] = [];
 
   for (const material of materials) {
     if (!material.scheduledAt) {
@@ -20,6 +20,28 @@ export function groupMaterialsBySchedule(materials: import("./types").Material[]
   }
 
   return { upcoming, past, undated };
+}
+
+/** Split assigned materials into dated class sessions vs undated extras. */
+export function splitSessionsAndExtras(materials: Material[]) {
+  const sessions: Material[] = [];
+  const extras: Material[] = [];
+
+  for (const material of materials) {
+    if (material.scheduledAt) {
+      sessions.push(material);
+    } else {
+      extras.push(material);
+    }
+  }
+
+  sessions.sort((a, b) => {
+    const aTime = new Date(a.scheduledAt ?? 0).getTime();
+    const bTime = new Date(b.scheduledAt ?? 0).getTime();
+    return aTime - bTime;
+  });
+
+  return { sessions, extras };
 }
 
 export function formatScheduledAt(value: string | null | undefined, locale: string) {
@@ -45,4 +67,12 @@ export function completionStatusLabel(
   if (status === "not_done") return labels.notDone;
   if (status === "partial") return labels.partial;
   return labels.pending;
+}
+
+export function toDatetimeLocalValue(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }

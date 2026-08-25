@@ -111,8 +111,8 @@ CREATE TABLE IF NOT EXISTS parent_students (
 CREATE TABLE IF NOT EXISTS student_class_schedules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   student_user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-  weekday SMALLINT NOT NULL CHECK (weekday BETWEEN 0 AND 6),
-  time_local TIME NOT NULL,
+  weekday SMALLINT CHECK (weekday IS NULL OR weekday BETWEEN 0 AND 6),
+  time_local TIME,
   timezone TEXT NOT NULL DEFAULT 'Europe/Warsaw',
   meet_url TEXT,
   title_template TEXT NOT NULL DEFAULT 'Clase',
@@ -121,6 +121,20 @@ CREATE TABLE IF NOT EXISTS student_class_schedules (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Allow Meet-only schedules (class-by-class students, no fixed weekday/time)
+ALTER TABLE student_class_schedules
+  ALTER COLUMN weekday DROP NOT NULL;
+
+ALTER TABLE student_class_schedules
+  ALTER COLUMN time_local DROP NOT NULL;
+
+ALTER TABLE student_class_schedules
+  DROP CONSTRAINT IF EXISTS student_class_schedules_weekday_check;
+
+ALTER TABLE student_class_schedules
+  ADD CONSTRAINT student_class_schedules_weekday_check
+  CHECK (weekday IS NULL OR weekday BETWEEN 0 AND 6);
 
 ALTER TABLE materials
   DROP CONSTRAINT IF EXISTS materials_schedule_id_fkey;

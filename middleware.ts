@@ -8,7 +8,9 @@ function isTeacherRoute(pathname: string) {
     pathname.startsWith("/api/alumno/materials") ||
     pathname.startsWith("/api/alumno/assignments") ||
     pathname.startsWith("/api/alumno/students") ||
-    pathname.startsWith("/api/alumno/parents")
+    pathname.startsWith("/api/alumno/parents") ||
+    pathname.startsWith("/api/alumno/schedules") ||
+    pathname.startsWith("/api/alumno/sessions")
   );
 }
 

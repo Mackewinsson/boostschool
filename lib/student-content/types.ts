@@ -26,11 +26,14 @@ export type StudentContent = {
     emptyBody: string;
     openLabel: string;
     newBadge: string;
+    classesTitle: string;
     upcomingTitle: string;
     pastTitle: string;
     undatedTitle: string;
     scheduledLabel: string;
     joinMeetLabel: string;
+    homeworkLabel: string;
+    homeworkEmpty: string;
     statusLabel: string;
     statusPending: string;
     statusDone: string;
@@ -43,6 +46,8 @@ export type StudentContent = {
   teacher: {
     title: string;
     subtitle: string;
+    selectStudentLabel: string;
+    selectStudentPlaceholder: string;
     urlHint: string;
     addTitle: string;
     titleLabel: string;
@@ -62,6 +67,16 @@ export type StudentContent = {
     cancelEditButton: string;
     materialsTitle: string;
     materialsEmpty: string;
+    classesTableTitle: string;
+    classesEmpty: string;
+    homeworkLabel: string;
+    homeworkPlaceholder: string;
+    saveHomeworkButton: string;
+    addClassLabel: string;
+    addClassButton: string;
+    extrasTitle: string;
+    extrasHint: string;
+    extrasEmpty: string;
     upcomingTitle: string;
     pastTitle: string;
     searchPlaceholder: string;
@@ -78,6 +93,8 @@ export type StudentContent = {
     noStudents: string;
     scheduleSectionTitle: string;
     scheduleSectionHint: string;
+    scheduleModeWeekly: string;
+    scheduleModeAdhoc: string;
     scheduleWeekdayLabel: string;
     scheduleTimeLabel: string;
     scheduleMeetLabel: string;
@@ -120,10 +137,12 @@ export type StudentContent = {
     successAdded: string;
     successAssigned: string;
     successUpdated: string;
+    successClassAdded: string;
     errorGeneric: string;
     errorUrl: string;
     errorTitle: string;
     errorContent: string;
+    errorClassDate: string;
     navMaterials: string;
     navLeads: string;
     navContacts: string;
