@@ -265,11 +265,11 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     }
   }
 
-  async function handleAddClass(scheduledAt: string) {
+  async function handleAddClass(scheduledAtIso: string) {
     if (!selectedStudentId) return;
     setError(null);
     setMessage(null);
-    if (!scheduledAt) {
+    if (!scheduledAtIso) {
       setError(copy.errorClassDate);
       return;
     }
@@ -280,7 +280,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           studentUserId: selectedStudentId,
-          scheduledAt: new Date(scheduledAt).toISOString(),
+          scheduledAt: scheduledAtIso,
         }),
       });
       if (!response.ok) {
@@ -299,7 +299,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
   async function handleSaveHomework(
     sessionId: string,
     homework: string,
-    scheduledAtLocal: string,
+    scheduledAtIso: string,
   ) {
     const session = materials.find((item) => item.id === sessionId);
     if (!session) return;
@@ -307,9 +307,6 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     setMessage(null);
     setSaving(true);
     try {
-      const scheduledAt = scheduledAtLocal
-        ? new Date(scheduledAtLocal).toISOString()
-        : session.scheduledAt;
       const response = await fetch(`/api/alumno/materials/${sessionId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -317,7 +314,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
           title: session.title,
           description: homework,
           url: session.url ?? "",
-          scheduledAt,
+          scheduledAt: scheduledAtIso || session.scheduledAt,
           meetUrl: session.meetUrl ?? "",
         }),
       });
@@ -616,6 +613,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
                 locale={locale as "es" | "en" | "pl"}
                 mode="teacher"
                 saving={saving}
+                timeZone={selectedSchedule?.timezone ?? "Europe/Warsaw"}
                 copy={{
                   classesTitle: copy.classesTableTitle,
                   classesEmpty: copy.classesEmpty,

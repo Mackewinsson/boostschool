@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db/client";
 import {
   assignMaterial,
   createMaterial,
+  deleteMaterial,
   listClassSchedules,
 } from "./repository";
 import type { Material, StudentClassSchedule } from "./types";
@@ -61,6 +62,44 @@ export function wallTimeInZoneToUtc(
     guess += delta;
   }
   return new Date(guess);
+}
+
+/** Parse `YYYY-MM-DDTHH:mm` as wall time in `timeZone` → UTC ISO. */
+export function datetimeLocalInZoneToUtcIso(
+  localValue: string,
+  timeZone: string,
+): string | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(localValue.trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+  return wallTimeInZoneToUtc(year, month, day, hour, minute, timeZone).toISOString();
+}
+
+/** Format a UTC instant as `YYYY-MM-DDTHH:mm` in `timeZone` for datetime-local inputs. */
+export function toDatetimeLocalValueInZone(
+  iso: string | null | undefined,
+  timeZone: string,
+): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+  const parts = formatter.formatToParts(date);
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "00";
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
 }
 
 function partsInZone(date: Date, timeZone: string) {
@@ -161,6 +200,99 @@ async function materialExistsForOccurrence(
     LIMIT 1
   `) as { id: string }[];
   return rows.length > 0;
+}
+
+type FutureSessionRow = {
+  id: string;
+  description: string | null;
+  scheduled_at: string;
+};
+
+/**
+ * When the weekly day/time changes:
+ * - future sessions on the correct weekday → move to the new time (keep homework)
+ * - future empty sessions on other days → delete
+ * - future sessions with homework on other days → keep as one-offs at the new clock time
+ * - then generate any missing horizon slots
+ */
+export async function realignFutureSessionsForSchedule(
+  schedule: StudentClassSchedule,
+  locale: Locale = "es",
+): Promise<number> {
+  if (!schedule.active || !hasFixedWeeklySlot(schedule) || !schedule.timeLocal) {
+    return 0;
+  }
+
+  const [hourStr, minuteStr] = schedule.timeLocal.split(":");
+  const hour = Number(hourStr);
+  const minute = Number(minuteStr);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
+    return 0;
+  }
+
+  const sql = getDb();
+  const future = (await sql`
+    SELECT id, description, scheduled_at
+    FROM materials
+    WHERE schedule_id = ${schedule.id}::uuid
+      AND scheduled_at >= now()
+    ORDER BY scheduled_at ASC
+  `) as FutureSessionRow[];
+
+  for (const row of future) {
+    const parts = partsInZone(new Date(row.scheduled_at), schedule.timezone);
+    const hasHomework = Boolean(row.description?.trim());
+
+    if (parts.weekday === schedule.weekday) {
+      const occurrence = wallTimeInZoneToUtc(
+        parts.year,
+        parts.month,
+        parts.day,
+        hour,
+        minute,
+        schedule.timezone,
+      );
+      const dateLabel = formatTitleDate(occurrence, locale, schedule.timezone);
+      const title = `${schedule.titleTemplate} — ${dateLabel}`;
+      await sql`
+        UPDATE materials
+        SET
+          scheduled_at = ${occurrence.toISOString()}::timestamptz,
+          meet_url = ${schedule.meetUrl},
+          title = ${title}
+        WHERE id = ${row.id}::uuid
+      `;
+      continue;
+    }
+
+    if (!hasHomework) {
+      await deleteMaterial(row.id);
+      continue;
+    }
+
+    // Homework on a different weekday: keep the text, apply new clock time, detach from weekly series
+    const occurrence = wallTimeInZoneToUtc(
+      parts.year,
+      parts.month,
+      parts.day,
+      hour,
+      minute,
+      schedule.timezone,
+    );
+    const dateLabel = formatTitleDate(occurrence, locale, schedule.timezone);
+    const title = `${schedule.titleTemplate} — ${dateLabel}`;
+    await sql`
+      UPDATE materials
+      SET
+        schedule_id = NULL,
+        scheduled_at = ${occurrence.toISOString()}::timestamptz,
+        meet_url = COALESCE(meet_url, ${schedule.meetUrl}),
+        title = ${title}
+      WHERE id = ${row.id}::uuid
+    `;
+  }
+
+  return generateSessionsForSchedule(schedule, locale);
 }
 
 export async function generateSessionsForSchedule(

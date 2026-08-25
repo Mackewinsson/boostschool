@@ -7,8 +7,11 @@ import type { CompletionStatus, Material } from "@/lib/materials/types";
 import {
   completionStatusLabel,
   formatScheduledAt,
-  toDatetimeLocalValue,
 } from "@/lib/materials/schedule-groups";
+import {
+  datetimeLocalInZoneToUtcIso,
+  toDatetimeLocalValueInZone,
+} from "@/lib/materials/schedule-generate";
 import { externalLinkProps } from "@/lib/site-links";
 
 export type ClassSessionTableCopy = {
@@ -38,6 +41,7 @@ type ClassSessionTableProps = {
   copy: ClassSessionTableCopy;
   mode: "teacher" | "readonly";
   saving?: boolean;
+  timeZone?: string;
   onSaveHomework?: (sessionId: string, description: string, scheduledAt: string) => Promise<void>;
   onStatusChange?: (sessionId: string, status: CompletionStatus | null) => Promise<void>;
   onAddClass?: (scheduledAt: string) => Promise<void>;
@@ -45,12 +49,15 @@ type ClassSessionTableProps = {
   allowNotes?: boolean;
 };
 
+const DEFAULT_TZ = "Europe/Warsaw";
+
 export function ClassSessionTable({
   sessions,
   locale,
   copy,
   mode,
   saving = false,
+  timeZone = DEFAULT_TZ,
   onSaveHomework,
   onStatusChange,
   onAddClass,
@@ -69,7 +76,9 @@ export function ClassSessionTable({
             onSubmit={(event) => {
               event.preventDefault();
               if (!newClassAt) return;
-              void onAddClass(newClassAt).then(() => setNewClassAt(""));
+              const iso = datetimeLocalInZoneToUtcIso(newClassAt, timeZone);
+              if (!iso) return;
+              void onAddClass(iso).then(() => setNewClassAt(""));
             }}
           >
             <label className="block text-sm">
@@ -105,6 +114,7 @@ export function ClassSessionTable({
               copy={copy}
               mode={mode}
               saving={saving}
+              timeZone={timeZone}
               onSaveHomework={onSaveHomework}
               onStatusChange={onStatusChange}
               onSaveNotes={onSaveNotes}
@@ -123,6 +133,7 @@ function SessionRow({
   copy,
   mode,
   saving,
+  timeZone,
   onSaveHomework,
   onStatusChange,
   onSaveNotes,
@@ -133,25 +144,29 @@ function SessionRow({
   copy: ClassSessionTableCopy;
   mode: "teacher" | "readonly";
   saving: boolean;
+  timeZone: string;
   onSaveHomework?: ClassSessionTableProps["onSaveHomework"];
   onStatusChange?: ClassSessionTableProps["onStatusChange"];
   onSaveNotes?: ClassSessionTableProps["onSaveNotes"];
   allowNotes: boolean;
 }) {
   const [homework, setHomework] = useState(session.description ?? "");
-  const [scheduledAt, setScheduledAt] = useState(toDatetimeLocalValue(session.scheduledAt));
+  const [scheduledAt, setScheduledAt] = useState(
+    toDatetimeLocalValueInZone(session.scheduledAt, timeZone),
+  );
   const [notes, setNotes] = useState(session.notes ?? "");
   const [notesJustSaved, setNotesJustSaved] = useState(false);
-  const [syncedSessionId, setSyncedSessionId] = useState(session.id);
+  const [syncedKey, setSyncedKey] = useState(`${session.id}:${session.scheduledAt}`);
 
-  if (session.id !== syncedSessionId) {
-    setSyncedSessionId(session.id);
+  const nextKey = `${session.id}:${session.scheduledAt}`;
+  if (nextKey !== syncedKey) {
+    setSyncedKey(nextKey);
     setHomework(session.description ?? "");
-    setScheduledAt(toDatetimeLocalValue(session.scheduledAt));
+    setScheduledAt(toDatetimeLocalValueInZone(session.scheduledAt, timeZone));
     setNotes(session.notes ?? "");
   }
 
-  const dateLabel = formatScheduledAt(session.scheduledAt, locale);
+  const dateLabel = formatScheduledAt(session.scheduledAt, locale, timeZone);
   const status = session.completionStatus ?? null;
 
   async function handleNotesBlur() {
@@ -197,9 +212,7 @@ function SessionRow({
         </div>
 
         <div className="sm:text-right">
-          <p className="text-xs font-medium uppercase tracking-wide text-fg-faint">
-            {copy.statusLabel}
-          </p>
+          <p className="text-xs font-medium text-fg-faint">{copy.statusLabel}</p>
           {mode === "teacher" && onStatusChange ? (
             <select
               data-testid="homework-status"
@@ -207,8 +220,7 @@ function SessionRow({
               disabled={saving}
               onChange={(event) => {
                 const value = event.target.value;
-                const next =
-                  value === "" ? null : (value as CompletionStatus);
+                const next = value === "" ? null : (value as CompletionStatus);
                 void onStatusChange(session.id, next);
               }}
               className="mt-1 rounded-lg border border-border bg-canvas px-2.5 py-1.5 text-sm text-fg focus:border-accent/50 focus:outline-none"
@@ -249,7 +261,11 @@ function SessionRow({
             <button
               type="button"
               disabled={saving}
-              onClick={() => void onSaveHomework(session.id, homework, scheduledAt)}
+              onClick={() => {
+                const iso =
+                  datetimeLocalInZoneToUtcIso(scheduledAt, timeZone) ?? scheduledAt;
+                void onSaveHomework(session.id, homework, iso);
+              }}
               className="mt-2 rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
             >
               {copy.saveHomeworkButton}

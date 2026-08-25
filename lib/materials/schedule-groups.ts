@@ -44,13 +44,19 @@ export function splitSessionsAndExtras(materials: Material[]) {
   return { sessions, extras };
 }
 
-export function formatScheduledAt(value: string | null | undefined, locale: string) {
+export function formatScheduledAt(
+  value: string | null | undefined,
+  locale: string,
+  timeZone = "Europe/Warsaw",
+) {
   if (!value) {
     return null;
   }
   return new Intl.DateTimeFormat(locale, {
+    timeZone,
     dateStyle: "medium",
     timeStyle: "short",
+    hourCycle: "h23",
   }).format(new Date(value));
 }
 
@@ -69,6 +75,7 @@ export function completionStatusLabel(
   return labels.pending;
 }
 
+/** @deprecated Prefer toDatetimeLocalValueInZone from schedule-generate for schedule TZ. */
 export function toDatetimeLocalValue(iso: string | null | undefined): string {
   if (!iso) return "";
   const date = new Date(iso);

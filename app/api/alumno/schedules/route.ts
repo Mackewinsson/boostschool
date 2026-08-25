@@ -7,7 +7,7 @@ import {
   syncMeetUrlForSchedule,
   upsertClassSchedule,
 } from "@/lib/materials/repository";
-import { generateSessionsForSchedule } from "@/lib/materials/schedule-generate";
+import { generateSessionsForSchedule, realignFutureSessionsForSchedule } from "@/lib/materials/schedule-generate";
 import { isValidHttpsUrl } from "@/lib/materials/validation";
 
 export async function GET() {
@@ -84,7 +84,11 @@ export async function POST(request: Request) {
     });
 
     await syncMeetUrlForSchedule(schedule.id, schedule.meetUrl);
-    await generateSessionsForSchedule(schedule, "es");
+    if (hasFixedSlot) {
+      await realignFutureSessionsForSchedule(schedule, "es");
+    } else {
+      await generateSessionsForSchedule(schedule, "es");
+    }
 
     return NextResponse.json({ schedule });
   } catch (error) {

@@ -40,7 +40,7 @@ test.describe("homework flow teacher → student → parent", () => {
     await page.locator('input[name="timeLocal"]').fill("18:00");
     await page.locator('input[name="meetUrl"]').fill(MEET_URL);
     await page.getByRole("button", { name: "Guardar horario" }).click();
-    await expect(page.getByText("Horario guardado.")).toBeVisible({
+    await expect(page.getByText(/Horario guardado/)).toBeVisible({
       timeout: 15_000,
     });
 
@@ -120,7 +120,7 @@ test.describe("homework flow teacher → student → parent", () => {
     await page.getByRole("button", { name: "Clase a clase" }).click();
     await page.locator('input[name="meetUrl"]').fill(MEET_URL);
     await page.getByRole("button", { name: "Guardar horario" }).click();
-    await expect(page.getByText("Horario guardado.")).toBeVisible({
+    await expect(page.getByText(/Horario guardado/)).toBeVisible({
       timeout: 15_000,
     });
 
