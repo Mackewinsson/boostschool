@@ -16,6 +16,7 @@ export type StudentContent = {
     signInButton: string;
     signInError: string;
     logoutLabel: string;
+    languageToggleAria: string;
   };
   student: {
     title: string;
@@ -50,10 +51,14 @@ export type StudentContent = {
     descriptionPlaceholder: string;
     urlLabel: string;
     urlPlaceholder: string;
+    urlOptionalHint: string;
     scheduledAtLabel: string;
     meetUrlLabel: string;
     meetUrlPlaceholder: string;
     addButton: string;
+    editButton: string;
+    saveEditButton: string;
+    cancelEditButton: string;
     materialsTitle: string;
     materialsEmpty: string;
     upcomingTitle: string;
@@ -70,6 +75,21 @@ export type StudentContent = {
     statusNotDone: string;
     statusPartial: string;
     noStudents: string;
+    scheduleSectionTitle: string;
+    scheduleSectionHint: string;
+    scheduleWeekdayLabel: string;
+    scheduleTimeLabel: string;
+    scheduleMeetLabel: string;
+    scheduleSaveLabel: string;
+    scheduleActiveLabel: string;
+    scheduleSaved: string;
+    weekdaySunday: string;
+    weekdayMonday: string;
+    weekdayTuesday: string;
+    weekdayWednesday: string;
+    weekdayThursday: string;
+    weekdayFriday: string;
+    weekdaySaturday: string;
     createStudentTitle: string;
     studentNameLabel: string;
     studentNamePlaceholder: string;
@@ -98,9 +118,11 @@ export type StudentContent = {
     errorParentStudent: string;
     successAdded: string;
     successAssigned: string;
+    successUpdated: string;
     errorGeneric: string;
     errorUrl: string;
     errorTitle: string;
+    errorContent: string;
     navMaterials: string;
     navLeads: string;
     navContacts: string;

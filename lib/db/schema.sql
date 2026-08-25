@@ -2,12 +2,19 @@ CREATE TABLE IF NOT EXISTS materials (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
-  url TEXT NOT NULL,
+  url TEXT,
   locale TEXT NOT NULL DEFAULT 'es',
   scheduled_at TIMESTAMPTZ,
   meet_url TEXT,
+  schedule_id UUID,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE materials
+  ALTER COLUMN url DROP NOT NULL;
+
+ALTER TABLE materials
+  ADD COLUMN IF NOT EXISTS schedule_id UUID;
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -100,6 +107,41 @@ CREATE TABLE IF NOT EXISTS parent_students (
   student_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   PRIMARY KEY (parent_user_id, student_user_id)
 );
+
+CREATE TABLE IF NOT EXISTS student_class_schedules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  weekday SMALLINT NOT NULL CHECK (weekday BETWEEN 0 AND 6),
+  time_local TIME NOT NULL,
+  timezone TEXT NOT NULL DEFAULT 'Europe/Warsaw',
+  meet_url TEXT,
+  title_template TEXT NOT NULL DEFAULT 'Clase',
+  horizon_weeks INT NOT NULL DEFAULT 6,
+  active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE materials
+  DROP CONSTRAINT IF EXISTS materials_schedule_id_fkey;
+
+ALTER TABLE materials
+  ADD CONSTRAINT materials_schedule_id_fkey
+  FOREIGN KEY (schedule_id) REFERENCES student_class_schedules(id) ON DELETE SET NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS materials_schedule_occurrence_uidx
+  ON materials (schedule_id, scheduled_at)
+  WHERE schedule_id IS NOT NULL AND scheduled_at IS NOT NULL;
+
+-- Remove demo placeholder that linked to a personal site
+DELETE FROM student_materials
+WHERE material_id IN (
+  SELECT id FROM materials
+  WHERE lower(title) = 'guia' AND url ILIKE '%mackewinsson.com%'
+);
+
+DELETE FROM materials
+WHERE lower(title) = 'guia' AND url ILIKE '%mackewinsson.com%';
 
 CREATE TABLE IF NOT EXISTS leads (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

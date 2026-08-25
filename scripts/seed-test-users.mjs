@@ -94,19 +94,34 @@ async function main() {
     ON CONFLICT (parent_user_id, student_user_id) DO NOTHING
   `;
 
-  const materials = await sql`
-    SELECT id FROM materials ORDER BY created_at DESC LIMIT 1
+  let materialId;
+  const existing = await sql`
+    SELECT id FROM materials
+    WHERE title = ${"Ejercicio de prueba"} AND url IS NULL
+    ORDER BY created_at DESC
+    LIMIT 1
   `;
+  materialId = existing[0]?.id;
 
-  if (materials[0]) {
-    await sql`
-      INSERT INTO student_materials (user_id, material_id)
-      VALUES (${created.student.id}::uuid, ${materials[0].id}::uuid)
-      ON CONFLICT (user_id, material_id) DO NOTHING
+  if (!materialId) {
+    const createdMaterial = await sql`
+      INSERT INTO materials (title, description, url, locale)
+      VALUES (
+        ${"Ejercicio de prueba"},
+        ${"Completa: Ella __ una oferta. (recibir)"},
+        ${null},
+        ${"es"}
+      )
+      RETURNING id
     `;
-  } else {
-    console.log("No materials yet — create one as teacher to test assignments.");
+    materialId = createdMaterial[0].id;
   }
+
+  await sql`
+    INSERT INTO student_materials (user_id, material_id)
+    VALUES (${created.student.id}::uuid, ${materialId}::uuid)
+    ON CONFLICT (user_id, material_id) DO NOTHING
+  `;
 
   console.log("Test users ready (password for all):", PASSWORD);
   console.log("");
@@ -116,11 +131,7 @@ async function main() {
   }
   console.log("");
   console.log("Parent is linked to student:", created.student.email);
-  if (materials[0]) {
-    console.log("Assigned latest material to student.");
-  } else {
-    console.log("No materials yet — create one as teacher to test assignments.");
-  }
+  console.log("Assigned demo homework (no external URL) to student.");
 }
 
 main().catch((error) => {

@@ -1,15 +1,23 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { LanguageToggle } from "@/components/landing/language-toggle";
 import { logoutAction } from "@/lib/actions/auth";
+import type { Locale } from "@/lib/locale";
 import type { StudentContent } from "@/lib/student-content/types";
 
 type PortalShellProps = {
   copy: StudentContent["portal"];
+  locale: Locale;
   children: ReactNode;
   teacherLink?: boolean;
 };
 
-export function PortalShell({ copy, children, teacherLink = false }: PortalShellProps) {
+export function PortalShell({
+  copy,
+  locale,
+  children,
+  teacherLink = false,
+}: PortalShellProps) {
   return (
     <div className="min-h-screen bg-canvas text-fg">
       <header className="border-b border-border bg-canvas/90 backdrop-blur-md">
@@ -20,7 +28,8 @@ export function PortalShell({ copy, children, teacherLink = false }: PortalShell
               Boost
             </span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <LanguageToggle locale={locale} ariaLabel={copy.languageToggleAria} />
             {teacherLink ? (
               <Link
                 href="/alumno/profesor"

@@ -3,6 +3,7 @@ import { apiError } from "@/lib/api-error";
 import { isDatabaseConfigured } from "@/lib/db/client";
 import { requireTeacher } from "@/lib/materials/auth";
 import { createMaterial, listMaterials } from "@/lib/materials/repository";
+import { generateSessionsForAllSchedules } from "@/lib/materials/schedule-generate";
 import { isValidHttpsUrl, parseLocale } from "@/lib/materials/validation";
 
 export async function GET() {
@@ -11,6 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: "Database not configured" }, { status: 503 });
     }
     await requireTeacher();
+    await generateSessionsForAllSchedules("es");
     const materials = await listMaterials();
     return NextResponse.json({ materials });
   } catch (error) {
@@ -44,7 +46,13 @@ export async function POST(request: Request) {
     if (title.length < 2) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
-    if (!isValidHttpsUrl(url)) {
+    if (!description && !url) {
+      return NextResponse.json(
+        { error: "Description or URL is required" },
+        { status: 400 },
+      );
+    }
+    if (url && !isValidHttpsUrl(url)) {
       return NextResponse.json({ error: "Valid https URL is required" }, { status: 400 });
     }
     if (meetUrl && !isValidHttpsUrl(meetUrl)) {
@@ -62,8 +70,8 @@ export async function POST(request: Request) {
 
     const material = await createMaterial({
       title,
-      description: description || undefined,
-      url,
+      description: description || null,
+      url: url || null,
       locale: parseLocale(body.locale),
       scheduledAt,
       meetUrl: meetUrl || null,

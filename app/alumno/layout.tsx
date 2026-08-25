@@ -15,5 +15,5 @@ export default async function AlumnoLayout({
   const locale = await getLocaleFromCookies();
   const { portal } = getStudentContent(locale);
 
-  return <PortalShell copy={portal}>{children}</PortalShell>;
+  return <PortalShell copy={portal} locale={locale}>{children}</PortalShell>;
 }

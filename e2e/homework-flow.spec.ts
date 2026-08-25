@@ -9,24 +9,30 @@ import {
   uniqueTitle,
 } from "./helpers";
 
-const DRIVE_URL = "https://drive.google.com/file/d/e2e-test/view";
 const STUDENT_LABEL = /Ana Alumna|alumno@bilingualboost\.test/;
 
 test.describe("homework flow teacher → student → parent", () => {
-  test("create, assign, mark Sí; student notes; parent read-only", async ({
+  test("create text-only homework, assign, mark Sí; student notes; parent read-only", async ({
     page,
   }) => {
     const title = uniqueTitle();
+    const exercise = [
+      "Completa con la forma correcta:",
+      "Ella __ una oferta. (recibir)",
+      "Nosotros __ ir al abogado. (querer)",
+    ].join("\n");
     const notes = `Apunte e2e ${Date.now()}`;
 
     await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
 
     await page.locator("#material-title").fill(title);
-    await page.locator("#material-url").fill(DRIVE_URL);
+    await page.locator("#material-description").fill(exercise);
     await page.locator("#material-scheduled").fill(futureScheduledLocal());
     await page.getByRole("button", { name: "Guardar deber" }).click();
 
     const row = await materialRow(page, title);
+    await expect(row.getByText(/0\s*\/\s*\d+/)).toHaveCount(0);
+
     const assignToggle = row.locator("button[aria-expanded]");
     if ((await assignToggle.getAttribute("aria-expanded")) !== "true") {
       await assignToggle.click();
@@ -46,7 +52,9 @@ test.describe("homework flow teacher → student → parent", () => {
 
     await login(page, e2eCreds.student, /\/alumno\/?$/);
     const studentCard = await materialCard(page, title);
-    await expect(studentCard.getByText(/Estado.*Sí|Sí/)).toBeVisible();
+    await expect(studentCard.getByText("Ella __ una oferta.")).toBeVisible();
+    await expect(studentCard.getByRole("link", { name: /Abrir/ })).toHaveCount(0);
+    await expect(studentCard.getByText(/Estado.*Sí|Sí|Deber:\s*Sí/)).toBeVisible();
 
     const notesBox = studentCard.getByTestId("class-notes");
     await expect(notesBox).toBeVisible();
@@ -60,7 +68,8 @@ test.describe("homework flow teacher → student → parent", () => {
 
     await login(page, e2eCreds.parent, /\/alumno\/?$/);
     const parentCard = await materialCard(page, title);
-    await expect(parentCard.getByText(/Estado.*Sí|Sí/)).toBeVisible();
+    await expect(parentCard.getByText("Ella __ una oferta.")).toBeVisible();
+    await expect(parentCard.getByText(/Estado.*Sí|Sí|Deber:\s*Sí/)).toBeVisible();
     await expect(parentCard.getByTestId("class-notes")).toHaveCount(0);
     await expect(parentCard.getByLabel("Apuntes de clase")).toHaveCount(0);
   });

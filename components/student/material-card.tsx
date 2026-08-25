@@ -138,33 +138,37 @@ export function MaterialCard({
         </p>
       ) : null}
       {material.description ? (
-        <p className="mt-2 flex-1 text-sm leading-relaxed text-fg-muted">
+        <p className="mt-2 flex-1 whitespace-pre-wrap text-sm leading-relaxed text-fg-muted">
           {material.description}
         </p>
       ) : (
         <div className="flex-1" />
       )}
 
-      <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-        <a
-          href={material.url}
-          className="btn-glow inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
-          {...externalLinkProps(material.url)}
-        >
-          {openLabel}
-          <ExternalLink size={16} aria-hidden="true" />
-        </a>
-        {material.meetUrl ? (
-          <a
-            href={material.meetUrl}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent"
-            {...externalLinkProps(material.meetUrl)}
-          >
-            <Video size={16} aria-hidden="true" />
-            {joinMeetLabel}
-          </a>
-        ) : null}
-      </div>
+      {material.url || material.meetUrl ? (
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          {material.url ? (
+            <a
+              href={material.url}
+              className="btn-glow inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
+              {...externalLinkProps(material.url)}
+            >
+              {openLabel}
+              <ExternalLink size={16} aria-hidden="true" />
+            </a>
+          ) : null}
+          {material.meetUrl ? (
+            <a
+              href={material.meetUrl}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent"
+              {...externalLinkProps(material.meetUrl)}
+            >
+              <Video size={16} aria-hidden="true" />
+              {joinMeetLabel}
+            </a>
+          ) : null}
+        </div>
+      ) : null}
 
       {!readOnly ? (
         <div className="mt-4">

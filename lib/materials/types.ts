@@ -3,7 +3,7 @@ import type { Locale } from "@/lib/locale";
 
 export type Role = UserRole;
 
-export type MaterialKind = "video" | "document" | "audio" | "link";
+export type MaterialKind = "video" | "document" | "audio" | "link" | "text";
 
 export type CompletionStatus = "done" | "not_done" | "partial";
 
@@ -11,15 +11,29 @@ export type Material = {
   id: string;
   title: string;
   description: string | null;
-  url: string;
+  url: string | null;
   locale: Locale;
   scheduledAt: string | null;
   meetUrl: string | null;
+  scheduleId?: string | null;
   createdAt: string;
   assignedAt?: string;
   completionStatus?: CompletionStatus | null;
   reviewedAt?: string | null;
   notes?: string | null;
+};
+
+/** weekday: 0 = Sunday … 6 = Saturday (JS Date.getDay) */
+export type StudentClassSchedule = {
+  id: string;
+  studentUserId: string;
+  weekday: number;
+  timeLocal: string;
+  timezone: string;
+  meetUrl: string | null;
+  titleTemplate: string;
+  horizonWeeks: number;
+  active: boolean;
 };
 
 export type StudentSummary = {

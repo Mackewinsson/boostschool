@@ -1,7 +1,11 @@
 import { FileText, Headphones, Link2, Video, type LucideIcon } from "lucide-react";
 import type { MaterialKind } from "./types";
 
-export function detectMaterialKind(url: string): MaterialKind {
+export function detectMaterialKind(url: string | null | undefined): MaterialKind {
+  if (!url?.trim()) {
+    return "text";
+  }
+
   const lower = url.toLowerCase();
 
   if (
@@ -36,6 +40,7 @@ export function getMaterialKindIcon(kind: MaterialKind): LucideIcon {
     case "video":
       return Video;
     case "document":
+    case "text":
       return FileText;
     case "audio":
       return Headphones;

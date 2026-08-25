@@ -14,6 +14,7 @@ export function MaterialKindIcon({ kind, size = 22, className }: MaterialKindIco
     case "video":
       return <Video {...props} />;
     case "document":
+    case "text":
       return <FileText {...props} />;
     case "audio":
       return <Headphones {...props} />;

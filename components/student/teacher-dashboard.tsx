@@ -9,21 +9,38 @@ import type {
   Assignment,
   CompletionStatus,
   Material,
+  StudentClassSchedule,
   StudentSummary,
 } from "@/lib/materials/types";
 import { MaterialAssignPanel } from "./material-assign-panel";
 import { MaterialKindIcon } from "./material-kind-icon";
+import { StudentSchedulePanel } from "./student-schedule-panel";
 
 type TeacherDashboardProps = {
   copy: StudentContent["teacher"];
   locale: string;
 };
 
+function toDatetimeLocalValue(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [schedules, setSchedules] = useState<StudentClassSchedule[]>([]);
   const [expandedMaterialId, setExpandedMaterialId] = useState<string | null>(null);
+  const [editingMaterialId, setEditingMaterialId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editUrl, setEditUrl] = useState("");
+  const [editScheduledAt, setEditScheduledAt] = useState("");
+  const [editMeetUrl, setEditMeetUrl] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [studentName, setStudentName] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
@@ -52,7 +69,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       (material) =>
         material.title.toLowerCase().includes(query) ||
         material.description?.toLowerCase().includes(query) ||
-        material.url.toLowerCase().includes(query),
+        (material.url?.toLowerCase().includes(query) ?? false),
     );
   }, [materials, searchQuery]);
 
@@ -65,10 +82,11 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
   }
 
   async function loadData() {
-    const [materialsRes, studentsRes, assignmentsRes] = await Promise.all([
+    const [materialsRes, studentsRes, assignmentsRes, schedulesRes] = await Promise.all([
       fetch("/api/alumno/materials"),
       fetch("/api/alumno/students"),
       fetch("/api/alumno/assignments"),
+      fetch("/api/alumno/schedules"),
     ]);
 
     if (materialsRes.ok) {
@@ -83,6 +101,10 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       const data = (await assignmentsRes.json()) as { assignments?: Assignment[] };
       setAssignments(data.assignments ?? []);
     }
+    if (schedulesRes.ok) {
+      const data = (await schedulesRes.json()) as { schedules?: StudentClassSchedule[] };
+      setSchedules(data.schedules ?? []);
+    }
     setLoading(false);
   }
 
@@ -90,29 +112,10 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     let cancelled = false;
 
     async function init() {
-      const [materialsRes, studentsRes, assignmentsRes] = await Promise.all([
-        fetch("/api/alumno/materials"),
-        fetch("/api/alumno/students"),
-        fetch("/api/alumno/assignments"),
-      ]);
-
+      await loadData();
       if (cancelled) {
         return;
       }
-
-      if (materialsRes.ok) {
-        const data = (await materialsRes.json()) as { materials?: Material[] };
-        setMaterials(data.materials ?? []);
-      }
-      if (studentsRes.ok) {
-        const data = (await studentsRes.json()) as { students?: StudentSummary[] };
-        setStudents(data.students ?? []);
-      }
-      if (assignmentsRes.ok) {
-        const data = (await assignmentsRes.json()) as { assignments?: Assignment[] };
-        setAssignments(data.assignments ?? []);
-      }
-      setLoading(false);
     }
 
     void init();
@@ -230,7 +233,11 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       setError(copy.errorTitle);
       return;
     }
-    if (!url.trim().startsWith("https://")) {
+    if (!description.trim() && !url.trim()) {
+      setError(copy.errorContent);
+      return;
+    }
+    if (url.trim() && !url.trim().startsWith("https://")) {
       setError(copy.errorUrl);
       return;
     }
@@ -247,7 +254,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
         body: JSON.stringify({
           title,
           description,
-          url,
+          url: url.trim() || undefined,
           scheduledAt: scheduledAt || undefined,
           meetUrl: meetUrl || undefined,
         }),
@@ -273,6 +280,91 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
             ?.scrollIntoView({ behavior: "smooth", block: "center" });
         });
       }
+    } catch {
+      setError(copy.errorGeneric);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function beginEditMaterial(material: Material) {
+    setEditingMaterialId(material.id);
+    setEditTitle(material.title);
+    setEditDescription(material.description ?? "");
+    setEditUrl(material.url ?? "");
+    setEditScheduledAt(toDatetimeLocalValue(material.scheduledAt));
+    setEditMeetUrl(material.meetUrl ?? "");
+    setExpandedMaterialId(material.id);
+  }
+
+  async function handleUpdateMaterial(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingMaterialId) return;
+    setError(null);
+    setMessage(null);
+
+    if (editTitle.trim().length < 2) {
+      setError(copy.errorTitle);
+      return;
+    }
+    if (editUrl.trim() && !editUrl.trim().startsWith("https://")) {
+      setError(copy.errorUrl);
+      return;
+    }
+    if (editMeetUrl.trim() && !editMeetUrl.trim().startsWith("https://")) {
+      setError(copy.errorUrl);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/alumno/materials/${editingMaterialId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editTitle,
+          description: editDescription,
+          url: editUrl.trim() || "",
+          scheduledAt: editScheduledAt || null,
+          meetUrl: editMeetUrl.trim() || "",
+        }),
+      });
+      if (!response.ok) {
+        setError(copy.errorGeneric);
+        return;
+      }
+      setEditingMaterialId(null);
+      setMessage(copy.successUpdated);
+      await loadData();
+    } catch {
+      setError(copy.errorGeneric);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSaveSchedule(input: {
+    studentUserId: string;
+    weekday: number;
+    timeLocal: string;
+    meetUrl: string;
+    active: boolean;
+  }) {
+    setError(null);
+    setMessage(null);
+    setSaving(true);
+    try {
+      const response = await fetch("/api/alumno/schedules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) {
+        setError(copy.errorGeneric);
+        return;
+      }
+      setMessage(copy.scheduleSaved);
+      await loadData();
     } catch {
       setError(copy.errorGeneric);
     } finally {
@@ -383,10 +475,6 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     } finally {
       setSaving(false);
     }
-  }
-
-  function assignedCount(materialId: string): number {
-    return assignments.filter((assignment) => assignment.materialId === materialId).length;
   }
 
   if (loading) {
@@ -522,6 +610,14 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
         </form>
       </section>
 
+      <StudentSchedulePanel
+        students={students}
+        schedules={schedules}
+        saving={saving}
+        copy={copy}
+        onSave={handleSaveSchedule}
+      />
+
       <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
         <h2 className="text-xl font-bold text-fg">{copy.addTitle}</h2>
         <p className="mt-2 text-sm text-fg-muted">{copy.urlHint}</p>
@@ -546,7 +642,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
               id="material-description"
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              rows={3}
+              rows={8}
               placeholder={copy.descriptionPlaceholder}
               className="mt-1.5 w-full resize-y rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
             />
@@ -563,6 +659,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
               placeholder={copy.urlPlaceholder}
               className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
             />
+            <p className="mt-1 text-xs text-fg-faint">{copy.urlOptionalHint}</p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
@@ -630,7 +727,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
           <ul ref={listRef} className="mt-4 space-y-3">
             {filteredMaterials.map((material) => {
               const expanded = expandedMaterialId === material.id;
-              const count = assignedCount(material.id);
+              const editing = editingMaterialId === material.id;
               return (
                 <li
                   key={material.id}
@@ -652,15 +749,26 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
                           </p>
                         ) : null}
                         {material.description ? (
-                          <p className="mt-1 text-sm text-fg-muted">{material.description}</p>
+                          <p className="mt-1 whitespace-pre-wrap text-sm text-fg-muted">
+                            {material.description}
+                          </p>
                         ) : null}
-                        <p className="mt-1 truncate text-xs text-fg-faint">{material.url}</p>
+                        {material.url ? (
+                          <p className="mt-1 truncate text-xs text-fg-faint">{material.url}</p>
+                        ) : null}
                         {material.meetUrl ? (
                           <p className="mt-1 truncate text-xs text-fg-faint">{material.meetUrl}</p>
                         ) : null}
                       </div>
                     </div>
                     <div className="flex shrink-0 flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => beginEditMaterial(material)}
+                        className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent"
+                      >
+                        {copy.editButton}
+                      </button>
                       <button
                         type="button"
                         onClick={() =>
@@ -675,13 +783,6 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
                       >
                         <UserPlus size={15} aria-hidden="true" />
                         {copy.assignButton}
-                        <span
-                          className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${
-                            count > 0 ? "bg-accent/15 text-accent" : "bg-canvas text-fg-faint"
-                          }`}
-                        >
-                          {count}/{students.length}
-                        </span>
                         <ChevronDown
                           size={14}
                           aria-hidden="true"
@@ -698,6 +799,91 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
                       </button>
                     </div>
                   </div>
+
+                  {editing ? (
+                    <form
+                      onSubmit={handleUpdateMaterial}
+                      className="mt-4 space-y-3 rounded-xl border border-border bg-canvas p-4"
+                    >
+                      <div>
+                        <label className="block text-sm font-medium text-fg" htmlFor={`edit-title-${material.id}`}>
+                          {copy.titleLabel}
+                        </label>
+                        <input
+                          id={`edit-title-${material.id}`}
+                          value={editTitle}
+                          onChange={(event) => setEditTitle(event.target.value)}
+                          className="mt-1.5 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-fg" htmlFor={`edit-desc-${material.id}`}>
+                          {copy.descriptionLabel}
+                        </label>
+                        <textarea
+                          id={`edit-desc-${material.id}`}
+                          value={editDescription}
+                          onChange={(event) => setEditDescription(event.target.value)}
+                          rows={6}
+                          className="mt-1.5 w-full resize-y rounded-xl border border-border bg-card px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-fg" htmlFor={`edit-url-${material.id}`}>
+                          {copy.urlLabel}
+                        </label>
+                        <input
+                          id={`edit-url-${material.id}`}
+                          type="url"
+                          value={editUrl}
+                          onChange={(event) => setEditUrl(event.target.value)}
+                          className="mt-1.5 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+                        />
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <div>
+                          <label className="block text-sm font-medium text-fg" htmlFor={`edit-scheduled-${material.id}`}>
+                            {copy.scheduledAtLabel}
+                          </label>
+                          <input
+                            id={`edit-scheduled-${material.id}`}
+                            type="datetime-local"
+                            value={editScheduledAt}
+                            onChange={(event) => setEditScheduledAt(event.target.value)}
+                            className="mt-1.5 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-fg" htmlFor={`edit-meet-${material.id}`}>
+                            {copy.meetUrlLabel}
+                          </label>
+                          <input
+                            id={`edit-meet-${material.id}`}
+                            type="url"
+                            value={editMeetUrl}
+                            onChange={(event) => setEditMeetUrl(event.target.value)}
+                            className="mt-1.5 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="submit"
+                          disabled={saving}
+                          className="rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                        >
+                          {copy.saveEditButton}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingMaterialId(null)}
+                          className="rounded-xl border border-border px-4 py-2 text-sm text-fg-muted"
+                        >
+                          {copy.cancelEditButton}
+                        </button>
+                      </div>
+                    </form>
+                  ) : null}
 
                   {expanded ? (
                     <MaterialAssignPanel
