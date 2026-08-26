@@ -10,29 +10,35 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Descripción
 
-**Bilingual Boost** es la landing page de **Paulina Poloca** — profe de inglés y español online. Todo el copy está en **español neutro LATAM**. El objetivo es convertir visitantes en alumnos mediante copy cercano y directo al beneficio.
+**Bilingual Boost** es el sitio de **Paulina Poloca** (profe de inglés y español online):
+
+1. **Marketing / landing** — convertir visitantes en alumnos (copy cercano, beneficio primero).
+2. **Portal `/alumno`** — clases, deberes y materiales para **profe**, **alumno** y **padre**.
+
+Idiomas de UI del portal: **ES / EN / PL** (`lib/student-content/`). Landing: mismos locales en `lib/landing-content/`. Copy de marketing en **español neutro LATAM** salvo que se pida explícitamente otro idioma.
 
 ### Brief de la clienta
 
-La fuente autoritativa del copy y reglas de contenido está en:
+Fuente autoritativa de copy y reglas de contenido:
 
 `.cursor/skills/bilingual-boost-client/SKILL.md`
 
-**Regla de copy:** cambios de texto van en `lib/landing-content.ts`. Cambios de estilo (colores, fuentes) requieren fase de diseño explícita.
+**Reglas de copy:**
 
-### Placeholders pendientes (confirmar con Paulina)
+| Superficie | Dónde editar |
+|---|---|
+| Landing | `lib/landing-content/{es,en,pl}.ts` (+ `types.ts`) |
+| Portal alumno/profe | `lib/student-content/{es,en,pl}.ts` (+ `types.ts`) |
+
+No hardcodear strings visibles en componentes. Cambios de estilo (colores, fuentes) requieren fase de diseño explícita.
+
+### Placeholders / pendientes (confirmar con Paulina)
 
 - Método de pago concreto
 - URLs: Calendly, WhatsApp, Instagram, TikTok, correo
 - Testimonios reales de alumnos
 - Envío funcional del formulario de contacto
-
-### Copy aún no implementado (fase diseño)
-
-- Colores `#FFD93D` / `#FFA726` y fuentes Quicksand/Nunito/Superclarendon
-- Widget Calendly integrado
-- Versión EN del sitio
-- Tips de aprendizaje, cursos, packs
+- Colores `#FFD93D` / `#FFA726` y fuentes Quicksand/Nunito/Superclarendon (fase diseño)
 
 ---
 
@@ -40,184 +46,195 @@ La fuente autoritativa del copy y reglas de contenido está en:
 
 | Tecnología | Versión | Rol |
 |---|---|---|
-| Next.js | 16.x (App Router) | Framework principal |
+| Next.js | 16.x (App Router) | Framework |
 | React | 19.x | UI |
 | TypeScript | 5.x | Lenguaje |
 | Tailwind CSS | 4.x | Estilos |
-| lucide-react | última | Íconos SVG |
+| Neon / Postgres | — | Datos del portal |
+| Playwright | — | E2E (`e2e/`) |
+| lucide-react | última | Íconos |
 
-> **Importante:** Este proyecto usa **Next.js 16** con **App Router** y **Tailwind CSS v4**. Ambas versiones tienen cambios de ruptura respecto a versiones anteriores. No asumas APIs de versiones anteriores.
+> **Importante:** Next.js 16 + Tailwind v4 tienen cambios de ruptura. Leer docs en `node_modules/next/dist/docs/` antes de inventar APIs.
 
 ---
 
-## Estructura de archivos
+## Estructura de archivos (alto nivel)
 
 ```
 /
 ├── app/
-│   ├── globals.css          ← ÚNICA fuente de verdad para colores del tema
-│   ├── layout.tsx           ← Layout raíz (metadata, fuentes, lang="es")
-│   └── page.tsx             ← Página de entrada → monta <LandingPage />
+│   ├── globals.css              ← tokens de color del tema
+│   ├── layout.tsx               ← layout raíz
+│   ├── page.tsx                 ← landing
+│   ├── api/alumno/              ← APIs del portal (materials, schedules, sessions…)
+│   └── alumno/                  ← portal autenticado
+│       ├── page.tsx             ← alumno / padre
+│       └── profesor/            ← área profe (+ leads, contactos, emails, firma)
 │
 ├── components/
-│   └── landing/
-│       ├── landing-page.tsx ← Página completa (server component)
-│       └── navbar.tsx       ← Navbar sticky con glassmorphism (client component)
+│   ├── landing/                 ← marketing
+│   └── student/                 ← portal (dashboards, tabla de clases, horario…)
 │
 ├── lib/
-│   └── landing-content.ts   ← Toda la data de la landing (copy, stats, FAQs, etc.)
+│   ├── landing-content/         ← copy landing ES/EN/PL
+│   ├── student-content/         ← copy portal ES/EN/PL
+│   ├── materials/               ← repo, schedules, realign, tipos
+│   ├── db/                      ← cliente Neon + schema.sql
+│   └── auth/                    ← usuarios / sesión
 │
-└── public/                  ← Assets estáticos
+├── e2e/                         ← Playwright (flujo clases + deberes)
+└── .cursor/rules/               ← reglas de agentes (p. ej. rendimiento)
 ```
+
+---
+
+## Portal `/alumno` (modelo de producto)
+
+### Roles
+
+| Rol | Ruta | Puede |
+|---|---|---|
+| **teacher** | `/alumno/profesor` | Horario, tabla de clases, deberes, estado, extras, Meet |
+| **student** | `/alumno` | Ver clases, deberes, Meet, apuntes |
+| **parent** | `/alumno` (read-only) | Ver clases, deberes y estado; **sin** Meet ni apuntes |
+
+`GET /api/alumno/my-materials` devuelve `readOnly: true` para padres.
+
+### Tabla de clases (núcleo)
+
+Componente compartido: `components/student/class-session-table.tsx`.
+
+Cada fila = una clase con fecha/hora:
+
+- **Profe:** edita fecha/hora + deberes (`description`) → botón **Guardar** (guarda ambos).
+- **Alumno:** ve deberes o mensaje vacío; puede unirse a Meet; apuntes.
+- **Padre:** igual que alumno pero **sin** enlace Meet y sin apuntes.
+- Estado hecho: Pendiente / Sí / No / Parcial (`student_materials.completion_status`).
+- **Extras** (materiales sin `scheduled_at`) van fuera de la tabla.
+
+Deberes vacíos → copy `homeworkEmpty` (“Todavía no hay deberes…”). No mostrar badge de estado al alumno/padre si no hay deberes.
+
+### Horario por alumno
+
+`components/student/student-schedule-panel.tsx` + `POST /api/alumno/schedules`.
+
+| Modo | Comportamiento |
+|---|---|
+| **Horario fijo** | Día + hora 24h (Warsaw) + Meet + “Generar próximas clases”. Al guardar, **realinea** todas las clases futuras a ese día/hora y conserva textos de deberes. |
+| **Clase a clase** | Solo Meet; profe añade fechas con “Crear clase”. `active` queda en false. |
+
+Al pasar de “clase a clase” → “horario fijo”, el checkbox de generar debe arrancar **activo** (si no, el upsert guarda `active: false` y **no realinea**).
+
+Lógica de slots / TZ / realign: `lib/materials/schedule-generate.ts`
+
+- Zona por defecto: `Europe/Warsaw`, hora en **24h** (`20:00` = 8 pm).
+- `realignFutureSessionsForSchedule`: mueve futuras (con y sin deberes), borra shells vacíos, rellena horizonte.
+- Unique `(schedule_id, scheduled_at)` en materials — el realign desacopla `schedule_id` antes de reasignar.
+
+### Datos clave
+
+| Tabla | Uso |
+|---|---|
+| `materials` | Clase o extra (`scheduled_at`, `meet_url`, `description` = deberes, `schedule_id`) |
+| `student_materials` | Asignación + `completion_status` + `notes` |
+| `student_class_schedules` | Horario semanal o Meet-only por alumno |
+
+Schema: `lib/db/schema.sql`. Migrar: `npm run db:migrate`.
+
+### APIs relevantes
+
+| Ruta | Uso |
+|---|---|
+| `/api/alumno/schedules` | GET/POST horario; POST dispara realign si hay slot fijo |
+| `/api/alumno/sessions` | POST clase puntual |
+| `/api/alumno/materials` | CRUD materiales (+ genera shells semanales en GET) |
+| `/api/alumno/my-materials` | Vista alumno/padre |
+| `/api/alumno/assignments` | Estado de deberes |
+
+### E2E
+
+```bash
+npm run test:e2e                 # Playwright
+npm run test:e2e:ui
+```
+
+Helpers: `e2e/helpers.ts` (`saveWeeklySchedule`, `rowWithText`, …).  
+Specs: `e2e/homework-flow.spec.ts`, `e2e/auth.spec.ts`.
+
+Los e2e escriben en la **misma** DB configurada en `.env.local` — pueden dejar basura tipo `Realign homework (realign-…)` visible al alumno. Limpiar o usar DB aparte para demos.
 
 ---
 
 ## Sistema de colores (tema)
 
-**Regla principal: nunca hardcodear colores de marca en los componentes.**
-
-Todos los colores del sitio se definen en `app/globals.css` en el bloque `:root`. Tailwind los registra como utilidades via `@theme inline`.
+**Nunca hardcodear colores de marca en componentes.** Fuente: `app/globals.css` (`:root` + `@theme inline`).
 
 ### Variables en `:root`
 
 ```css
 :root {
-  --brand-from:     #06b6d4;   /* inicio del gradiente principal */
-  --brand-to:       #8b5cf6;   /* fin del gradiente principal    */
-  --accent:         #22d3ee;   /* acento primario (texto, iconos) */
-  --accent-alt:     #a78bfa;   /* acento secundario              */
-  --canvas:         #030712;   /* fondo base de la página        */
-  --canvas-up:      #07101f;   /* fondo de secciones elevadas    */
-  --brand-from-rgb: 6 182 212; /* RGB de --brand-from (para sombras con alpha) */
+  --brand-from:     #06b6d4;
+  --brand-to:       #8b5cf6;
+  --accent:         #22d3ee;
+  --accent-alt:     #a78bfa;
+  --canvas:         #030712;
+  --canvas-up:      #07101f;
+  --brand-from-rgb: 6 182 212;
 }
 ```
 
-### Clases Tailwind generadas
+### Clases útiles
 
-| Clase | Uso habitual |
+| Clase | Uso |
 |---|---|
-| `from-brand-from`, `to-brand-to` | Gradientes en botones, avatares |
-| `text-accent`, `text-accent-alt` | Labels de sección, íconos, badges |
-| `bg-accent/10`, `border-accent/25` | Fondos y bordes tintados de acento |
-| `bg-brand-from/20`, `bg-brand-to/20` | Íconos de features/outcomes |
-| `bg-canvas`, `bg-canvas-up` | Fondos de secciones |
-| `border-brand-from/30` | Bordes de tarjeta de precio |
-
-### Clases CSS especiales (en `globals.css`)
-
-| Clase | Descripción |
-|---|---|
-| `.btn-glow` | Sombra de brillo para botones CTA. Se intensifica en hover. |
-| `.card-glow` | Sombra halo exterior para la tarjeta de precio. |
-
-> Para cambiar toda la paleta del sitio: editar únicamente el bloque `:root` en `app/globals.css`. Recordar actualizar también `--brand-from-rgb` si se cambia `--brand-from`.
+| `from-brand-from`, `to-brand-to` | Gradientes CTA |
+| `text-accent`, `text-accent-alt` | Labels, íconos |
+| `bg-canvas`, `bg-canvas-up` | Fondos |
+| `.btn-glow`, `.card-glow` | Brillos (landing) |
 
 ---
 
-## Contenido / Copy (`lib/landing-content.ts`)
+## Landing (marketing)
 
-Toda la información de la landing está centralizada aquí. **No escribir strings de copy directamente en los componentes.**
+Copy: `lib/landing-content/`. Página: `components/landing/landing-page.tsx`.
 
-### Exports disponibles
+Slots habituales: hero, stats, sobre mí, programas, resultados, testimonios, planes, FAQ, contacto, CTA final.
 
-| Export | Tipo | Descripción |
-|---|---|---|
-| `brand` | objeto | Nombre, badge y tagline |
-| `nav` | objeto | Links de navegación (7) y `ctaLabel` |
-| `hero` | objeto | Título (before/highlight), subtítulo, CTAs |
-| `stats` | `Stat[]` | 3 credenciales de Paulina |
-| `about` | `AboutSection` | Sobre mí — 4 párrafos + alt de foto |
-| `featuresSection` | `SectionHeading` | Label y título de “Por qué clases conmigo” |
-| `features` | `Feature[]` | 3 pilares del enfoque |
-| `outcomesSection` | `SectionHeading` + linkText | Label y título de “Cómo son las clases” |
-| `outcomes` | `Feature[]` | 3 aspectos de la metodología |
-| `testimonialsSection` | `SectionHeading` | Label y título de testimonios |
-| `testimonials` | `Testimonial[]` | Placeholders hasta tener testimonios reales |
-| `plansSection` | `SectionHeading` | Label de sección precios |
-| `plans` | objeto | Trial gratis, 11/16/20 €, tipos de clase, CTA |
-| `faqSection` | `SectionHeading` | Label y título FAQ |
-| `faqs` | `FaqItem[]` | Requisitos, cómo empezar, inglés empresarial |
-| `contact` | `ContactSection` | Formulario estático + redes (placeholders) |
-| `finalCta` | objeto | Banner final de cierre |
-| `mobileStickyCta` | string | CTA sticky mobile |
-
-### Mapeo brief → slots de la página
-
-| Slot UI | Export(s) |
-|---|---|
-| Hero | `brand`, `hero` |
-| 3 stats | `stats` |
-| Sobre mí `#sobre-mi` | `about` |
-| Features `#programas` | `featuresSection`, `features` |
-| Outcomes `#resultados` | `outcomesSection`, `outcomes` |
-| Testimonios `#testimonios` | `testimonialsSection`, `testimonials` |
-| Pricing `#planes` | `plansSection`, `plans` |
-| FAQ `#faq` | `faqSection`, `faqs` |
-| CTA final | `finalCta` |
-| Contacto `#contacto` | `contact` |
-
-### Tipos definidos
-
-```ts
-type Stat        = { value: string; label: string }
-type Feature     = { title: string; description: string }
-type Testimonial = { name: string; role: string; quote: string }
-type FaqItem     = { question: string; answer: string }
-type NavLink     = { label: string; href: string }
-type AboutSection = { label: string; title: string; paragraphs: string[]; imageAlt: string }
-type ContactSection = { label: string; title: string; description: string; fields: object; socialLinks: NavLink[]; note: string }
-```
+Iconos de `features` / `outcomes` por **índice** en `landing-page.tsx` — si crece el array de copy, añadir ícono.
 
 ---
 
-## Arquitectura de componentes
+## Rendimiento
 
-```
-page.tsx  (Server Component)
-└── LandingPage  (Server Component)
-    ├── Navbar         ← "use client" — maneja scroll y menú mobile
-    ├── Hero section
-    ├── About section      (#sobre-mi)
-    ├── Features section   (#programas)
-    ├── Outcomes section   (#resultados)
-    ├── Testimonials section (#testimonios)
-    ├── Pricing section    (#planes)
-    ├── FAQ section        (#faq)
-    ├── Final CTA Banner
-    ├── Contact section    (#contacto)
-    ├── Footer
-    └── Mobile sticky CTA  (solo visible en < sm)
-```
+Regla obligatoria: `.cursor/rules/no-performance-regressions.mdc`
 
-### Iconos de sección
-
-Los íconos de `features` y `outcomes` se mapean por **índice de array** en `landing-page.tsx`:
-
-```ts
-const featureIcons = [MessageSquare, Users, Clock];
-const outcomeIcons = [Briefcase, Compass, BarChart3];
-```
-
-Si se agregan más items al array en `landing-content.ts`, hay que agregar un ícono correspondiente aquí.
+- No bloquear first paint / LCP con DB o auth en rutas públicas.
+- Auth y peso del portal solo en `/alumno` (y rutas gated).
+- Preferir Suspense / cache / dynamic import para trabajo no crítico.
 
 ---
 
 ## Comandos
 
 ```bash
-npm run dev     # Servidor de desarrollo en localhost:3000
-npm run build   # Build de producción
-npm run start   # Servidor de producción
-npm run lint    # ESLint (debe pasar sin errores antes de cada commit)
+npm run dev              # localhost:3000
+npm run build
+npm run start
+npm run lint             # debe pasar limpio
+npm run db:migrate
+npm run db:seed-test-users
+npm run test:e2e
 ```
 
 ---
 
 ## Reglas de desarrollo
 
-1. **DRY:** Todo el copy va en `lib/landing-content.ts`. Todo color de marca va en `app/globals.css`.
-2. **Tokens de tema:** Usar siempre las clases Tailwind de token (`text-accent`, `bg-canvas`, `from-brand-from`) — nunca hardcodear hex ni clases de Tailwind builtin como `text-cyan-400` para colores de marca.
-3. **Componentes client:** Solo marcar `"use client"` cuando sea estrictamente necesario (estado, efectos, eventos del browser). `Navbar` es el único client component actualmente.
-4. **Lint limpio:** Correr `npm run lint` después de cada cambio. Debe pasar sin errores ni warnings.
-5. **Idioma:** Todo el copy visible para el usuario va en **español neutro LATAM**. Sin regionalismos de España.
-6. **Accesibilidad:** Mantener `lang="es"` en `<html>`, usar roles semánticos (`<header>`, `<nav>`, `<main>`, `<footer>`, `<article>`, `<section>`), y `aria-label` en botones sin texto visible.
+1. **DRY copy:** landing → `lib/landing-content/`; portal → `lib/student-content/`. Colores → `app/globals.css`.
+2. **Tokens de tema:** `text-accent`, `bg-canvas`, `from-brand-from` — no hex de marca ni `text-cyan-400` ad hoc.
+3. **`"use client"`** solo con estado, efectos o eventos de browser.
+4. **Lint limpio** antes de commit.
+5. **Portal:** cambios de horario semanal deben realinear clases futuras; no dejar `active: false` por accidente al guardar horario fijo.
+6. **Padre:** sin Meet; sin edición de apuntes.
+7. **Accesibilidad:** roles semánticos; `aria-label` en controles solo-ícono.
+8. **Commits / push:** solo si el usuario lo pide.
