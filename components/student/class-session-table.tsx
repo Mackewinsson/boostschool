@@ -1,22 +1,25 @@
 "use client";
 
 import { Video } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Locale } from "@/lib/locale";
 import type { CompletionStatus, Material } from "@/lib/materials/types";
 import {
   completionStatusLabel,
   formatScheduledAt,
+  groupMaterialsBySchedule,
 } from "@/lib/materials/schedule-groups";
 import {
   datetimeLocalInZoneToUtcIso,
   toDatetimeLocalValueInZone,
-} from "@/lib/materials/schedule-generate";
+} from "@/lib/materials/schedule-time";
 import { externalLinkProps } from "@/lib/site-links";
 
 export type ClassSessionTableCopy = {
   classesTitle: string;
   classesEmpty: string;
+  upcomingTitle?: string;
+  pastTitle?: string;
   homeworkLabel: string;
   homeworkEmpty?: string;
   homeworkPlaceholder?: string;
@@ -40,7 +43,10 @@ type ClassSessionTableProps = {
   locale: Locale;
   copy: ClassSessionTableCopy;
   mode: "teacher" | "readonly";
-  saving?: boolean;
+  /** When set, only that session row shows busy controls. */
+  savingSessionId?: string | null;
+  /** Disables the “add class” control (e.g. while creating). */
+  addingClass?: boolean;
   timeZone?: string;
   onSaveHomework?: (sessionId: string, description: string, scheduledAt: string) => Promise<void>;
   onStatusChange?: (sessionId: string, status: CompletionStatus | null) => Promise<void>;
@@ -58,7 +64,8 @@ export function ClassSessionTable({
   locale,
   copy,
   mode,
-  saving = false,
+  savingSessionId = null,
+  addingClass = false,
   timeZone = DEFAULT_TZ,
   onSaveHomework,
   onStatusChange,
@@ -68,6 +75,33 @@ export function ClassSessionTable({
   showMeetLink = true,
 }: ClassSessionTableProps) {
   const [newClassAt, setNewClassAt] = useState("");
+  const { upcoming, past } = useMemo(() => {
+    const grouped = groupMaterialsBySchedule(sessions);
+    return { upcoming: grouped.upcoming, past: grouped.past };
+  }, [sessions]);
+
+  function renderRows(items: Material[]) {
+    return (
+      <ul className="mt-4 space-y-4">
+        {items.map((session) => (
+          <SessionRow
+            key={session.id}
+            session={session}
+            locale={locale}
+            copy={copy}
+            mode={mode}
+            saving={savingSessionId === session.id}
+            timeZone={timeZone}
+            onSaveHomework={onSaveHomework}
+            onStatusChange={onStatusChange}
+            onSaveNotes={onSaveNotes}
+            allowNotes={allowNotes}
+            showMeetLink={showMeetLink}
+          />
+        ))}
+      </ul>
+    );
+  }
 
   return (
     <section className="mt-10" data-testid="class-session-table">
@@ -96,7 +130,7 @@ export function ClassSessionTable({
             </label>
             <button
               type="submit"
-              disabled={saving || !newClassAt}
+              disabled={addingClass || !newClassAt}
               className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent disabled:opacity-60"
             >
               {copy.addClassButton}
@@ -108,24 +142,35 @@ export function ClassSessionTable({
       {sessions.length === 0 ? (
         <p className="mt-4 text-sm text-fg-muted">{copy.classesEmpty}</p>
       ) : (
-        <ul className="mt-4 space-y-4">
-          {sessions.map((session) => (
-            <SessionRow
-              key={session.id}
-              session={session}
-              locale={locale}
-              copy={copy}
-              mode={mode}
-              saving={saving}
-              timeZone={timeZone}
-              onSaveHomework={onSaveHomework}
-              onStatusChange={onStatusChange}
-              onSaveNotes={onSaveNotes}
-              allowNotes={allowNotes}
-              showMeetLink={showMeetLink}
-            />
-          ))}
-        </ul>
+        <>
+          <div className="mt-6">
+            {copy.upcomingTitle ? (
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
+                {copy.upcomingTitle}
+              </h3>
+            ) : null}
+            {upcoming.length === 0 ? (
+              <p className="mt-3 text-sm text-fg-muted">{copy.classesEmpty}</p>
+            ) : (
+              renderRows(upcoming)
+            )}
+          </div>
+
+          {past.length > 0 ? (
+            <details className="mt-8 group">
+              <summary className="cursor-pointer list-none text-sm font-semibold uppercase tracking-wide text-fg-muted marker:content-none [&::-webkit-details-marker]:hidden">
+                <span className="inline-flex items-center gap-2">
+                  {copy.pastTitle ?? "Past"}
+                  <span className="rounded-full bg-canvas px-2 py-0.5 text-xs font-medium text-fg-faint normal-case tracking-normal">
+                    {past.length}
+                  </span>
+                  <span className="text-fg-faint transition group-open:rotate-90">›</span>
+                </span>
+              </summary>
+              {renderRows(past)}
+            </details>
+          ) : null}
+        </>
       )}
     </section>
   );
@@ -162,9 +207,11 @@ function SessionRow({
   );
   const [notes, setNotes] = useState(session.notes ?? "");
   const [notesJustSaved, setNotesJustSaved] = useState(false);
-  const [syncedKey, setSyncedKey] = useState(`${session.id}:${session.scheduledAt}`);
+  const [syncedKey, setSyncedKey] = useState(
+    `${session.id}:${session.scheduledAt}:${session.description ?? ""}:${session.notes ?? ""}`,
+  );
 
-  const nextKey = `${session.id}:${session.scheduledAt}`;
+  const nextKey = `${session.id}:${session.scheduledAt}:${session.description ?? ""}:${session.notes ?? ""}`;
   if (nextKey !== syncedKey) {
     setSyncedKey(nextKey);
     setHomework(session.description ?? "");

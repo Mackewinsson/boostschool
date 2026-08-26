@@ -110,6 +110,8 @@ export function StudentDashboard({ copy, locale }: StudentDashboardProps) {
             copy={{
               classesTitle: copy.classesTitle,
               classesEmpty: copy.emptyBody,
+              upcomingTitle: copy.upcomingTitle,
+              pastTitle: copy.pastTitle,
               homeworkLabel: copy.homeworkLabel,
               homeworkEmpty: copy.homeworkEmpty,
               joinMeetLabel: copy.joinMeetLabel,

@@ -165,14 +165,14 @@ test.describe("class table homework flow", () => {
       new RegExp(marker),
     );
 
-    // Every future class row should now be 20:00 (no leftover old times)
+    // Upcoming weekly slots should be 20:00 (past / ad-hoc one-offs may differ)
     const times = await classRows(page)
       .locator('[data-testid="session-datetime"]')
       .evaluateAll((inputs) =>
         inputs.map((el) => (el as HTMLInputElement).value).filter(Boolean),
       );
-    expect(times.length).toBeGreaterThan(0);
-    expect(times.every((value) => value.endsWith("T20:00"))).toBe(true);
+    expect(times.some((value) => value.endsWith("T20:00"))).toBe(true);
+    expect(times.filter((value) => value.endsWith("T18:00")).length).toBe(0);
   });
 
   test("teacher can edit session datetime and mark not_done for parent", async ({

@@ -289,6 +289,20 @@ export async function listClassSchedules(): Promise<StudentClassSchedule[]> {
   return rows.map(mapSchedule);
 }
 
+export async function getClassScheduleByStudentId(
+  studentUserId: string,
+): Promise<StudentClassSchedule | null> {
+  const sql = getDb();
+  const rows = (await sql`
+    SELECT id, student_user_id, weekday, time_local, timezone, meet_url,
+           title_template, horizon_weeks, active
+    FROM student_class_schedules
+    WHERE student_user_id = ${studentUserId}::uuid
+    LIMIT 1
+  `) as ScheduleRow[];
+  return rows[0] ? mapSchedule(rows[0]) : null;
+}
+
 export async function upsertClassSchedule(input: {
   studentUserId: string;
   weekday?: number | null;

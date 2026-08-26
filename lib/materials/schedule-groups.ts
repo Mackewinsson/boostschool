@@ -75,7 +75,7 @@ export function completionStatusLabel(
   return labels.pending;
 }
 
-/** @deprecated Prefer toDatetimeLocalValueInZone from schedule-generate for schedule TZ. */
+/** @deprecated Prefer toDatetimeLocalValueInZone from schedule-time for schedule TZ. */
 export function toDatetimeLocalValue(iso: string | null | undefined): string {
   if (!iso) return "";
   const date = new Date(iso);

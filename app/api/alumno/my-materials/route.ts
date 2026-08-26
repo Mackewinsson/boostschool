@@ -11,6 +11,7 @@ import {
   listMaterialsForStudent,
   setStudentNotes,
 } from "@/lib/materials/repository";
+import { ensureHorizonForStudent } from "@/lib/materials/schedule-generate";
 
 export async function GET() {
   try {
@@ -23,6 +24,7 @@ export async function GET() {
       return NextResponse.json({ error: "No linked student" }, { status: 403 });
     }
 
+    await ensureHorizonForStudent(studentId, "es");
     const materials = await listMaterialsForStudent(studentId);
     const linkedStudentName = await getLinkedStudentName(context);
 

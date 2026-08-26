@@ -70,7 +70,8 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  /** Keys: sessionId | "schedule" | "add-class" | "extra" | "delete:{id}" | form ids */
+  const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const selectedSchedule = useMemo(
     () => schedules.find((item) => item.studentUserId === selectedStudentId),
@@ -90,7 +91,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     [studentMaterials],
   );
 
-  async function loadData() {
+  async function loadData(options?: { ensureStudentId?: string }) {
     const [materialsRes, studentsRes, assignmentsRes, schedulesRes] = await Promise.all([
       fetch("/api/alumno/materials"),
       fetch("/api/alumno/students"),
@@ -102,16 +103,19 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       const data = (await materialsRes.json()) as { materials?: Material[] };
       setMaterials(data.materials ?? []);
     }
+
+    let resolvedSelected = selectedStudentId;
     if (studentsRes.ok) {
       const data = (await studentsRes.json()) as { students?: StudentSummary[] };
       const nextStudents = data.students ?? [];
       setStudents(nextStudents);
-      setSelectedStudentId((current) => {
-        if (current && nextStudents.some((student) => student.id === current)) {
-          return current;
-        }
-        return nextStudents[0]?.id ?? "";
-      });
+      if (
+        !resolvedSelected ||
+        !nextStudents.some((student) => student.id === resolvedSelected)
+      ) {
+        resolvedSelected = nextStudents[0]?.id ?? "";
+      }
+      setSelectedStudentId(resolvedSelected);
     }
     if (assignmentsRes.ok) {
       const data = (await assignmentsRes.json()) as { assignments?: Assignment[] };
@@ -121,7 +125,36 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       const data = (await schedulesRes.json()) as { schedules?: StudentClassSchedule[] };
       setSchedules(data.schedules ?? []);
     }
+
+    const horizonStudentId = options?.ensureStudentId ?? resolvedSelected;
+    if (horizonStudentId) {
+      await fetch("/api/alumno/horizon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentUserId: horizonStudentId }),
+      });
+      const refreshed = await fetch("/api/alumno/materials");
+      if (refreshed.ok) {
+        const data = (await refreshed.json()) as { materials?: Material[] };
+        setMaterials(data.materials ?? []);
+      }
+    }
     setLoading(false);
+  }
+
+  async function selectStudent(studentId: string) {
+    setSelectedStudentId(studentId);
+    if (!studentId) return;
+    await fetch("/api/alumno/horizon", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentUserId: studentId }),
+    });
+    const refreshed = await fetch("/api/alumno/materials");
+    if (refreshed.ok) {
+      const data = (await refreshed.json()) as { materials?: Material[] };
+      setMaterials(data.materials ?? []);
+    }
   }
 
   useEffect(() => {
@@ -159,7 +192,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       return;
     }
 
-    setSaving(true);
+    setBusyKey("create-student");
     try {
       const response = await fetch("/api/alumno/students", {
         method: "POST",
@@ -182,7 +215,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     } catch {
       setError(copy.errorGeneric);
     } finally {
-      setSaving(false);
+      setBusyKey(null);
     }
   }
 
@@ -208,7 +241,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       return;
     }
 
-    setSaving(true);
+    setBusyKey("create-parent");
     try {
       const response = await fetch("/api/alumno/parents", {
         method: "POST",
@@ -232,7 +265,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     } catch {
       setError(copy.errorGeneric);
     } finally {
-      setSaving(false);
+      setBusyKey(null);
     }
   }
 
@@ -245,7 +278,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
   }) {
     setError(null);
     setMessage(null);
-    setSaving(true);
+    setBusyKey("schedule");
     try {
       const response = await fetch("/api/alumno/schedules", {
         method: "POST",
@@ -263,7 +296,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     } catch {
       setError(copy.errorGeneric);
     } finally {
-      setSaving(false);
+      setBusyKey(null);
     }
   }
 
@@ -275,7 +308,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       setError(copy.errorClassDate);
       return;
     }
-    setSaving(true);
+    setBusyKey("add-class");
     try {
       const response = await fetch("/api/alumno/sessions", {
         method: "POST",
@@ -294,7 +327,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     } catch {
       setError(copy.errorGeneric);
     } finally {
-      setSaving(false);
+      setBusyKey(null);
     }
   }
 
@@ -307,7 +340,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     if (!session) return;
     setError(null);
     setMessage(null);
-    setSaving(true);
+    setBusyKey(sessionId);
     try {
       const response = await fetch(`/api/alumno/materials/${sessionId}`, {
         method: "PATCH",
@@ -329,7 +362,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     } catch {
       setError(copy.errorGeneric);
     } finally {
-      setSaving(false);
+      setBusyKey(null);
     }
   }
 
@@ -340,7 +373,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     if (!selectedStudentId) return;
     setError(null);
     setMessage(null);
-    setSaving(true);
+    setBusyKey(sessionId);
     try {
       const response = await fetch("/api/alumno/assignments", {
         method: "PATCH",
@@ -363,7 +396,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     } catch {
       setError(copy.errorGeneric);
     } finally {
-      setSaving(false);
+      setBusyKey(null);
     }
   }
 
@@ -386,7 +419,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       return;
     }
 
-    setSaving(true);
+    setBusyKey("extra");
     try {
       const createRes = await fetch("/api/alumno/materials", {
         method: "POST",
@@ -426,12 +459,12 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     } catch {
       setError(copy.errorGeneric);
     } finally {
-      setSaving(false);
+      setBusyKey(null);
     }
   }
 
   async function handleDeleteExtra(id: string) {
-    setSaving(true);
+    setBusyKey(`delete:${id}`);
     setError(null);
     try {
       await fetch(`/api/alumno/materials/${id}`, { method: "DELETE" });
@@ -439,7 +472,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
     } catch {
       setError(copy.errorGeneric);
     } finally {
-      setSaving(false);
+      setBusyKey(null);
     }
   }
 
@@ -496,7 +529,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
           <div className="md:col-span-3">
             <button
               type="submit"
-              disabled={saving}
+              disabled={busyKey !== null}
               className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] disabled:opacity-70"
             >
               {copy.createStudentButton}
@@ -567,7 +600,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
           <div className="md:col-span-2">
             <button
               type="submit"
-              disabled={saving || students.length === 0}
+              disabled={busyKey !== null || students.length === 0}
               className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] disabled:opacity-70"
             >
               {copy.createParentButton}
@@ -588,7 +621,9 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
               id="selected-student"
               data-testid="selected-student"
               value={selectedStudentId}
-              onChange={(event) => setSelectedStudentId(event.target.value)}
+              onChange={(event) => {
+                void selectStudent(event.target.value);
+              }}
               className="mt-1.5 w-full max-w-md rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg focus:border-accent/50 focus:outline-none"
             >
               {students.map((student) => (
@@ -605,7 +640,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
                 key={`${selectedStudentId}-${selectedSchedule?.weekday ?? "x"}-${selectedSchedule?.timeLocal ?? "none"}-${selectedSchedule?.active ? "1" : "0"}`}
                 studentId={selectedStudentId}
                 schedule={selectedSchedule}
-                saving={saving}
+                saving={busyKey === "schedule"}
                 copy={copy}
                 onSave={handleSaveSchedule}
               />
@@ -614,11 +649,26 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
                 sessions={sessions}
                 locale={locale as "es" | "en" | "pl"}
                 mode="teacher"
-                saving={saving}
+                savingSessionId={
+                  busyKey &&
+                  ![
+                    "schedule",
+                    "add-class",
+                    "extra",
+                    "create-student",
+                    "create-parent",
+                  ].includes(busyKey) &&
+                  !busyKey.startsWith("delete:")
+                    ? busyKey
+                    : null
+                }
+                addingClass={busyKey === "add-class"}
                 timeZone={selectedSchedule?.timezone ?? "Europe/Warsaw"}
                 copy={{
                   classesTitle: copy.classesTableTitle,
                   classesEmpty: copy.classesEmpty,
+                  upcomingTitle: copy.upcomingTitle,
+                  pastTitle: copy.pastTitle,
                   homeworkLabel: copy.homeworkLabel,
                   homeworkPlaceholder: copy.homeworkPlaceholder,
                   saveHomeworkButton: copy.saveHomeworkButton,
@@ -685,7 +735,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
                   </div>
                   <button
                     type="submit"
-                    disabled={saving}
+                    disabled={busyKey !== null}
                     className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] disabled:opacity-70"
                   >
                     {copy.addButton}
@@ -725,7 +775,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
                         <button
                           type="button"
                           onClick={() => void handleDeleteExtra(material.id)}
-                          disabled={saving}
+                          disabled={busyKey !== null}
                           className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-fg-muted transition hover:border-red-400/40 hover:text-red-400 disabled:opacity-60"
                         >
                           {copy.deleteLabel}
