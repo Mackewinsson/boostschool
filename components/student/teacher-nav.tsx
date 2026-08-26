@@ -7,22 +7,30 @@ import { teacherPaths } from "@/lib/teacher/paths";
 
 type TeacherNavProps = {
   copy: StudentContent["teacher"];
+  showUsersNav?: boolean;
 };
 
 const NAV = [
-  { href: teacherPaths.home, key: "navMaterials", exact: true },
-  { href: teacherPaths.leads, key: "navLeads" },
-  { href: teacherPaths.contacts, key: "navContacts" },
-  { href: teacherPaths.emails, key: "navEmails" },
-  { href: teacherPaths.signature, key: "navSignature" },
+  { href: teacherPaths.students, key: "navStudents" as const },
+  { href: teacherPaths.home, key: "navMaterials" as const, exact: true },
+  { href: teacherPaths.leads, key: "navLeads" as const },
+  { href: teacherPaths.contacts, key: "navContacts" as const },
+  { href: teacherPaths.emails, key: "navEmails" as const },
+  { href: teacherPaths.signature, key: "navSignature" as const },
 ] as const;
 
-export function TeacherNav({ copy }: TeacherNavProps) {
+export function TeacherNav({ copy, showUsersNav = false }: TeacherNavProps) {
   const pathname = usePathname();
+  const items = [
+    ...NAV,
+    ...(showUsersNav
+      ? ([{ href: teacherPaths.users, key: "navUsers" as const }] as const)
+      : []),
+  ];
 
   return (
     <nav className="mt-8 flex flex-wrap gap-2" aria-label={copy.navMaterials}>
-      {NAV.map((item) => {
+      {items.map((item) => {
         const isExact = "exact" in item && item.exact;
         const isActive = isExact
           ? pathname === item.href

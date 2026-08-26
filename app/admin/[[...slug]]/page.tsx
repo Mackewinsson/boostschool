@@ -21,6 +21,12 @@ export default async function AdminRedirectPage({ params }: PageProps) {
   if (section === "contacts") {
     redirect(id ? teacherPaths.contact(id) : teacherPaths.contacts);
   }
+  if (section === "usuarios" || section === "users") {
+    redirect(id ? teacherPaths.user(id) : teacherPaths.users);
+  }
+  if (section === "estudiantes" || section === "students") {
+    redirect(teacherPaths.students);
+  }
 
   redirect(teacherPaths.home);
 }

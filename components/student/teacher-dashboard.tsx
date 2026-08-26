@@ -18,6 +18,7 @@ import { StudentSchedulePanel } from "./student-schedule-panel";
 type TeacherDashboardProps = {
   copy: StudentContent["teacher"];
   locale: string;
+  initialStudentId?: string;
 };
 
 function studentDisplayName(student: StudentSummary): string {
@@ -51,12 +52,16 @@ function enrichForStudent(
     });
 }
 
-export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
+export function TeacherDashboard({
+  copy,
+  locale,
+  initialStudentId,
+}: TeacherDashboardProps) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [schedules, setSchedules] = useState<StudentClassSchedule[]>([]);
-  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [selectedStudentId, setSelectedStudentId] = useState(initialStudentId ?? "");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
@@ -104,7 +109,7 @@ export function TeacherDashboard({ copy, locale }: TeacherDashboardProps) {
       setMaterials(data.materials ?? []);
     }
 
-    let resolvedSelected = selectedStudentId;
+    let resolvedSelected = selectedStudentId || initialStudentId || "";
     if (studentsRes.ok) {
       const data = (await studentsRes.json()) as { students?: StudentSummary[] };
       const nextStudents = data.students ?? [];

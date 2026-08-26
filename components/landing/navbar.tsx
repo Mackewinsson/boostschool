@@ -17,7 +17,7 @@ type NavbarProps = {
 };
 
 const navLinkClass =
-  "whitespace-nowrap text-xs font-medium text-fg-muted transition-colors duration-200 hover:text-fg lg:text-sm";
+  "whitespace-nowrap text-xs font-medium text-fg-muted transition-colors duration-200 hover:text-fg xl:text-sm";
 
 function NavLink({
   href,
@@ -58,81 +58,82 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
           : "bg-transparent"
       }`}
     >
-      <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:px-6 lg:gap-3 lg:px-8">
-        {/* Logo */}
-        <Link href="/" className="flex shrink-0 items-center">
-          <span className="text-lg font-extrabold tracking-tight text-fg lg:text-xl">
+      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 lg:px-8">
+        {/* Logo — never shrink under nav */}
+        <Link href="/" className="relative z-10 flex shrink-0 items-center">
+          <span className="text-lg font-extrabold tracking-tight text-fg xl:text-xl">
             {brand.name.split(" ")[0]}
           </span>
-          <span className="ml-1 bg-gradient-to-r from-accent to-accent-alt bg-clip-text text-lg font-extrabold tracking-tight text-transparent lg:ml-1.5 lg:text-xl">
+          <span className="ml-1.5 bg-gradient-to-r from-accent to-accent-alt bg-clip-text text-lg font-extrabold tracking-tight text-transparent xl:text-xl">
             {brand.name.split(" ")[1]}
           </span>
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop section links — only when there is enough width */}
         <nav
           aria-label="Main"
-          className="hidden min-w-0 flex-1 items-center justify-center gap-2 lg:flex xl:gap-3"
+          className="hidden min-w-0 flex-1 items-center justify-center gap-x-3 overflow-hidden px-2 xl:flex 2xl:gap-x-4"
         >
           {nav.links.map((link) => (
             <NavLink key={`${link.href}-${link.label}`} href={link.href} label={link.label} />
           ))}
-          <PortalNavLink
-            signInLabel={ui.signInNavLabel}
-            className={navLinkClass}
-          />
         </nav>
 
-        {/* Desktop controls */}
-        <div className="ml-auto flex shrink-0 items-center gap-2 lg:gap-3">
+        {/* Right cluster — always spaced, never overlapped by nav */}
+        <div className="relative z-10 ml-auto flex shrink-0 items-center gap-2.5 sm:gap-3">
+          <PortalNavLink
+            signInLabel={ui.signInNavLabel}
+            className={`${navLinkClass} hidden sm:inline`}
+          />
           <LanguageToggle locale={locale} ariaLabel={ui.languageToggleAria} />
           <ThemeToggle ariaLabel={ui.themeToggleAria} />
           <a
             href={siteLinks.booking}
-            className="btn-glow hidden items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-4 py-2 text-xs font-semibold text-white transition-all duration-300 hover:scale-[1.03] md:inline-flex lg:px-5 lg:py-2.5 lg:text-sm"
+            className="btn-glow hidden items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-4 py-2 text-xs font-semibold text-white transition-all duration-300 hover:scale-[1.03] md:inline-flex xl:px-5 xl:py-2.5 xl:text-sm"
             {...bookingLinkProps}
           >
             {nav.ctaLabel}
           </a>
-        </div>
 
-        {/* Mobile menu toggle */}
-        <button
-          onClick={() => setOpen(!open)}
-          aria-label={ui.openMenuAria}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-border-strong bg-card text-fg-muted transition hover:bg-card-hover hover:text-fg lg:hidden"
-        >
-          {open ? (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M2 2l12 12M14 2L2 14" />
-            </svg>
-          ) : (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M2 4h12M2 8h12M2 12h12" />
-            </svg>
-          )}
-        </button>
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            aria-label={ui.openMenuAria}
+            aria-expanded={open}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border-strong bg-card text-fg-muted transition hover:bg-card-hover hover:text-fg xl:hidden"
+          >
+            {open ? (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <path d="M2 2l12 12M14 2L2 14" />
+              </svg>
+            ) : (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <path d="M2 4h12M2 8h12M2 12h12" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Compact / mobile menu (below xl) */}
       <div
-        className={`overflow-hidden transition-all duration-300 lg:hidden ${
+        className={`overflow-hidden transition-all duration-300 xl:hidden ${
           open ? "max-h-[min(32rem,85vh)] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
@@ -149,14 +150,14 @@ export function Navbar({ locale, brand, nav, ui }: NavbarProps) {
             ))}
             <PortalNavLink
               signInLabel={ui.signInNavLabel}
-              className="rounded-lg px-3 py-2.5 text-sm font-medium text-fg-soft transition hover:bg-card hover:text-fg"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-fg-soft transition hover:bg-card hover:text-fg sm:hidden"
               onClick={() => setOpen(false)}
             />
           </nav>
           <a
             href={siteLinks.booking}
             onClick={() => setOpen(false)}
-            className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-3 text-sm font-semibold text-white"
+            className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-5 py-3 text-sm font-semibold text-white md:hidden"
             {...bookingLinkProps}
           >
             {nav.ctaLabel}

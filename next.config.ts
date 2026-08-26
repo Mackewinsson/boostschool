@@ -50,6 +50,36 @@ const nextConfig: NextConfig = {
         destination: "/alumno/profesor/contactos/:id",
         permanent: false,
       },
+      {
+        source: "/admin/usuarios",
+        destination: "/alumno/profesor/usuarios",
+        permanent: false,
+      },
+      {
+        source: "/admin/usuarios/:id",
+        destination: "/alumno/profesor/usuarios/:id",
+        permanent: false,
+      },
+      {
+        source: "/admin/users",
+        destination: "/alumno/profesor/usuarios",
+        permanent: false,
+      },
+      {
+        source: "/admin/users/:id",
+        destination: "/alumno/profesor/usuarios/:id",
+        permanent: false,
+      },
+      {
+        source: "/admin/estudiantes",
+        destination: "/alumno/profesor/estudiantes",
+        permanent: false,
+      },
+      {
+        source: "/admin/students",
+        destination: "/alumno/profesor/estudiantes",
+        permanent: false,
+      },
     ];
   },
   images: {

@@ -14,8 +14,20 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function TeacherPage() {
+type PageProps = {
+  searchParams: Promise<{ student?: string }>;
+};
+
+export default async function TeacherPage({ searchParams }: PageProps) {
   const locale = await getLocaleFromCookies();
   const { teacher } = getStudentContent(locale);
-  return <TeacherDashboard copy={teacher} locale={locale} />;
+  const params = await searchParams;
+  const initialStudentId = params.student?.trim() || undefined;
+  return (
+    <TeacherDashboard
+      copy={teacher}
+      locale={locale}
+      initialStudentId={initialStudentId}
+    />
+  );
 }

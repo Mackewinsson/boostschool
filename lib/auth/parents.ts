@@ -40,6 +40,30 @@ export async function linkParentToStudent(
   `;
 }
 
+/** Replace any existing parent→student links with a single student. */
+export async function setParentStudentLink(
+  parentUserId: string,
+  studentUserId: string,
+): Promise<void> {
+  const sql = getDb();
+  await sql`
+    DELETE FROM parent_students
+    WHERE parent_user_id = ${parentUserId}::uuid
+  `;
+  await sql`
+    INSERT INTO parent_students (parent_user_id, student_user_id)
+    VALUES (${parentUserId}::uuid, ${studentUserId}::uuid)
+  `;
+}
+
+export async function clearParentStudentLinks(parentUserId: string): Promise<void> {
+  const sql = getDb();
+  await sql`
+    DELETE FROM parent_students
+    WHERE parent_user_id = ${parentUserId}::uuid
+  `;
+}
+
 export async function createParentForStudent(input: {
   name: string;
   email: string;

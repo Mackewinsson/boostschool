@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { TeacherNav } from "@/components/student/teacher-nav";
-import { canAccessTeacherWorkspace } from "@/lib/admin/auth";
+import { canAccessTeacherWorkspace, isAdminUser } from "@/lib/admin/auth";
 import { getAuthContext } from "@/lib/materials/auth";
 import { getStudentContent } from "@/lib/student-content";
 import { getLocaleFromCookies } from "@/lib/locale-server";
@@ -25,7 +25,7 @@ export default async function TeacherWorkspaceLayout({
 
   return (
     <>
-      <TeacherNav copy={teacher} />
+      <TeacherNav copy={teacher} showUsersNav={isAdminUser(context.role)} />
       {children}
     </>
   );
