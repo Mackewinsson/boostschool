@@ -76,7 +76,7 @@ export const es: StudentContent = {
     classesEmpty: "Todavía no hay clases. Guarda un horario fijo o añade una clase.",
     homeworkLabel: "Deberes de esta clase",
     homeworkPlaceholder: "Pega el ejercicio o escribe libro y página…",
-    saveHomeworkButton: "Guardar deberes",
+    saveHomeworkButton: "Guardar",
     addClassLabel: "Añadir clase",
     addClassButton: "Crear clase",
     extrasTitle: "Materiales extra",

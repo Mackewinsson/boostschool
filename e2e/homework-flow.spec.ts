@@ -39,7 +39,7 @@ test.describe("class table homework flow", () => {
     const homeworkRow = await rowWithDatetimeEnding(page, "T18:00");
 
     await homeworkRow.getByTestId("session-homework").fill(exercise);
-    await homeworkRow.getByRole("button", { name: "Guardar deberes" }).click();
+    await homeworkRow.getByRole("button", { name: "Guardar" }).click();
     await expect(page.getByText("Cambios guardados.")).toBeVisible({
       timeout: 15_000,
     });
@@ -83,7 +83,7 @@ test.describe("class table homework flow", () => {
     await login(page, e2eCreds.parent, /\/alumno\/?$/);
     const parentRow = await rowWithText(page, marker);
     await expect(parentRow.getByTestId("homework-status-badge")).toContainText(/Sí/);
-    await expect(parentRow.getByRole("link", { name: /Unirse a Meet/i })).toBeVisible();
+    await expect(parentRow.getByRole("link", { name: /Unirse a Meet|Meet/i })).toHaveCount(0);
     await expect(parentRow.getByTestId("class-notes")).toHaveCount(0);
     await expect(parentRow.getByTestId("homework-status")).toHaveCount(0);
     await expect(page.getByLabel("Apuntes de clase")).toHaveCount(0);
@@ -109,7 +109,7 @@ test.describe("class table homework flow", () => {
     // Prefer the newly created row: match Meet + empty homework, then write marker
     const newRow = await rowWithMeet(page);
     await newRow.getByTestId("session-homework").fill(exercise);
-    await newRow.getByRole("button", { name: "Guardar deberes" }).click();
+    await newRow.getByRole("button", { name: "Guardar" }).click();
     await expect(page.getByText("Cambios guardados.")).toBeVisible({
       timeout: 15_000,
     });
@@ -132,6 +132,7 @@ test.describe("class table homework flow", () => {
     const parentRow = await rowWithText(page, marker);
     await expect(parentRow.getByTestId("session-homework-text")).toContainText(marker);
     await expect(parentRow.getByTestId("homework-status-badge")).toContainText(/Parcialmente/);
+    await expect(parentRow.getByRole("link", { name: /Unirse a Meet|Meet/i })).toHaveCount(0);
     await expect(parentRow.getByTestId("class-notes")).toHaveCount(0);
   });
 
@@ -147,7 +148,7 @@ test.describe("class table homework flow", () => {
 
     const homeworkRow = await rowWithDatetimeEnding(page, "T18:00");
     await homeworkRow.getByTestId("session-homework").fill(exercise);
-    await homeworkRow.getByRole("button", { name: "Guardar deberes" }).click();
+    await homeworkRow.getByRole("button", { name: "Guardar" }).click();
     await expect(page.getByText("Cambios guardados.")).toBeVisible({
       timeout: 15_000,
     });
@@ -188,7 +189,7 @@ test.describe("class table homework flow", () => {
     const row = await rowWithMeet(page);
     await row.getByTestId("session-datetime").fill(when);
     await row.getByTestId("session-homework").fill(exercise);
-    await row.getByRole("button", { name: "Guardar deberes" }).click();
+    await row.getByRole("button", { name: "Guardar" }).click();
     await expect(page.getByText("Cambios guardados.")).toBeVisible({
       timeout: 15_000,
     });

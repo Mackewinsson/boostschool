@@ -145,7 +145,7 @@ export function MaterialCard({
         <div className="flex-1" />
       )}
 
-      {material.url || material.meetUrl ? (
+      {material.url || (material.meetUrl && !readOnly) ? (
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">
           {material.url ? (
             <a
@@ -157,7 +157,7 @@ export function MaterialCard({
               <ExternalLink size={16} aria-hidden="true" />
             </a>
           ) : null}
-          {material.meetUrl ? (
+          {material.meetUrl && !readOnly ? (
             <a
               href={material.meetUrl}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent"

@@ -115,7 +115,7 @@ export async function saveWeeklySchedule(
     timeout: 15_000,
   });
 
-  // Confirm the table reflects the weekly slot (not a stale pre-reload render).
+  // At least one class row should show the new weekly time (adhoc one-offs may differ).
   await expect
     .poll(
       async () => {
@@ -124,10 +124,7 @@ export async function saveWeeklySchedule(
           .evaluateAll((inputs) =>
             inputs.map((el) => (el as HTMLInputElement).value).filter(Boolean),
           );
-        return (
-          values.length > 0 &&
-          values.every((value) => value.endsWith(`T${input.timeLocal}`))
-        );
+        return values.some((value) => value.endsWith(`T${input.timeLocal}`));
       },
       { timeout: 15_000 },
     )

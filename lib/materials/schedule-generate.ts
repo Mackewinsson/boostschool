@@ -243,7 +243,14 @@ export async function realignFutureSessionsForSchedule(
   const empty = future.filter((row) => !row.description?.trim());
   const occurrences = upcomingOccurrences(schedule);
 
-  // Detach everything so unique (schedule_id, scheduled_at) cannot block moves
+  // Detach this student's future rows and any leftover weekly shells for the
+  // schedule so unique (schedule_id, scheduled_at) cannot block reattach.
+  await sql`
+    UPDATE materials
+    SET schedule_id = NULL
+    WHERE schedule_id = ${schedule.id}::uuid
+      AND scheduled_at >= now()
+  `;
   for (const row of future) {
     await sql`
       UPDATE materials
@@ -264,6 +271,14 @@ export async function realignFutureSessionsForSchedule(
     const scheduledAt = occurrence.toISOString();
     const dateLabel = formatTitleDate(occurrence, locale, schedule.timezone);
     const title = `${schedule.titleTemplate} — ${dateLabel}`;
+    // Drop empty shells that still claim this slot (orphans / races)
+    await sql`
+      DELETE FROM materials
+      WHERE schedule_id = ${schedule.id}::uuid
+        AND scheduled_at = ${scheduledAt}::timestamptz
+        AND id <> ${row.id}::uuid
+        AND (description IS NULL OR btrim(description) = '')
+    `;
     await sql`
       UPDATE materials
       SET

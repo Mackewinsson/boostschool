@@ -76,7 +76,7 @@ export const pl: StudentContent = {
     classesEmpty: "Brak zajęć. Zapisz stały harmonogram albo dodaj lekcję.",
     homeworkLabel: "Zadania do tych zajęć",
     homeworkPlaceholder: "Wklej ćwiczenie albo podręcznik i stronę…",
-    saveHomeworkButton: "Zapisz zadania",
+    saveHomeworkButton: "Zapisz",
     addClassLabel: "Dodaj zajęcia",
     addClassButton: "Utwórz zajęcia",
     extrasTitle: "Materiały dodatkowe",

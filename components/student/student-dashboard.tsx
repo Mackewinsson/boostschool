@@ -105,6 +105,7 @@ export function StudentDashboard({ copy, locale }: StudentDashboardProps) {
             locale={locale}
             mode="readonly"
             allowNotes={!readOnly}
+            showMeetLink={!readOnly}
             onSaveNotes={readOnly ? undefined : handleSaveNotes}
             copy={{
               classesTitle: copy.classesTitle,

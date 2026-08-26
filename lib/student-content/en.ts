@@ -76,7 +76,7 @@ export const en: StudentContent = {
     classesEmpty: "No classes yet. Save a fixed schedule or add a class.",
     homeworkLabel: "Homework for this class",
     homeworkPlaceholder: "Paste the exercise or note book and page…",
-    saveHomeworkButton: "Save homework",
+    saveHomeworkButton: "Save",
     addClassLabel: "Add class",
     addClassButton: "Create class",
     extrasTitle: "Extra materials",

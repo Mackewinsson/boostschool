@@ -47,6 +47,8 @@ type ClassSessionTableProps = {
   onAddClass?: (scheduledAt: string) => Promise<void>;
   onSaveNotes?: (sessionId: string, notes: string) => Promise<void>;
   allowNotes?: boolean;
+  /** Parents should not get the Meet join link. */
+  showMeetLink?: boolean;
 };
 
 const DEFAULT_TZ = "Europe/Warsaw";
@@ -63,6 +65,7 @@ export function ClassSessionTable({
   onAddClass,
   onSaveNotes,
   allowNotes = false,
+  showMeetLink = true,
 }: ClassSessionTableProps) {
   const [newClassAt, setNewClassAt] = useState("");
 
@@ -119,6 +122,7 @@ export function ClassSessionTable({
               onStatusChange={onStatusChange}
               onSaveNotes={onSaveNotes}
               allowNotes={allowNotes}
+              showMeetLink={showMeetLink}
             />
           ))}
         </ul>
@@ -138,6 +142,7 @@ function SessionRow({
   onStatusChange,
   onSaveNotes,
   allowNotes,
+  showMeetLink,
 }: {
   session: Material;
   locale: Locale;
@@ -149,6 +154,7 @@ function SessionRow({
   onStatusChange?: ClassSessionTableProps["onStatusChange"];
   onSaveNotes?: ClassSessionTableProps["onSaveNotes"];
   allowNotes: boolean;
+  showMeetLink: boolean;
 }) {
   const [homework, setHomework] = useState(session.description ?? "");
   const [scheduledAt, setScheduledAt] = useState(
@@ -201,7 +207,7 @@ function SessionRow({
           ) : (
             <p className="text-base font-semibold text-accent">{dateLabel}</p>
           )}
-          {session.meetUrl ? (
+          {showMeetLink && session.meetUrl ? (
             <a
               href={session.meetUrl}
               className="mt-2 inline-flex items-center gap-1.5 text-sm text-fg-muted transition hover:text-accent"
