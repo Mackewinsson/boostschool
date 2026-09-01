@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Inbox, Mail, Users } from "lucide-react";
+import { CalendarDays, ChartNoAxesCombined, Inbox, Mail, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { StudentContent } from "@/lib/student-content/types";
 import { teacherPaths } from "@/lib/teacher/paths";
@@ -23,11 +23,15 @@ type SubItem = {
 };
 
 type NavGroup = {
-  id: "classes" | "people" | "crm" | "mail";
+  id: "classes" | "analytics" | "people" | "crm" | "mail";
   href: string;
   labelKey: keyof Pick<
     TeacherCopy,
-    "navGroupClasses" | "navGroupPeople" | "navGroupCrm" | "navGroupMail"
+    | "navGroupClasses"
+    | "navGroupAnalytics"
+    | "navGroupPeople"
+    | "navGroupCrm"
+    | "navGroupMail"
   >;
   icon: LucideIcon;
   items: SubItem[];
@@ -39,6 +43,13 @@ const GROUPS: NavGroup[] = [
     href: teacherPaths.home,
     labelKey: "navGroupClasses",
     icon: CalendarDays,
+    items: [],
+  },
+  {
+    id: "analytics",
+    href: teacherPaths.analytics,
+    labelKey: "navGroupAnalytics",
+    icon: ChartNoAxesCombined,
     items: [],
   },
   {
@@ -78,8 +89,8 @@ function isItemActive(pathname: string, href: string): boolean {
 }
 
 function isGroupActive(pathname: string, group: NavGroup): boolean {
-  if (group.id === "classes") {
-    return pathname === teacherPaths.home;
+  if (group.items.length === 0) {
+    return pathname === group.href;
   }
   return group.items.some((item) => isItemActive(pathname, item.href));
 }

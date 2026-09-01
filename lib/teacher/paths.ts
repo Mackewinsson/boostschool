@@ -9,4 +9,5 @@ export const teacherPaths = {
   signature: "/alumno/profesor/firma",
   users: "/alumno/profesor/usuarios",
   user: (id: string) => `/alumno/profesor/usuarios/${id}`,
+  analytics: "/alumno/profesor/resumen",
 } as const;
