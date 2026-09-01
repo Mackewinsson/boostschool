@@ -111,6 +111,9 @@ export type StudentContent = {
     scheduleModeAdhoc: string;
     scheduleWeekdayLabel: string;
     scheduleTimeLabel: string;
+    scheduleHorizonLabel: string;
+    scheduleHorizonWeeks: string;
+    scheduleHorizonMonths: string;
     scheduleMeetLabel: string;
     scheduleSaveLabel: string;
     scheduleActiveLabel: string;

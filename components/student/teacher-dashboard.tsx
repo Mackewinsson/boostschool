@@ -183,6 +183,7 @@ export function TeacherDashboard({
     weekday: number | null;
     timeLocal: string | null;
     meetUrl: string;
+    horizonWeeks: number;
     active: boolean;
   }) {
     setError(null);
@@ -460,7 +461,7 @@ export function TeacherDashboard({
           {selectedStudentId && dashTab === "classes" ? (
             <>
               <StudentSchedulePanel
-                key={`${selectedStudentId}-${selectedSchedule?.weekday ?? "x"}-${selectedSchedule?.timeLocal ?? "none"}-${selectedSchedule?.active ? "1" : "0"}`}
+                key={`${selectedStudentId}-${selectedSchedule?.weekday ?? "x"}-${selectedSchedule?.timeLocal ?? "none"}-${selectedSchedule?.horizonWeeks ?? "h"}-${selectedSchedule?.active ? "1" : "0"}`}
                 studentId={selectedStudentId}
                 schedule={selectedSchedule}
                 saving={busyKey === "schedule"}

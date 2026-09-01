@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/locale";
 import { getDb } from "@/lib/db/client";
+import { parseHorizonWeeks } from "./schedule-horizon";
 import type {
   Assignment,
   CompletionStatus,
@@ -316,7 +317,7 @@ export async function upsertClassSchedule(input: {
   const sql = getDb();
   const timezone = input.timezone?.trim() || "Europe/Warsaw";
   const titleTemplate = input.titleTemplate?.trim() || "Clase";
-  const horizonWeeks = input.horizonWeeks ?? 6;
+  const horizonWeeks = parseHorizonWeeks(input.horizonWeeks);
   const active = input.active ?? true;
   const meetUrl = input.meetUrl?.trim() || null;
   const weekday = input.weekday ?? null;
