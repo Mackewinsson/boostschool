@@ -17,6 +17,20 @@ export type StudentContent = {
     signInError: string;
     logoutLabel: string;
     languageToggleAria: string;
+    accountNavLabel: string;
+    accountTitle: string;
+    accountHint: string;
+    accountCurrentLabel: string;
+    accountNewLabel: string;
+    accountConfirmLabel: string;
+    accountSaveButton: string;
+    accountMinHint: string;
+    accountUpdated: string;
+    accountErrorCurrent: string;
+    accountErrorShort: string;
+    accountErrorMismatch: string;
+    accountErrorSame: string;
+    accountErrorGeneric: string;
   };
   student: {
     title: string;
