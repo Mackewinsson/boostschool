@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { StudentContent } from "@/lib/student-content/types";
+import { teacherPaths } from "@/lib/teacher/paths";
 import { detectMaterialKind } from "@/lib/materials/material-kind";
 import { splitSessionsAndExtras } from "@/lib/materials/schedule-groups";
 import type {
@@ -19,6 +21,7 @@ type TeacherDashboardProps = {
   copy: StudentContent["teacher"];
   locale: string;
   initialStudentId?: string;
+  accountsHref?: string;
 };
 
 function studentDisplayName(student: StudentSummary): string {
@@ -56,6 +59,7 @@ export function TeacherDashboard({
   copy,
   locale,
   initialStudentId,
+  accountsHref = teacherPaths.students,
 }: TeacherDashboardProps) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [students, setStudents] = useState<StudentSummary[]>([]);
@@ -65,21 +69,12 @@ export function TeacherDashboard({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
-  const [studentName, setStudentName] = useState("");
-  const [studentEmail, setStudentEmail] = useState("");
-  const [studentPassword, setStudentPassword] = useState("");
-  const [parentName, setParentName] = useState("");
-  const [parentEmail, setParentEmail] = useState("");
-  const [parentPassword, setParentPassword] = useState("");
-  const [parentStudentId, setParentStudentId] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   /** Keys: sessionId | "schedule" | "add-class" | "extra" | "delete:{id}" | form ids */
   const [busyKey, setBusyKey] = useState<string | null>(null);
-  const [dashTab, setDashTab] = useState<"classes" | "extras" | "accounts">(
-    "classes",
-  );
+  const [dashTab, setDashTab] = useState<"classes" | "extras">("classes");
 
   const selectedSchedule = useMemo(
     () => schedules.find((item) => item.studentUserId === selectedStudentId),
@@ -181,101 +176,6 @@ export function TeacherDashboard({
       cancelled = true;
     };
   }, []);
-
-  async function handleCreateStudent(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setMessage(null);
-
-    if (studentName.trim().length < 2) {
-      setError(copy.errorStudentName);
-      return;
-    }
-    if (!studentEmail.trim() || !studentEmail.includes("@")) {
-      setError(copy.errorStudentEmail);
-      return;
-    }
-    if (studentPassword.length < 8) {
-      setError(copy.errorStudentPassword);
-      return;
-    }
-
-    setBusyKey("create-student");
-    try {
-      const response = await fetch("/api/alumno/students", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: studentName,
-          email: studentEmail,
-          password: studentPassword,
-        }),
-      });
-      if (!response.ok) {
-        setError(copy.errorGeneric);
-        return;
-      }
-      setStudentName("");
-      setStudentEmail("");
-      setStudentPassword("");
-      setMessage(copy.successStudentCreated);
-      await loadData();
-    } catch {
-      setError(copy.errorGeneric);
-    } finally {
-      setBusyKey(null);
-    }
-  }
-
-  async function handleCreateParent(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setMessage(null);
-
-    if (parentName.trim().length < 2) {
-      setError(copy.errorParentName);
-      return;
-    }
-    if (!parentEmail.trim() || !parentEmail.includes("@")) {
-      setError(copy.errorParentEmail);
-      return;
-    }
-    if (parentPassword.length < 8) {
-      setError(copy.errorParentPassword);
-      return;
-    }
-    if (!parentStudentId) {
-      setError(copy.errorParentStudent);
-      return;
-    }
-
-    setBusyKey("create-parent");
-    try {
-      const response = await fetch("/api/alumno/parents", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: parentName,
-          email: parentEmail,
-          password: parentPassword,
-          studentId: parentStudentId,
-        }),
-      });
-      if (!response.ok) {
-        setError(copy.errorGeneric);
-        return;
-      }
-      setParentName("");
-      setParentEmail("");
-      setParentPassword("");
-      setParentStudentId("");
-      setMessage(copy.successParentCreated);
-    } catch {
-      setError(copy.errorGeneric);
-    } finally {
-      setBusyKey(null);
-    }
-  }
 
   async function handleSaveSchedule(input: {
     studentUserId: string;
@@ -524,149 +424,15 @@ export function TeacherDashboard({
         >
           {copy.extrasTitle}
         </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={dashTab === "accounts"}
-          className={
-            dashTab === "accounts"
-              ? "admin-nav__chip admin-nav__chip--active"
-              : "admin-nav__chip"
-          }
-          onClick={() => setDashTab("accounts")}
-        >
-          {copy.dashTabAccounts}
-        </button>
       </div>
 
-      {dashTab === "accounts" ? (
-      <>
-      <section className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
-        <h2 className="text-xl font-bold text-fg">{copy.createStudentTitle}</h2>
-        <form onSubmit={handleCreateStudent} className="mt-5 grid gap-4 md:grid-cols-3">
-          <div>
-            <label htmlFor="student-name" className="block text-sm font-medium text-fg">
-              {copy.studentNameLabel}
-            </label>
-            <input
-              id="student-name"
-              value={studentName}
-              onChange={(event) => setStudentName(event.target.value)}
-              placeholder={copy.studentNamePlaceholder}
-              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-            />
-          </div>
-          <div>
-            <label htmlFor="student-email" className="block text-sm font-medium text-fg">
-              {copy.studentEmailLabel}
-            </label>
-            <input
-              id="student-email"
-              type="email"
-              value={studentEmail}
-              onChange={(event) => setStudentEmail(event.target.value)}
-              placeholder={copy.studentEmailPlaceholder}
-              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-            />
-          </div>
-          <div>
-            <label htmlFor="student-password" className="block text-sm font-medium text-fg">
-              {copy.studentPasswordLabel}
-            </label>
-            <input
-              id="student-password"
-              type="password"
-              value={studentPassword}
-              onChange={(event) => setStudentPassword(event.target.value)}
-              placeholder={copy.studentPasswordPlaceholder}
-              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-            />
-          </div>
-          <div className="md:col-span-3">
-            <button
-              type="submit"
-              disabled={busyKey !== null}
-              className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] disabled:opacity-70"
-            >
-              {copy.createStudentButton}
-            </button>
-          </div>
-        </form>
-      </section>
-
-      <section className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
-        <h2 className="text-xl font-bold text-fg">{copy.createParentTitle}</h2>
-        <form onSubmit={handleCreateParent} className="mt-5 grid gap-4 md:grid-cols-2">
-          <div>
-            <label htmlFor="parent-name" className="block text-sm font-medium text-fg">
-              {copy.parentNameLabel}
-            </label>
-            <input
-              id="parent-name"
-              value={parentName}
-              onChange={(event) => setParentName(event.target.value)}
-              placeholder={copy.parentNamePlaceholder}
-              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-            />
-          </div>
-          <div>
-            <label htmlFor="parent-email" className="block text-sm font-medium text-fg">
-              {copy.parentEmailLabel}
-            </label>
-            <input
-              id="parent-email"
-              type="email"
-              value={parentEmail}
-              onChange={(event) => setParentEmail(event.target.value)}
-              placeholder={copy.parentEmailPlaceholder}
-              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-            />
-          </div>
-          <div>
-            <label htmlFor="parent-password" className="block text-sm font-medium text-fg">
-              {copy.parentPasswordLabel}
-            </label>
-            <input
-              id="parent-password"
-              type="password"
-              value={parentPassword}
-              onChange={(event) => setParentPassword(event.target.value)}
-              placeholder={copy.parentPasswordPlaceholder}
-              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-            />
-          </div>
-          <div>
-            <label htmlFor="parent-student" className="block text-sm font-medium text-fg">
-              {copy.parentStudentLabel}
-            </label>
-            <select
-              id="parent-student"
-              value={parentStudentId}
-              onChange={(event) => setParentStudentId(event.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-4 py-2.5 text-sm text-fg focus:border-accent/50 focus:outline-none"
-            >
-              <option value="">{copy.parentStudentLabel}</option>
-              {students.map((student) => (
-                <option key={student.id} value={student.id}>
-                  {studentDisplayName(student)}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="md:col-span-2">
-            <button
-              type="submit"
-              disabled={busyKey !== null || students.length === 0}
-              className="btn-glow inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] disabled:opacity-70"
-            >
-              {copy.createParentButton}
-            </button>
-          </div>
-        </form>
-      </section>
-      </>
-      ) : students.length === 0 ? (
-        <p className="mt-10 text-sm text-fg-muted">{copy.noStudents}</p>
+      {students.length === 0 ? (
+        <p className="mt-10 text-sm text-fg-muted">
+          {copy.noStudents}{" "}
+          <Link href={accountsHref} className="font-medium text-accent hover:underline">
+            {copy.studentsCreateCta}
+          </Link>
+        </p>
       ) : (
         <>
           <section className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
@@ -707,13 +473,7 @@ export function TeacherDashboard({
                 mode="teacher"
                 savingSessionId={
                   busyKey &&
-                  ![
-                    "schedule",
-                    "add-class",
-                    "extra",
-                    "create-student",
-                    "create-parent",
-                  ].includes(busyKey) &&
+                  !["schedule", "add-class", "extra"].includes(busyKey) &&
                   !busyKey.startsWith("delete:")
                     ? busyKey
                     : null

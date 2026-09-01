@@ -95,7 +95,7 @@ export const en: StudentContent = {
     statusDone: "Yes",
     statusNotDone: "No",
     statusPartial: "Partially",
-    noStudents: "No students yet. Create them above to get started.",
+    noStudents: "No students yet. Create them under People.",
     scheduleSectionTitle: "Schedule and Meet",
     scheduleSectionHint:
       "Fixed schedule: saving updates all upcoming classes for this student to that day and time (homework is kept). Class by class: save Meet only and add each date. The link stays the same.",
@@ -162,7 +162,7 @@ export const en: StudentContent = {
     navGroupPeople: "People",
     navGroupCrm: "CRM",
     navGroupMail: "Mail",
-    dashTabAccounts: "New accounts",
+    studentsCreateCta: "Create accounts",
     usersTitle: "Users",
     usersSubtitle: "Create and manage admin, teacher, student, and parent accounts.",
     usersEmpty: "No users yet.",

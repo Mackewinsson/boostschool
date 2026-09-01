@@ -95,7 +95,7 @@ export const pl: StudentContent = {
     statusDone: "Tak",
     statusNotDone: "Nie",
     statusPartial: "Częściowo",
-    noStudents: "Nie ma jeszcze uczniów. Utwórz ich powyżej.",
+    noStudents: "Nie ma jeszcze uczniów. Utwórz ich w Osoby.",
     scheduleSectionTitle: "Harmonogram i Meet",
     scheduleSectionHint:
       "Stały termin: zapis aktualizuje wszystkie nadchodzące zajęcia ucznia do tego dnia i godziny (zadania zostają). Z lekcji na lekcję: zapisujesz Meet i dodajesz każdą datę. Link jest zawsze ten sam.",
@@ -162,7 +162,7 @@ export const pl: StudentContent = {
     navGroupPeople: "Osoby",
     navGroupCrm: "CRM",
     navGroupMail: "Poczta",
-    dashTabAccounts: "Nowe konta",
+    studentsCreateCta: "Utworz konta",
     usersTitle: "Uzytkownicy",
     usersSubtitle: "Tworz i zarzadzaj kontami admina, nauczyciela, ucznia i rodzica.",
     usersEmpty: "Brak uzytkownikow.",

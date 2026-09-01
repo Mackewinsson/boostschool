@@ -1,5 +1,9 @@
 import Link from "next/link";
+import { AdminButton } from "@/components/admin/admin-button";
+import { CreateStudentParentPanel } from "@/components/admin/create-student-parent-panel";
+import { isAdminUser } from "@/lib/admin/auth";
 import { isDatabaseConfigured } from "@/lib/db/client";
+import { getAuthContext } from "@/lib/materials/auth";
 import { getLocaleFromCookies } from "@/lib/locale-server";
 import { listStudentRoster } from "@/lib/materials/student-roster";
 import { getStudentContent } from "@/lib/student-content";
@@ -39,6 +43,8 @@ function formatSchedule(
 export default async function TeacherStudentsPage() {
   const locale = await getLocaleFromCookies();
   const { teacher: copy } = getStudentContent(locale);
+  const context = await getAuthContext();
+  const isAdmin = isAdminUser(context?.role);
 
   if (!isDatabaseConfigured()) {
     return (
@@ -55,10 +61,28 @@ export default async function TeacherStudentsPage() {
 
   return (
     <div>
-      <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
-        {copy.studentsTitle}
-      </h1>
-      <p className="mt-3 max-w-3xl text-base text-fg-muted">{copy.studentsSubtitle}</p>
+      <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+            {copy.studentsTitle}
+          </h1>
+          <p className="mt-3 max-w-3xl text-base text-fg-muted">{copy.studentsSubtitle}</p>
+        </div>
+        {isAdmin ? (
+          <AdminButton href={teacherPaths.users}>{copy.studentsCreateCta}</AdminButton>
+        ) : null}
+      </div>
+
+      {!isAdmin ? (
+        <CreateStudentParentPanel
+          copy={copy}
+          students={students.map((student) => ({
+            id: student.id,
+            name: student.name,
+            email: student.email,
+          }))}
+        />
+      ) : null}
 
       <div className="admin-card admin-card--flush mt-8">
         <table className="admin-table">
