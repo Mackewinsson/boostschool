@@ -94,6 +94,7 @@ export async function createParentForStudent(input: {
   password: string;
   studentId: string;
 }) {
+  await assertLinkableStudent(input.studentId);
   const parent = await createUser({
     name: input.name,
     email: input.email,

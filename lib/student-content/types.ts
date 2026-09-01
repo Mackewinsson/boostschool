@@ -164,7 +164,7 @@ export type StudentContent = {
     navGroupPeople: string;
     navGroupCrm: string;
     navGroupMail: string;
-    dashTabAccounts: string;
+    studentsCreateCta: string;
     usersTitle: string;
     usersSubtitle: string;
     usersEmpty: string;
