@@ -174,6 +174,7 @@ export type StudentContent = {
     usersPasswordUpdated: string;
     usersActiveLabel: string;
     usersStudentLinkLabel: string;
+    usersStudentLinkEmpty: string;
     usersCreateButton: string;
     usersSaveButton: string;
     usersDeactivateButton: string;

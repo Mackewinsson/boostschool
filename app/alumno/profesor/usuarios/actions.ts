@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdminUser } from "@/lib/admin/auth";
 import {
+  assertLinkableStudent,
+  clearLinksForStudent,
   clearParentStudentLinks,
   setParentStudentLink,
 } from "@/lib/auth/parents";
@@ -93,8 +95,12 @@ export async function createManagedUserAction(formData: FormData) {
     redirect(`${teacherPaths.users}?error=generic`);
   }
 
-  if (role === "parent" && !studentId) {
-    redirect(`${teacherPaths.users}?error=parentStudent`);
+  if (role === "parent") {
+    try {
+      await assertLinkableStudent(studentId);
+    } catch {
+      redirect(`${teacherPaths.users}?error=parentStudent`);
+    }
   }
 
   const existing = await findUserByEmail(email);
@@ -136,8 +142,12 @@ export async function updateManagedUserAction(formData: FormData) {
     redirect(`${teacherPaths.user(id || "")}?error=generic`);
   }
 
-  if (role === "parent" && !studentId) {
-    redirect(`${teacherPaths.user(id)}?error=parentStudent`);
+  if (role === "parent") {
+    try {
+      await assertLinkableStudent(studentId, id);
+    } catch {
+      redirect(`${teacherPaths.user(id)}?error=parentStudent`);
+    }
   }
 
   try {
@@ -154,6 +164,10 @@ export async function updateManagedUserAction(formData: FormData) {
       await setParentStudentLink(id, studentId);
     } else {
       await clearParentStudentLinks(id);
+    }
+
+    if (role !== "student") {
+      await clearLinksForStudent(id);
     }
   } catch (error) {
     redirect(`${teacherPaths.user(id)}?error=${mapUserError(error)}`);

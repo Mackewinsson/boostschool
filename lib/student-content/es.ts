@@ -180,6 +180,7 @@ export const es: StudentContent = {
     usersPasswordUpdated: "Contraseña actualizada.",
     usersActiveLabel: "Cuenta activa",
     usersStudentLinkLabel: "Alumno vinculado",
+    usersStudentLinkEmpty: "Crea un alumno primero para poder vincular al padre/madre.",
     usersCreateButton: "Crear usuario",
     usersSaveButton: "Guardar cambios",
     usersDeactivateButton: "Desactivar",

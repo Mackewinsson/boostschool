@@ -9,6 +9,7 @@ import { getAuthContext } from "@/lib/materials/auth";
 import { getLocaleFromCookies } from "@/lib/locale-server";
 import { getStudentContent } from "@/lib/student-content";
 import { teacherPaths } from "@/lib/teacher/paths";
+import { UserRoleFields } from "@/components/admin/user-role-fields";
 import { createManagedUserAction } from "./actions";
 import { managedUserFormError } from "./form-errors";
 
@@ -172,17 +173,13 @@ export default async function TeacherUsersPage({ searchParams }: PageProps) {
                 required
               />
             </div>
-            <div className="admin-field">
-              <label className="admin-label" htmlFor="user-role">
-                {copy.usersRoleLabel}
-              </label>
-              <select id="user-role" className="admin-input" name="role" defaultValue="student">
-                <option value="admin">{copy.usersRoleAdmin}</option>
-                <option value="teacher">{copy.usersRoleTeacher}</option>
-                <option value="student">{copy.usersRoleStudent}</option>
-                <option value="parent">{copy.usersRoleParent}</option>
-              </select>
-            </div>
+            <UserRoleFields
+              copy={copy}
+              roleFieldId="user-role"
+              studentFieldId="user-student"
+              defaultRole="student"
+              students={students}
+            />
             <div className="admin-field">
               <label className="admin-label" htmlFor="user-password">
                 {copy.usersPasswordLabel}
@@ -199,19 +196,6 @@ export default async function TeacherUsersPage({ searchParams }: PageProps) {
               <p className="admin-muted" style={{ margin: "0.35rem 0 0" }}>
                 {copy.usersPasswordHint}
               </p>
-            </div>
-            <div className="admin-field">
-              <label className="admin-label" htmlFor="user-student">
-                {copy.usersStudentLinkLabel}
-              </label>
-              <select id="user-student" className="admin-input" name="studentId" defaultValue="">
-                <option value="">—</option>
-                {students.map((student) => (
-                  <option key={student.id} value={student.id}>
-                    {student.name} ({student.email})
-                  </option>
-                ))}
-              </select>
             </div>
             <label className="admin-check">
               <input type="checkbox" name="active" defaultChecked />

@@ -1,6 +1,31 @@
 import { expect, test } from "@playwright/test";
 import { e2eCreds, login, logout, uniqueMarker } from "./helpers";
 
+test.describe("admin user student link", () => {
+  test("vincular alumno only appears for parent role", async ({ page }) => {
+    await login(page, e2eCreds.admin, /\/alumno\/profesor/);
+    await page.goto("/alumno/profesor/usuarios");
+
+    const createForm = page.getByTestId("user-create-form");
+    const studentLink = createForm.getByTestId("user-student-link");
+
+    await expect(createForm.locator('select[name="role"]')).toHaveValue("student");
+    await expect(studentLink).toHaveCount(0);
+
+    await createForm.locator('select[name="role"]').selectOption("teacher");
+    await expect(studentLink).toHaveCount(0);
+
+    await createForm.locator('select[name="role"]').selectOption("admin");
+    await expect(studentLink).toHaveCount(0);
+
+    await createForm.locator('select[name="role"]').selectOption("parent");
+    await expect(studentLink).toBeVisible();
+
+    await createForm.locator('select[name="role"]').selectOption("student");
+    await expect(studentLink).toHaveCount(0);
+  });
+});
+
 test.describe("admin user password", () => {
   test("admin can set a new password and the user can sign in with it", async ({
     page,
