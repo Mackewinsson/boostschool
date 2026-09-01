@@ -1,5 +1,5 @@
 import { getDb } from "@/lib/db/client";
-import { createUser } from "./users";
+import { createUser, findUserById } from "./users";
 
 type ParentStudentRow = {
   student_user_id: string;
@@ -37,6 +37,30 @@ export async function linkParentToStudent(
     INSERT INTO parent_students (parent_user_id, student_user_id)
     VALUES (${parentUserId}::uuid, ${studentUserId}::uuid)
     ON CONFLICT (parent_user_id, student_user_id) DO NOTHING
+  `;
+}
+
+export async function assertLinkableStudent(
+  studentUserId: string,
+  parentUserId?: string,
+): Promise<void> {
+  if (!studentUserId) {
+    throw new Error("PARENT_STUDENT_REQUIRED");
+  }
+  if (parentUserId && parentUserId === studentUserId) {
+    throw new Error("PARENT_STUDENT_REQUIRED");
+  }
+  const student = await findUserById(studentUserId);
+  if (!student || student.role !== "student") {
+    throw new Error("PARENT_STUDENT_REQUIRED");
+  }
+}
+
+export async function clearLinksForStudent(studentUserId: string): Promise<void> {
+  const sql = getDb();
+  await sql`
+    DELETE FROM parent_students
+    WHERE student_user_id = ${studentUserId}::uuid
   `;
 }
 

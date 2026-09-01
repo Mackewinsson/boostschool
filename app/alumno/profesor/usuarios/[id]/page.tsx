@@ -2,7 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminButton } from "@/components/admin/admin-button";
 import { isAdminUser, requireAdminUser } from "@/lib/admin/auth";
-import { getManagedUserById, listStudents } from "@/lib/auth/users";
+import { UserRoleFields } from "@/components/admin/user-role-fields";
+import { findUserById, getManagedUserById, listStudents } from "@/lib/auth/users";
+import type { StudentSummary } from "@/lib/materials/types";
 import { isDatabaseConfigured } from "@/lib/db/client";
 import { getAuthContext } from "@/lib/materials/auth";
 import { getLocaleFromCookies } from "@/lib/locale-server";
@@ -57,6 +59,26 @@ export default async function TeacherUserDetailPage({
 
   if (!user) {
     redirect(teacherPaths.users);
+  }
+
+  const studentOptions: StudentSummary[] = students.filter(
+    (student) => student.id !== user.id,
+  );
+  if (
+    user.linkedStudentId &&
+    user.linkedStudentId !== user.id &&
+    !studentOptions.some((student) => student.id === user.linkedStudentId)
+  ) {
+    const linked = await findUserById(user.linkedStudentId);
+    if (linked) {
+      studentOptions.unshift({
+        id: linked.id,
+        email: linked.email,
+        name: linked.name,
+        firstName: null,
+        lastName: null,
+      });
+    }
   }
 
   const isSelf = user.id === context.userId;
@@ -123,42 +145,16 @@ export default async function TeacherUserDetailPage({
               defaultValue={user.email}
             />
           </div>
-          <div className="admin-field">
-            <label className="admin-label" htmlFor="edit-role">
-              {copy.usersRoleLabel}
-            </label>
-            <select
-              id="edit-role"
-              className="admin-input"
-              name="role"
-              defaultValue={user.role}
-              disabled={isSelf}
-            >
-              <option value="admin">{copy.usersRoleAdmin}</option>
-              <option value="teacher">{copy.usersRoleTeacher}</option>
-              <option value="student">{copy.usersRoleStudent}</option>
-              <option value="parent">{copy.usersRoleParent}</option>
-            </select>
-            {isSelf ? <input type="hidden" name="role" value="admin" /> : null}
-          </div>
-          <div className="admin-field">
-            <label className="admin-label" htmlFor="edit-student">
-              {copy.usersStudentLinkLabel}
-            </label>
-            <select
-              id="edit-student"
-              className="admin-input"
-              name="studentId"
-              defaultValue={user.linkedStudentId ?? ""}
-            >
-              <option value="">—</option>
-              {students.map((student) => (
-                <option key={student.id} value={student.id}>
-                  {student.name} ({student.email})
-                </option>
-              ))}
-            </select>
-          </div>
+          <UserRoleFields
+            copy={copy}
+            roleFieldId="edit-role"
+            studentFieldId="edit-student"
+            defaultRole={user.role}
+            defaultStudentId={user.linkedStudentId ?? ""}
+            roleDisabled={isSelf}
+            lockedRole={isSelf ? "admin" : undefined}
+            students={studentOptions}
+          />
           <label className="admin-check">
             <input
               type="checkbox"
