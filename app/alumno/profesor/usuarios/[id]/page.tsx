@@ -12,8 +12,10 @@ import {
   activateManagedUserAction,
   deactivateManagedUserAction,
   updateManagedUserAction,
+  updateManagedUserPasswordAction,
 } from "../actions";
 import { DeleteUserButton } from "../delete-user-button";
+import { managedUserFormError } from "../form-errors";
 
 export const dynamic = "force-dynamic";
 
@@ -59,16 +61,13 @@ export default async function TeacherUserDetailPage({
 
   const isSelf = user.id === context.userId;
 
-  const errorMessage =
-    query.error === "self"
-      ? copy.usersErrorSelf
-      : query.error === "lastAdmin"
-        ? copy.usersErrorLastAdmin
-        : query.error === "parentStudent"
-          ? copy.usersErrorParentStudent
-          : query.error
-            ? copy.usersErrorGeneric
-            : null;
+  const errorMessage = managedUserFormError(query.error, copy);
+  const savedMessage =
+    query.saved === "password"
+      ? copy.usersPasswordUpdated
+      : query.saved
+        ? copy.successUpdated
+        : null;
 
   return (
     <div>
@@ -84,9 +83,9 @@ export default async function TeacherUserDetailPage({
       </h1>
       <p className="mt-2 text-base text-fg-muted">{user.email}</p>
 
-      {query.saved ? (
+      {savedMessage ? (
         <p className="mt-4 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent">
-          {copy.successUpdated}
+          {savedMessage}
         </p>
       ) : null}
       {errorMessage ? (
@@ -141,22 +140,6 @@ export default async function TeacherUserDetailPage({
               <option value="parent">{copy.usersRoleParent}</option>
             </select>
             {isSelf ? <input type="hidden" name="role" value="admin" /> : null}
-          </div>
-          <div className="admin-field">
-            <label className="admin-label" htmlFor="edit-password">
-              {copy.usersPasswordLabel}
-            </label>
-            <input
-              id="edit-password"
-              className="admin-input"
-              name="password"
-              type="password"
-              minLength={8}
-              placeholder={copy.usersPasswordOptionalHint}
-            />
-            <p className="admin-muted" style={{ margin: "0.35rem 0 0" }}>
-              {copy.usersPasswordOptionalHint}
-            </p>
           </div>
           <div className="admin-field">
             <label className="admin-label" htmlFor="edit-student">
@@ -217,6 +200,49 @@ export default async function TeacherUserDetailPage({
         {!isSelf ? (
           <p className="admin-muted mt-3 text-xs">{copy.usersDeleteConfirm}</p>
         ) : null}
+      </div>
+
+      <div className="admin-card mt-6 max-w-xl">
+        <h2 className="admin-section-title">{copy.usersPasswordSectionTitle}</h2>
+        <form
+          action={updateManagedUserPasswordAction}
+          className="admin-form"
+          data-testid="user-password-form"
+        >
+          <input type="hidden" name="id" value={user.id} />
+          <div className="admin-field">
+            <label className="admin-label" htmlFor="edit-new-password">
+              {copy.usersNewPasswordLabel}
+            </label>
+            <input
+              id="edit-new-password"
+              className="admin-input"
+              name="password"
+              type="password"
+              required
+              minLength={8}
+              autoComplete="new-password"
+            />
+            <p className="admin-muted" style={{ margin: "0.35rem 0 0" }}>
+              {copy.usersPasswordHint}
+            </p>
+          </div>
+          <div className="admin-field">
+            <label className="admin-label" htmlFor="edit-password-confirm">
+              {copy.usersPasswordConfirmLabel}
+            </label>
+            <input
+              id="edit-password-confirm"
+              className="admin-input"
+              name="passwordConfirm"
+              type="password"
+              required
+              minLength={8}
+              autoComplete="new-password"
+            />
+          </div>
+          <AdminButton type="submit">{copy.usersPasswordSaveButton}</AdminButton>
+        </form>
       </div>
     </div>
   );

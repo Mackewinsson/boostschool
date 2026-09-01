@@ -159,7 +159,12 @@ export type StudentContent = {
     usersEmailLabel: string;
     usersRoleLabel: string;
     usersPasswordLabel: string;
-    usersPasswordOptionalHint: string;
+    usersPasswordSectionTitle: string;
+    usersNewPasswordLabel: string;
+    usersPasswordConfirmLabel: string;
+    usersPasswordSaveButton: string;
+    usersPasswordHint: string;
+    usersPasswordUpdated: string;
     usersActiveLabel: string;
     usersStudentLinkLabel: string;
     usersCreateButton: string;
@@ -179,6 +184,8 @@ export type StudentContent = {
     usersErrorSelf: string;
     usersErrorLastAdmin: string;
     usersErrorParentStudent: string;
+    usersErrorPassword: string;
+    usersErrorPasswordMismatch: string;
     studentsTitle: string;
     studentsSubtitle: string;
     studentsEmpty: string;

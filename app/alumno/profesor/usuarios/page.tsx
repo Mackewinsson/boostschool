@@ -10,6 +10,7 @@ import { getLocaleFromCookies } from "@/lib/locale-server";
 import { getStudentContent } from "@/lib/student-content";
 import { teacherPaths } from "@/lib/teacher/paths";
 import { createManagedUserAction } from "./actions";
+import { managedUserFormError } from "./form-errors";
 
 export const dynamic = "force-dynamic";
 
@@ -51,16 +52,7 @@ export default async function TeacherUsersPage({ searchParams }: PageProps) {
 
   const [users, students] = await Promise.all([listUsers(), listStudents()]);
 
-  const errorMessage =
-    params.error === "self"
-      ? copy.usersErrorSelf
-      : params.error === "lastAdmin"
-        ? copy.usersErrorLastAdmin
-        : params.error === "parentStudent"
-          ? copy.usersErrorParentStudent
-          : params.error
-            ? copy.usersErrorGeneric
-            : null;
+  const errorMessage = managedUserFormError(params.error, copy);
 
   return (
     <div>
@@ -151,7 +143,11 @@ export default async function TeacherUsersPage({ searchParams }: PageProps) {
 
         <div className="admin-card admin-sticky-sidebar">
           <h2 className="admin-section-title">{copy.usersCreateTitle}</h2>
-          <form action={createManagedUserAction} className="admin-form">
+          <form
+            action={createManagedUserAction}
+            className="admin-form"
+            data-testid="user-create-form"
+          >
             <div className="admin-field">
               <label className="admin-label" htmlFor="user-name">
                 {copy.usersNameLabel}
@@ -198,7 +194,11 @@ export default async function TeacherUsersPage({ searchParams }: PageProps) {
                 type="password"
                 required
                 minLength={8}
+                autoComplete="new-password"
               />
+              <p className="admin-muted" style={{ margin: "0.35rem 0 0" }}>
+                {copy.usersPasswordHint}
+              </p>
             </div>
             <div className="admin-field">
               <label className="admin-label" htmlFor="user-student">

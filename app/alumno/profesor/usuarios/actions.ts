@@ -8,6 +8,7 @@ import {
   setParentStudentLink,
 } from "@/lib/auth/parents";
 import type { UserRole } from "@/lib/auth/constants";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password";
 import {
   createUser,
   deactivateUser,
@@ -15,11 +16,17 @@ import {
   findUserByEmail,
   getManagedUserById,
   updateUser,
+  updateUserPassword,
 } from "@/lib/auth/users";
 import { teacherPaths } from "@/lib/teacher/paths";
 
 function readString(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
+}
+
+function readPassword(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : "";
 }
 
 function parseRole(value: string): UserRole | null {
@@ -58,6 +65,12 @@ function mapUserError(error: unknown): string {
   if (error.message === "PARENT_STUDENT_REQUIRED") {
     return "parentStudent";
   }
+  if (error.message === "PASSWORD_TOO_SHORT") {
+    return "password";
+  }
+  if (error.message === "PASSWORD_MISMATCH") {
+    return "passwordMismatch";
+  }
   return "generic";
 }
 
@@ -66,12 +79,17 @@ export async function createManagedUserAction(formData: FormData) {
 
   const name = readString(formData, "name");
   const email = readString(formData, "email").toLowerCase();
-  const password = readString(formData, "password");
+  const password = readPassword(formData, "password");
   const role = parseRole(readString(formData, "role"));
   const studentId = readString(formData, "studentId");
   const active = formData.get("active") === "on";
 
-  if (name.length < 2 || !email.includes("@") || !role || password.length < 8) {
+  if (
+    name.length < 2 ||
+    !email.includes("@") ||
+    !role ||
+    password.length < MIN_PASSWORD_LENGTH
+  ) {
     redirect(`${teacherPaths.users}?error=generic`);
   }
 
@@ -84,6 +102,7 @@ export async function createManagedUserAction(formData: FormData) {
     redirect(`${teacherPaths.users}?error=generic`);
   }
 
+  let userId: string;
   try {
     const user = await createUser({
       name,
@@ -95,11 +114,13 @@ export async function createManagedUserAction(formData: FormData) {
     if (role === "parent") {
       await setParentStudentLink(user.id, studentId);
     }
-    revalidateUserPaths(user.id);
-    redirect(teacherPaths.user(user.id));
+    userId = user.id;
   } catch (error) {
     redirect(`${teacherPaths.users}?error=${mapUserError(error)}`);
   }
+
+  revalidateUserPaths(userId);
+  redirect(teacherPaths.user(userId));
 }
 
 export async function updateManagedUserAction(formData: FormData) {
@@ -107,7 +128,6 @@ export async function updateManagedUserAction(formData: FormData) {
   const id = readString(formData, "id");
   const name = readString(formData, "name");
   const email = readString(formData, "email").toLowerCase();
-  const password = readString(formData, "password");
   const role = parseRole(readString(formData, "role"));
   const studentId = readString(formData, "studentId");
   const active = formData.get("active") === "on";
@@ -127,7 +147,6 @@ export async function updateManagedUserAction(formData: FormData) {
       email,
       role,
       active,
-      password: password.length >= 8 ? password : undefined,
       actorUserId: actor.userId,
     });
 
@@ -136,12 +155,40 @@ export async function updateManagedUserAction(formData: FormData) {
     } else {
       await clearParentStudentLinks(id);
     }
-
-    revalidateUserPaths(id);
-    redirect(`${teacherPaths.user(id)}?saved=1`);
   } catch (error) {
     redirect(`${teacherPaths.user(id)}?error=${mapUserError(error)}`);
   }
+
+  revalidateUserPaths(id);
+  redirect(`${teacherPaths.user(id)}?saved=1`);
+}
+
+export async function updateManagedUserPasswordAction(formData: FormData) {
+  await requireAdminUser();
+  const id = readString(formData, "id");
+  const password = readPassword(formData, "password");
+  const passwordConfirm = readPassword(formData, "passwordConfirm");
+
+  if (!id) {
+    redirect(teacherPaths.users);
+  }
+
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    redirect(`${teacherPaths.user(id)}?error=password`);
+  }
+
+  if (password !== passwordConfirm) {
+    redirect(`${teacherPaths.user(id)}?error=passwordMismatch`);
+  }
+
+  try {
+    await updateUserPassword(id, password);
+  } catch (error) {
+    redirect(`${teacherPaths.user(id)}?error=${mapUserError(error)}`);
+  }
+
+  revalidateUserPaths(id);
+  redirect(`${teacherPaths.user(id)}?saved=password`);
 }
 
 export async function deactivateManagedUserAction(formData: FormData) {
@@ -152,11 +199,11 @@ export async function deactivateManagedUserAction(formData: FormData) {
   }
   try {
     await deactivateUser(id, actor.userId);
-    revalidateUserPaths(id);
-    redirect(`${teacherPaths.user(id)}?saved=1`);
   } catch (error) {
     redirect(`${teacherPaths.user(id)}?error=${mapUserError(error)}`);
   }
+  revalidateUserPaths(id);
+  redirect(`${teacherPaths.user(id)}?saved=1`);
 }
 
 export async function activateManagedUserAction(formData: FormData) {
@@ -165,11 +212,12 @@ export async function activateManagedUserAction(formData: FormData) {
   if (!id) {
     redirect(teacherPaths.users);
   }
+  const user = await getManagedUserById(id);
+  if (!user) {
+    redirect(teacherPaths.users);
+  }
+
   try {
-    const user = await getManagedUserById(id);
-    if (!user) {
-      redirect(teacherPaths.users);
-    }
     await updateUser({
       id,
       name: user.name,
@@ -178,11 +226,11 @@ export async function activateManagedUserAction(formData: FormData) {
       active: true,
       actorUserId: actor.userId,
     });
-    revalidateUserPaths(id);
-    redirect(`${teacherPaths.user(id)}?saved=1`);
   } catch (error) {
     redirect(`${teacherPaths.user(id)}?error=${mapUserError(error)}`);
   }
+  revalidateUserPaths(id);
+  redirect(`${teacherPaths.user(id)}?saved=1`);
 }
 
 export async function deleteManagedUserAction(formData: FormData) {
@@ -193,9 +241,9 @@ export async function deleteManagedUserAction(formData: FormData) {
   }
   try {
     await deleteUser(id, actor.userId);
-    revalidateUserPaths();
-    redirect(teacherPaths.users);
   } catch (error) {
     redirect(`${teacherPaths.user(id)}?error=${mapUserError(error)}`);
   }
+  revalidateUserPaths();
+  redirect(teacherPaths.users);
 }

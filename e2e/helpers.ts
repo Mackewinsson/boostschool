@@ -8,6 +8,10 @@ export type PortalCreds = {
 const DEFAULT_PASSWORD = "Prueba123!";
 
 export const e2eCreds = {
+  admin: {
+    email: process.env.E2E_ADMIN_EMAIL?.trim() || "admin@bilingualboost.test",
+    password: process.env.E2E_PASSWORD?.trim() || DEFAULT_PASSWORD,
+  } satisfies PortalCreds,
   teacher: {
     email: process.env.E2E_TEACHER_EMAIL?.trim() || "profe@bilingualboost.test",
     password: process.env.E2E_PASSWORD?.trim() || DEFAULT_PASSWORD,
