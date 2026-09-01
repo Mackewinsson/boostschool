@@ -38,6 +38,12 @@ export function PortalShell({
                 {copy.teacherArea}
               </Link>
             ) : null}
+            <Link
+              href="/alumno/cuenta"
+              className="text-sm font-medium text-fg-muted transition hover:text-accent"
+            >
+              {copy.accountNavLabel}
+            </Link>
             <form action={logoutAction}>
               <button
                 type="submit"

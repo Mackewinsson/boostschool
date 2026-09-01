@@ -24,6 +24,16 @@ export default async function AlumnoPage() {
     redirect("/alumno/profesor");
   }
 
-  const { student } = getStudentContent(locale);
-  return <StudentDashboard copy={student} locale={locale} />;
+  const { student, portal } = getStudentContent(locale);
+  return (
+    <StudentDashboard
+      copy={student}
+      locale={locale}
+      account={{
+        accountTitle: portal.accountTitle,
+        accountHint: portal.accountHint,
+        accountNavLabel: portal.accountNavLabel,
+      }}
+    />
+  );
 }

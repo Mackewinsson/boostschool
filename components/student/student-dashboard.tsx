@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Locale } from "@/lib/locale";
 import type { Material } from "@/lib/materials/types";
@@ -11,9 +12,17 @@ import { MaterialsGrid } from "./materials-grid";
 type StudentDashboardProps = {
   copy: StudentContent["student"];
   locale: Locale;
+  account?: Pick<
+    StudentContent["portal"],
+    "accountTitle" | "accountHint" | "accountNavLabel"
+  >;
 };
 
-export function StudentDashboard({ copy, locale }: StudentDashboardProps) {
+export function StudentDashboard({
+  copy,
+  locale,
+  account,
+}: StudentDashboardProps) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
   const [readOnly, setReadOnly] = useState(false);
@@ -134,6 +143,19 @@ export function StudentDashboard({ copy, locale }: StudentDashboardProps) {
           ) : null}
         </>
       )}
+
+      {account ? (
+        <section className="mt-12 max-w-xl rounded-2xl border border-border bg-card p-6">
+          <h2 className="text-lg font-bold text-fg">{account.accountTitle}</h2>
+          <p className="mt-2 text-sm text-fg-muted">{account.accountHint}</p>
+          <Link
+            href="/alumno/cuenta"
+            className="mt-4 inline-flex text-sm font-semibold text-accent transition hover:text-accent-alt"
+          >
+            {account.accountNavLabel}
+          </Link>
+        </section>
+      ) : null}
     </>
   );
 }
