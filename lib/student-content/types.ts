@@ -101,6 +101,14 @@ export type StudentContent = {
     scheduleSaveLabel: string;
     scheduleActiveLabel: string;
     scheduleSaved: string;
+    calendarTitle: string;
+    calendarHint: string;
+    calendarPrevMonth: string;
+    calendarNextMonth: string;
+    calendarToday: string;
+    calendarEmptyMonth: string;
+    calendarMore: string;
+    calendarSessionAria: string;
     weekdaySunday: string;
     weekdayMonday: string;
     weekdayTuesday: string;

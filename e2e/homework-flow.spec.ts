@@ -36,6 +36,15 @@ test.describe("class table homework flow", () => {
 
     const table = classTable(page);
     await expect(table).toBeVisible();
+    const calendar = page.getByTestId("class-month-calendar");
+    await expect(calendar).toBeVisible();
+    const calendarChip = calendar.getByTestId("calendar-session-chip").first();
+    for (let i = 0; i < 3; i += 1) {
+      if (await calendarChip.isVisible()) break;
+      await calendar.getByLabel("Mes siguiente").click();
+    }
+    await expect(calendarChip).toBeVisible();
+    await calendarChip.click();
     const homeworkRow = await rowWithDatetimeEnding(page, "T18:00");
 
     await homeworkRow.getByTestId("session-homework").fill(exercise);
