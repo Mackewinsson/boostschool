@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 import type { Locale } from "@/lib/locale";
 import type { CompletionStatus, Material } from "@/lib/materials/types";
 import {
-  completionStatusLabel,
   formatScheduledAt,
   groupMaterialsBySchedule,
 } from "@/lib/materials/schedule-groups";
@@ -268,11 +267,10 @@ function SessionRow({
           ) : null}
         </div>
 
-        {mode === "teacher" || hasHomework ? (
+        {mode === "teacher" && onStatusChange ? (
           <div className="sm:text-right">
             <p className="text-xs font-medium text-fg-faint">{copy.statusLabel}</p>
-            {mode === "teacher" && onStatusChange ? (
-              <select
+            <select
                 data-testid="homework-status"
                 value={status ?? ""}
                 disabled={saving}
@@ -288,19 +286,6 @@ function SessionRow({
                 <option value="not_done">{copy.statusNotDone}</option>
                 <option value="partial">{copy.statusPartial}</option>
               </select>
-            ) : (
-              <p
-                data-testid="homework-status-badge"
-                className="mt-1 text-sm font-medium text-fg"
-              >
-                {completionStatusLabel(status, {
-                  pending: copy.statusPending,
-                  done: copy.statusDone,
-                  notDone: copy.statusNotDone,
-                  partial: copy.statusPartial,
-                })}
-              </p>
-            )}
           </div>
         ) : null}
       </div>
