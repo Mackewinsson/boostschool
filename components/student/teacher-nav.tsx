@@ -2,53 +2,141 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { CalendarDays, Inbox, Mail, Users } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { StudentContent } from "@/lib/student-content/types";
 import { teacherPaths } from "@/lib/teacher/paths";
 
+type TeacherCopy = StudentContent["teacher"];
 type TeacherNavProps = {
-  copy: StudentContent["teacher"];
+  copy: TeacherCopy;
   showUsersNav?: boolean;
 };
 
-const NAV = [
-  { href: teacherPaths.students, key: "navStudents" as const },
-  { href: teacherPaths.home, key: "navMaterials" as const, exact: true },
-  { href: teacherPaths.leads, key: "navLeads" as const },
-  { href: teacherPaths.contacts, key: "navContacts" as const },
-  { href: teacherPaths.emails, key: "navEmails" as const },
-  { href: teacherPaths.signature, key: "navSignature" as const },
-] as const;
+type SubItem = {
+  href: string;
+  labelKey: keyof Pick<
+    TeacherCopy,
+    "navStudents" | "navUsers" | "navLeads" | "navContacts" | "navEmails" | "navSignature"
+  >;
+  adminOnly?: boolean;
+};
+
+type NavGroup = {
+  id: "classes" | "people" | "crm" | "mail";
+  href: string;
+  labelKey: keyof Pick<
+    TeacherCopy,
+    "navGroupClasses" | "navGroupPeople" | "navGroupCrm" | "navGroupMail"
+  >;
+  icon: LucideIcon;
+  items: SubItem[];
+};
+
+const GROUPS: NavGroup[] = [
+  {
+    id: "classes",
+    href: teacherPaths.home,
+    labelKey: "navGroupClasses",
+    icon: CalendarDays,
+    items: [],
+  },
+  {
+    id: "people",
+    href: teacherPaths.students,
+    labelKey: "navGroupPeople",
+    icon: Users,
+    items: [
+      { href: teacherPaths.students, labelKey: "navStudents" },
+      { href: teacherPaths.users, labelKey: "navUsers", adminOnly: true },
+    ],
+  },
+  {
+    id: "crm",
+    href: teacherPaths.leads,
+    labelKey: "navGroupCrm",
+    icon: Inbox,
+    items: [
+      { href: teacherPaths.leads, labelKey: "navLeads" },
+      { href: teacherPaths.contacts, labelKey: "navContacts" },
+    ],
+  },
+  {
+    id: "mail",
+    href: teacherPaths.emails,
+    labelKey: "navGroupMail",
+    icon: Mail,
+    items: [
+      { href: teacherPaths.emails, labelKey: "navEmails" },
+      { href: teacherPaths.signature, labelKey: "navSignature" },
+    ],
+  },
+];
+
+function isItemActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function isGroupActive(pathname: string, group: NavGroup): boolean {
+  if (group.id === "classes") {
+    return pathname === teacherPaths.home;
+  }
+  return group.items.some((item) => isItemActive(pathname, item.href));
+}
 
 export function TeacherNav({ copy, showUsersNav = false }: TeacherNavProps) {
   const pathname = usePathname();
-  const items = [
-    ...NAV,
-    ...(showUsersNav
-      ? ([{ href: teacherPaths.users, key: "navUsers" as const }] as const)
-      : []),
-  ];
+  const activeGroup =
+    GROUPS.find((group) => isGroupActive(pathname, group)) ?? GROUPS[0];
+  const subItems = activeGroup.items.filter(
+    (item) => !item.adminOnly || showUsersNav,
+  );
 
   return (
-    <nav className="mt-8 flex flex-wrap gap-2" aria-label={copy.navMaterials}>
-      {items.map((item) => {
-        const isExact = "exact" in item && item.exact;
-        const isActive = isExact
-          ? pathname === item.href
-          : pathname === item.href || pathname.startsWith(`${item.href}/`);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={
-              isActive
-                ? "rounded-xl bg-accent/15 px-4 py-2 text-sm font-semibold text-accent"
-                : "rounded-xl border border-border px-4 py-2 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent"
-            }
-          >
-            {copy[item.key]}
-          </Link>
-        );
-      })}
-    </nav>
+    <div className="admin-nav">
+      <nav className="admin-nav__primary" aria-label={copy.navAria} data-testid="teacher-nav">
+        {GROUPS.map((group) => {
+          const Icon = group.icon;
+          const active = group.id === activeGroup.id;
+          return (
+            <Link
+              key={group.id}
+              href={group.href}
+              aria-current={active ? "page" : undefined}
+              className={
+                active ? "admin-nav__link admin-nav__link--active" : "admin-nav__link"
+              }
+            >
+              <Icon size={18} strokeWidth={2} aria-hidden="true" />
+              {copy[group.labelKey]}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {subItems.length > 0 ? (
+        <nav
+          className="admin-nav__secondary"
+          aria-label={copy.navSubAria}
+          data-testid="teacher-subnav"
+        >
+          {subItems.map((item) => {
+            const active = isItemActive(pathname, item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={
+                  active ? "admin-nav__chip admin-nav__chip--active" : "admin-nav__chip"
+                }
+              >
+                {copy[item.labelKey]}
+              </Link>
+            );
+          })}
+        </nav>
+      ) : null}
+    </div>
   );
 }

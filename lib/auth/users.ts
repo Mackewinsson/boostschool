@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db/client";
 import type { StudentSummary } from "@/lib/materials/types";
-import { hashPassword } from "./password";
+import { hashPassword, MIN_PASSWORD_LENGTH } from "./password";
 import type { UserRole } from "./constants";
 
 export type AuthUser = {
@@ -247,7 +247,7 @@ export async function updateUser(input: {
   const sql = getDb();
   const email = input.email.trim().toLowerCase();
 
-  if (input.password && input.password.length >= 8) {
+  if (input.password && input.password.length >= MIN_PASSWORD_LENGTH) {
     const passwordHash = await hashPassword(input.password);
     await sql`
       UPDATE users
@@ -330,6 +330,10 @@ export async function deleteUser(
 }
 
 export async function updateUserPassword(userId: string, password: string) {
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    throw new Error("PASSWORD_TOO_SHORT");
+  }
+
   const sql = getDb();
   const passwordHash = await hashPassword(password);
   const rows = (await sql`
@@ -339,5 +343,9 @@ export async function updateUserPassword(userId: string, password: string) {
     RETURNING id
   `) as { id: string }[];
 
-  return rows.length > 0;
+  if (rows.length === 0) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  return true;
 }

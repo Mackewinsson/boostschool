@@ -150,6 +150,13 @@ export type StudentContent = {
     navEmails: string;
     navSignature: string;
     navUsers: string;
+    navAria: string;
+    navSubAria: string;
+    navGroupClasses: string;
+    navGroupPeople: string;
+    navGroupCrm: string;
+    navGroupMail: string;
+    dashTabAccounts: string;
     usersTitle: string;
     usersSubtitle: string;
     usersEmpty: string;
@@ -159,7 +166,12 @@ export type StudentContent = {
     usersEmailLabel: string;
     usersRoleLabel: string;
     usersPasswordLabel: string;
-    usersPasswordOptionalHint: string;
+    usersPasswordSectionTitle: string;
+    usersNewPasswordLabel: string;
+    usersPasswordConfirmLabel: string;
+    usersPasswordSaveButton: string;
+    usersPasswordHint: string;
+    usersPasswordUpdated: string;
     usersActiveLabel: string;
     usersStudentLinkLabel: string;
     usersCreateButton: string;
@@ -179,6 +191,8 @@ export type StudentContent = {
     usersErrorSelf: string;
     usersErrorLastAdmin: string;
     usersErrorParentStudent: string;
+    usersErrorPassword: string;
+    usersErrorPasswordMismatch: string;
     studentsTitle: string;
     studentsSubtitle: string;
     studentsEmpty: string;
