@@ -13,6 +13,7 @@ import {
   datetimeLocalInZoneToUtcIso,
   toDatetimeLocalValueInZone,
 } from "@/lib/materials/schedule-time";
+import { sessionRowDomId } from "@/lib/materials/class-calendar";
 import { externalLinkProps } from "@/lib/site-links";
 
 export type ClassSessionTableCopy = {
@@ -234,9 +235,10 @@ function SessionRow({
 
   return (
     <li
+      id={sessionRowDomId(session.id)}
       data-testid="class-session-row"
       data-session-id={session.id}
-      className="rounded-2xl border border-border bg-card p-4 sm:p-5"
+      className="scroll-mt-28 rounded-2xl border border-border bg-card p-4 sm:p-5 transition ring-accent/70 data-[calendar-focus=true]:ring-2"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">

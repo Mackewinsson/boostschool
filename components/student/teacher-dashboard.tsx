@@ -11,6 +11,7 @@ import type {
   StudentClassSchedule,
   StudentSummary,
 } from "@/lib/materials/types";
+import { ClassMonthCalendar } from "./class-month-calendar";
 import { ClassSessionTable } from "./class-session-table";
 import { MaterialKindIcon } from "./material-kind-icon";
 import { StudentSchedulePanel } from "./student-schedule-panel";
@@ -699,6 +700,14 @@ export function TeacherDashboard({
                 saving={busyKey === "schedule"}
                 copy={copy}
                 onSave={handleSaveSchedule}
+              />
+
+              <ClassMonthCalendar
+                key={selectedStudentId}
+                sessions={sessions}
+                locale={locale as "es" | "en" | "pl"}
+                timeZone={selectedSchedule?.timezone ?? "Europe/Warsaw"}
+                copy={copy}
               />
 
               <ClassSessionTable
