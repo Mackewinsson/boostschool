@@ -24,9 +24,9 @@ export default async function TeacherWorkspaceLayout({
   const { teacher } = getStudentContent(locale);
 
   return (
-    <>
+    <div className="admin-workspace">
       <TeacherNav copy={teacher} showUsersNav={isAdminUser(context.role)} />
       {children}
-    </>
+    </div>
   );
 }

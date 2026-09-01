@@ -150,6 +150,13 @@ export type StudentContent = {
     navEmails: string;
     navSignature: string;
     navUsers: string;
+    navAria: string;
+    navSubAria: string;
+    navGroupClasses: string;
+    navGroupPeople: string;
+    navGroupCrm: string;
+    navGroupMail: string;
+    dashTabAccounts: string;
     usersTitle: string;
     usersSubtitle: string;
     usersEmpty: string;

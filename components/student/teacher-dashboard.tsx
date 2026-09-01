@@ -77,6 +77,9 @@ export function TeacherDashboard({
   const [loading, setLoading] = useState(true);
   /** Keys: sessionId | "schedule" | "add-class" | "extra" | "delete:{id}" | form ids */
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [dashTab, setDashTab] = useState<"classes" | "extras" | "accounts">(
+    "classes",
+  );
 
   const selectedSchedule = useMemo(
     () => schedules.find((item) => item.studentUserId === selectedStudentId),
@@ -490,7 +493,55 @@ export function TeacherDashboard({
       <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">{copy.title}</h1>
       <p className="mt-3 max-w-3xl text-base text-fg-muted">{copy.subtitle}</p>
 
-      <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
+      <div
+        className="admin-nav__secondary mt-8"
+        role="tablist"
+        aria-label={copy.title}
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={dashTab === "classes"}
+          className={
+            dashTab === "classes"
+              ? "admin-nav__chip admin-nav__chip--active"
+              : "admin-nav__chip"
+          }
+          onClick={() => setDashTab("classes")}
+        >
+          {copy.navGroupClasses}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={dashTab === "extras"}
+          className={
+            dashTab === "extras"
+              ? "admin-nav__chip admin-nav__chip--active"
+              : "admin-nav__chip"
+          }
+          onClick={() => setDashTab("extras")}
+        >
+          {copy.extrasTitle}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={dashTab === "accounts"}
+          className={
+            dashTab === "accounts"
+              ? "admin-nav__chip admin-nav__chip--active"
+              : "admin-nav__chip"
+          }
+          onClick={() => setDashTab("accounts")}
+        >
+          {copy.dashTabAccounts}
+        </button>
+      </div>
+
+      {dashTab === "accounts" ? (
+      <>
+      <section className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
         <h2 className="text-xl font-bold text-fg">{copy.createStudentTitle}</h2>
         <form onSubmit={handleCreateStudent} className="mt-5 grid gap-4 md:grid-cols-3">
           <div>
@@ -543,7 +594,7 @@ export function TeacherDashboard({
         </form>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
+      <section className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
         <h2 className="text-xl font-bold text-fg">{copy.createParentTitle}</h2>
         <form onSubmit={handleCreateParent} className="mt-5 grid gap-4 md:grid-cols-2">
           <div>
@@ -613,12 +664,12 @@ export function TeacherDashboard({
           </div>
         </form>
       </section>
-
-      {students.length === 0 ? (
+      </>
+      ) : students.length === 0 ? (
         <p className="mt-10 text-sm text-fg-muted">{copy.noStudents}</p>
       ) : (
         <>
-          <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <section className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
             <label htmlFor="selected-student" className="block text-sm font-medium text-fg">
               {copy.selectStudentLabel}
             </label>
@@ -639,7 +690,7 @@ export function TeacherDashboard({
             </select>
           </section>
 
-          {selectedStudentId ? (
+          {selectedStudentId && dashTab === "classes" ? (
             <>
               <StudentSchedulePanel
                 key={`${selectedStudentId}-${selectedSchedule?.weekday ?? "x"}-${selectedSchedule?.timeLocal ?? "none"}-${selectedSchedule?.active ? "1" : "0"}`}
@@ -691,8 +742,11 @@ export function TeacherDashboard({
                 onStatusChange={handleStatusChange}
                 onAddClass={handleAddClass}
               />
+            </>
+          ) : null}
 
-              <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          {selectedStudentId && dashTab === "extras" ? (
+              <section className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
                 <h2 className="text-xl font-bold text-fg">{copy.extrasTitle}</h2>
                 <p className="mt-2 text-sm text-fg-muted">{copy.extrasHint}</p>
                 <form onSubmit={handleAddExtra} className="mt-5 space-y-4">
@@ -790,7 +844,6 @@ export function TeacherDashboard({
                   </ul>
                 )}
               </section>
-            </>
           ) : null}
         </>
       )}
