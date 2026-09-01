@@ -106,13 +106,13 @@ Componente compartido: `components/student/class-session-table.tsx`.
 
 Cada fila = una clase con fecha/hora:
 
-- **Profe:** edita fecha/hora + deberes (`description`) → botón **Guardar** (guarda ambos).
-- **Alumno:** ve deberes o mensaje vacío; puede unirse a Meet; apuntes.
-- **Padre:** igual que alumno pero **sin** enlace Meet y sin apuntes.
-- Estado hecho: Pendiente / Sí / No / Parcial (`student_materials.completion_status`).
+- **Profe:** edita fecha/hora + deberes (`description`) → botón **Guardar** (guarda ambos). Marca hecho: Pendiente / Sí / No / Parcial.
+- **Alumno:** ve deberes o mensaje vacío; puede unirse a Meet; apuntes. **Sin** estado hecho/pendiente.
+- **Padre:** igual que alumno pero **sin** enlace Meet, sin apuntes y **sin** estado hecho/pendiente.
+- Estado hecho solo lo ve y edita la profe (`student_materials.completion_status`).
 - **Extras** (materiales sin `scheduled_at`) van fuera de la tabla.
 
-Deberes vacíos → copy `homeworkEmpty` (“Todavía no hay deberes…”). No mostrar badge de estado al alumno/padre si no hay deberes.
+Deberes vacíos → copy `homeworkEmpty` (“Todavía no hay deberes…”).
 
 ### Horario por alumno
 
@@ -235,6 +235,6 @@ npm run test:e2e
 3. **`"use client"`** solo con estado, efectos o eventos de browser.
 4. **Lint limpio** antes de commit.
 5. **Portal:** cambios de horario semanal deben realinear clases futuras; no dejar `active: false` por accidente al guardar horario fijo.
-6. **Padre:** sin Meet; sin edición de apuntes.
+6. **Padre:** sin Meet; sin edición de apuntes; sin estado de deberes. **Alumno:** sin estado de deberes (solo la profe marca hecho/pendiente).
 7. **Accesibilidad:** roles semánticos; `aria-label` en controles solo-ícono.
 8. **Commits / push:** solo si el usuario lo pide.

@@ -9,11 +9,6 @@ type MaterialsGridProps = {
   newBadge: string;
   scheduledLabel: string;
   joinMeetLabel: string;
-  statusLabel: string;
-  statusPending: string;
-  statusDone: string;
-  statusNotDone: string;
-  statusPartial: string;
   notesLabel: string;
   notesPlaceholder: string;
   notesSaved: string;
@@ -30,11 +25,6 @@ export function MaterialsGrid({
   newBadge,
   scheduledLabel,
   joinMeetLabel,
-  statusLabel,
-  statusPending,
-  statusDone,
-  statusNotDone,
-  statusPartial,
   notesLabel,
   notesPlaceholder,
   notesSaved,
@@ -63,11 +53,6 @@ export function MaterialsGrid({
           newBadge={newBadge}
           scheduledLabel={scheduledLabel}
           joinMeetLabel={joinMeetLabel}
-          statusLabel={statusLabel}
-          statusPending={statusPending}
-          statusDone={statusDone}
-          statusNotDone={statusNotDone}
-          statusPartial={statusPartial}
           notesLabel={notesLabel}
           notesPlaceholder={notesPlaceholder}
           notesSaved={notesSaved}

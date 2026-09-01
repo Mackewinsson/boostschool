@@ -76,7 +76,8 @@ test.describe("class table homework flow", () => {
 
     await login(page, e2eCreds.student, /\/alumno\/?$/);
     const studentRow = await rowWithText(page, marker);
-    await expect(studentRow.getByTestId("homework-status-badge")).toContainText(/Sí/);
+    await expect(studentRow.getByTestId("session-homework-text")).toContainText(marker);
+    await expect(studentRow.getByTestId("homework-status-badge")).toHaveCount(0);
     await expect(studentRow.getByRole("link", { name: /Unirse a Meet/i })).toBeVisible();
     await expect(studentRow.getByTestId("homework-status")).toHaveCount(0);
 
@@ -95,7 +96,8 @@ test.describe("class table homework flow", () => {
 
     await login(page, e2eCreds.parent, /\/alumno\/?$/);
     const parentRow = await rowWithText(page, marker);
-    await expect(parentRow.getByTestId("homework-status-badge")).toContainText(/Sí/);
+    await expect(parentRow.getByTestId("session-homework-text")).toContainText(marker);
+    await expect(parentRow.getByTestId("homework-status-badge")).toHaveCount(0);
     await expect(parentRow.getByRole("link", { name: /Unirse a Meet|Meet/i })).toHaveCount(0);
     await expect(parentRow.getByTestId("class-notes")).toHaveCount(0);
     await expect(parentRow.getByTestId("homework-status")).toHaveCount(0);
@@ -136,7 +138,8 @@ test.describe("class table homework flow", () => {
     await login(page, e2eCreds.student, /\/alumno\/?$/);
     const studentRow = await rowWithText(page, marker);
     await expect(studentRow.getByTestId("session-homework-text")).toContainText(marker);
-    await expect(studentRow.getByTestId("homework-status-badge")).toContainText(/Parcialmente/);
+    await expect(studentRow.getByTestId("homework-status-badge")).toHaveCount(0);
+    await expect(studentRow.getByTestId("homework-status")).toHaveCount(0);
     await expect(studentRow.getByRole("link", { name: /Unirse a Meet/i })).toBeVisible();
 
     await logout(page);
@@ -144,7 +147,8 @@ test.describe("class table homework flow", () => {
     await login(page, e2eCreds.parent, /\/alumno\/?$/);
     const parentRow = await rowWithText(page, marker);
     await expect(parentRow.getByTestId("session-homework-text")).toContainText(marker);
-    await expect(parentRow.getByTestId("homework-status-badge")).toContainText(/Parcialmente/);
+    await expect(parentRow.getByTestId("homework-status-badge")).toHaveCount(0);
+    await expect(parentRow.getByTestId("homework-status")).toHaveCount(0);
     await expect(parentRow.getByRole("link", { name: /Unirse a Meet|Meet/i })).toHaveCount(0);
     await expect(parentRow.getByTestId("class-notes")).toHaveCount(0);
   });
@@ -217,7 +221,8 @@ test.describe("class table homework flow", () => {
 
     await login(page, e2eCreds.parent, /\/alumno\/?$/);
     const parentRow = await rowWithText(page, marker);
-    await expect(parentRow.getByTestId("homework-status-badge")).toContainText(/^No$/);
+    await expect(parentRow.getByTestId("homework-status-badge")).toHaveCount(0);
+    await expect(parentRow.getByTestId("homework-status")).toHaveCount(0);
     await expect(parentRow.getByTestId("session-homework-text")).toContainText(marker);
   });
 
