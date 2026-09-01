@@ -32,7 +32,11 @@ test.describe("class table homework flow", () => {
 
     await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
     await selectStudent(page, STUDENT_LABEL);
-    await saveWeeklySchedule(page, { weekday: "1", timeLocal: "18:00" });
+    await saveWeeklySchedule(page, {
+      weekday: "1",
+      timeLocal: "18:00",
+      horizonWeeks: "12",
+    });
 
     const table = classTable(page);
     await expect(table).toBeVisible();

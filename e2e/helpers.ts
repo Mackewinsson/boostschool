@@ -79,7 +79,12 @@ export async function selectStudent(page: Page, label: RegExp = STUDENT_LABEL) {
 
 export async function saveWeeklySchedule(
   page: Page,
-  input: { weekday: string; timeLocal: string; meetUrl?: string },
+  input: {
+    weekday: string;
+    timeLocal: string;
+    meetUrl?: string;
+    horizonWeeks?: string;
+  },
 ) {
   await page.getByRole("button", { name: "Horario fijo (cada semana)" }).click();
   await page.locator('select[name="weekday"]').selectOption(input.weekday);
@@ -91,6 +96,10 @@ export async function saveWeeklySchedule(
 
   const meetInput = page.locator('input[name="meetUrl"]');
   await meetInput.fill(input.meetUrl ?? MEET_URL);
+
+  if (input.horizonWeeks) {
+    await page.getByTestId("schedule-horizon").selectOption(input.horizonWeeks);
+  }
 
   const activeInput = page.locator('input[name="active"]');
   await activeInput.check();
@@ -109,11 +118,15 @@ export async function saveWeeklySchedule(
       timeLocal?: string | null;
       weekday?: number | null;
       active?: boolean;
+      horizonWeeks?: number;
     };
   };
   expect(body.schedule?.timeLocal).toBe(input.timeLocal);
   expect(body.schedule?.weekday).toBe(Number(input.weekday));
   expect(body.schedule?.active).toBe(true);
+  if (input.horizonWeeks) {
+    expect(body.schedule?.horizonWeeks).toBe(Number(input.horizonWeeks));
+  }
 
   await expect(page.getByText(/Horario guardado/)).toBeVisible({
     timeout: 15_000,

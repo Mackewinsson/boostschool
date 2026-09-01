@@ -2,6 +2,12 @@
 
 import { useState } from "react";
 import type { StudentContent } from "@/lib/student-content/types";
+import {
+  DEFAULT_SCHEDULE_HORIZON_WEEKS,
+  SCHEDULE_HORIZON_OPTIONS,
+  horizonMonths,
+  parseHorizonWeeks,
+} from "@/lib/materials/schedule-horizon";
 import type { StudentClassSchedule } from "@/lib/materials/types";
 
 type StudentSchedulePanelProps = {
@@ -14,6 +20,7 @@ type StudentSchedulePanelProps = {
     weekday: number | null;
     timeLocal: string | null;
     meetUrl: string;
+    horizonWeeks: number;
     active: boolean;
   }) => Promise<void>;
 };
@@ -72,7 +79,7 @@ export function StudentSchedulePanel({
       </div>
 
       <form
-        className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end"
+        className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:items-end"
         onSubmit={(event) => {
           event.preventDefault();
           const form = event.currentTarget;
@@ -83,6 +90,10 @@ export function StudentSchedulePanel({
             weekday: mode === "weekly" ? Number(data.get("weekday")) : null,
             timeLocal: mode === "weekly" ? String(data.get("timeLocal") ?? "") : null,
             meetUrl: String(data.get("meetUrl") ?? ""),
+            horizonWeeks:
+              mode === "weekly"
+                ? parseHorizonWeeks(data.get("horizonWeeks"))
+                : parseHorizonWeeks(schedule?.horizonWeeks),
             active: mode === "weekly" ? (activeInput?.checked ?? true) : false,
           });
         }}
@@ -113,10 +124,37 @@ export function StudentSchedulePanel({
                 className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
               />
             </label>
+            <label className="block text-sm">
+              <span className="font-medium text-fg">{copy.scheduleHorizonLabel}</span>
+              <select
+                name="horizonWeeks"
+                data-testid="schedule-horizon"
+                defaultValue={parseHorizonWeeks(
+                  schedule?.horizonWeeks,
+                  DEFAULT_SCHEDULE_HORIZON_WEEKS,
+                )}
+                className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+              >
+                {SCHEDULE_HORIZON_OPTIONS.map((weeks) => {
+                  const months = horizonMonths(weeks);
+                  const label =
+                    months == null
+                      ? copy.scheduleHorizonWeeks.replace("{weeks}", String(weeks))
+                      : copy.scheduleHorizonMonths
+                          .replace("{weeks}", String(weeks))
+                          .replace("{months}", String(months));
+                  return (
+                    <option key={weeks} value={weeks}>
+                      {label}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
           </>
         ) : null}
 
-        <label className={`block text-sm ${mode === "adhoc" ? "sm:col-span-2 lg:col-span-2" : ""}`}>
+        <label className={`block text-sm ${mode === "weekly" ? "sm:col-span-2 lg:col-span-3" : "sm:col-span-2"}`}>
           <span className="font-medium text-fg">{copy.scheduleMeetLabel}</span>
           <input
             name="meetUrl"

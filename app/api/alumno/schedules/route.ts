@@ -8,6 +8,7 @@ import {
   upsertClassSchedule,
 } from "@/lib/materials/repository";
 import { generateSessionsForSchedule, realignFutureSessionsForSchedule } from "@/lib/materials/schedule-generate";
+import { parseHorizonWeeks } from "@/lib/materials/schedule-horizon";
 import { isValidHttpsUrl } from "@/lib/materials/validation";
 
 export async function GET() {
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
       timezone: body.timezone?.trim() || "Europe/Warsaw",
       meetUrl: meetUrl || null,
       titleTemplate: body.titleTemplate?.trim() || "Clase",
-      horizonWeeks: body.horizonWeeks ?? 6,
+      horizonWeeks: parseHorizonWeeks(body.horizonWeeks),
       active: body.active ?? true,
     });
 
