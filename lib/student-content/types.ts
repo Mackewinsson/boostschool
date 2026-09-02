@@ -2,6 +2,8 @@ export type StudentContent = {
   metadata: {
     studentTitle: string;
     studentDescription: string;
+    parentTitle: string;
+    parentDescription: string;
     teacherTitle: string;
     teacherDescription: string;
   };
@@ -56,6 +58,25 @@ export type StudentContent = {
     notesLabel: string;
     notesPlaceholder: string;
     notesSaved: string;
+  };
+  parent: {
+    title: string;
+    titleFallback: string;
+    subtitle: string;
+    linkedLabel: string;
+    unlinkedTitle: string;
+    unlinkedBody: string;
+    statUpcoming: string;
+    statDone: string;
+    statPending: string;
+    statOverdue: string;
+    homeworkBarTitle: string;
+    homeworkBarEmpty: string;
+    attentionTitle: string;
+    attentionEmpty: string;
+    nextClassTitle: string;
+    nextClassEmpty: string;
+    noHomework: string;
   };
   teacher: {
     title: string;

@@ -96,7 +96,7 @@ No hardcodear strings visibles en componentes. Cambios de estilo (colores, fuent
 |---|---|---|
 | **teacher** | `/alumno/profesor` | Horario, tabla de clases, deberes, estado, extras, Meet |
 | **student** | `/alumno` | Ver clases, deberes, Meet, apuntes |
-| **parent** | `/alumno` (read-only) | Ver clases, deberes y estado; **sin** Meet ni apuntes |
+| **parent** | `/alumno` (read-only dashboard) | Vinculado a un alumno: ve clases, deberes y **si los hizo**; **sin** Meet ni apuntes |
 
 `GET /api/alumno/my-materials` devuelve `readOnly: true` para padres.
 
@@ -108,8 +108,8 @@ Cada fila = una clase con fecha/hora:
 
 - **Profe:** edita fecha/hora + deberes (`description`) → botón **Guardar** (guarda ambos). Marca hecho: Pendiente / Sí / No / Parcial.
 - **Alumno:** ve deberes o mensaje vacío; puede unirse a Meet; apuntes. **Sin** estado hecho/pendiente.
-- **Padre:** igual que alumno pero **sin** enlace Meet, sin apuntes y **sin** estado hecho/pendiente.
-- Estado hecho solo lo ve y edita la profe (`student_materials.completion_status`).
+- **Padre:** dashboard del alumno vinculado: ve deberes y badge de estado (Pendiente / Sí / No / Parcial). **Sin** Meet, sin apuntes, sin editar estado.
+- Estado hecho lo marca solo la profe (`student_materials.completion_status`); el padre lo ve, el alumno no.
 - **Extras** (materiales sin `scheduled_at`) van fuera de la tabla.
 
 Deberes vacíos → copy `homeworkEmpty` (“Todavía no hay deberes…”).
@@ -235,6 +235,6 @@ npm run test:e2e
 3. **`"use client"`** solo con estado, efectos o eventos de browser.
 4. **Lint limpio** antes de commit.
 5. **Portal:** cambios de horario semanal deben realinear clases futuras; no dejar `active: false` por accidente al guardar horario fijo.
-6. **Padre:** sin Meet; sin edición de apuntes; sin estado de deberes. **Alumno:** sin estado de deberes (solo la profe marca hecho/pendiente).
+6. **Padre:** vinculado a un alumno; ve si hizo los deberes (solo lectura). Sin Meet; sin apuntes. **Alumno:** sin estado de deberes (solo la profe marca hecho/pendiente).
 7. **Accesibilidad:** roles semánticos; `aria-label` en controles solo-ícono.
 8. **Commits / push:** solo si el usuario lo pide.

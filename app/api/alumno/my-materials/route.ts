@@ -21,6 +21,13 @@ export async function GET() {
     const context = await requireAuth();
     const studentId = await getEffectiveStudentId(context);
     if (!studentId) {
+      if (context.role === "parent") {
+        return NextResponse.json({
+          materials: [],
+          readOnly: true,
+          linkedStudentName: null,
+        });
+      }
       return NextResponse.json({ error: "No linked student" }, { status: 403 });
     }
 

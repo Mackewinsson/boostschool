@@ -4,6 +4,8 @@ export const pl: StudentContent = {
   metadata: {
     studentTitle: "Moja strefa ucznia",
     studentDescription: "Uzyskaj dostęp do materiałów i zajęć udostępnionych przez Paulinę.",
+    parentTitle: "Strefa rodzica",
+    parentDescription: "Śledź zajęcia i zadania powiązanego ucznia.",
     teacherTitle: "Strefa nauczycielki",
     teacherDescription: "Zarządzaj zadaniami, zajęciami i dostępem uczniów oraz rodziców.",
   },
@@ -59,6 +61,27 @@ export const pl: StudentContent = {
     notesLabel: "Notatki z zajęć",
     notesPlaceholder: "Zapisz tu to, co chcesz zapamiętać z zajęć…",
     notesSaved: "Notatki zapisane",
+  },
+  parent: {
+    title: "Postępy: {name}",
+    titleFallback: "Postępy Twojego ucznia",
+    subtitle:
+      "Tutaj widzisz zajęcia powiązanego ucznia i czy zadania są zrobione. Paulina oznacza status po każdych zajęciach.",
+    linkedLabel: "Powiązany uczeń",
+    unlinkedTitle: "Nie ma jeszcze powiązanego ucznia",
+    unlinkedBody:
+      "Gdy Paulina powiąże Twoje konto z uczniem, zobaczysz tu zajęcia i czy zadania zostały zrobione.",
+    statUpcoming: "Nadchodzące zajęcia",
+    statDone: "Zadania zrobione",
+    statPending: "Zadania oczekujące",
+    statOverdue: "Zadania zaległe",
+    homeworkBarTitle: "Jak idą zadania",
+    homeworkBarEmpty: "Nie ma jeszcze przypisanych zadań.",
+    attentionTitle: "Do sprawdzenia",
+    attentionEmpty: "Wszystko na bieżąco: brak zaległych zadań.",
+    nextClassTitle: "Najbliższe zajęcia",
+    nextClassEmpty: "Nie ma teraz nadchodzących zajęć.",
+    noHomework: "Brak zadań",
   },
   teacher: {
     title: "Zajęcia i zadania",

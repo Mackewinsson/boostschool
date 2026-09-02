@@ -95,9 +95,14 @@ test.describe("class table homework flow", () => {
     await logout(page);
 
     await login(page, e2eCreds.parent, /\/alumno\/?$/);
+    await expect(page.getByTestId("parent-dashboard")).toBeVisible();
+    await expect(page.getByTestId("parent-linked-student")).toContainText(/Ana Alumna|alumno@bilingualboost\.test/);
     const parentRow = await rowWithText(page, marker);
     await expect(parentRow.getByTestId("session-homework-text")).toContainText(marker);
-    await expect(parentRow.getByTestId("homework-status-badge")).toHaveCount(0);
+    await expect(parentRow.getByTestId("homework-status-badge")).toHaveAttribute(
+      "data-status",
+      "done",
+    );
     await expect(parentRow.getByRole("link", { name: /Unirse a Meet|Meet/i })).toHaveCount(0);
     await expect(parentRow.getByTestId("class-notes")).toHaveCount(0);
     await expect(parentRow.getByTestId("homework-status")).toHaveCount(0);
@@ -145,9 +150,13 @@ test.describe("class table homework flow", () => {
     await logout(page);
 
     await login(page, e2eCreds.parent, /\/alumno\/?$/);
+    await expect(page.getByTestId("parent-dashboard")).toBeVisible();
     const parentRow = await rowWithText(page, marker);
     await expect(parentRow.getByTestId("session-homework-text")).toContainText(marker);
-    await expect(parentRow.getByTestId("homework-status-badge")).toHaveCount(0);
+    await expect(parentRow.getByTestId("homework-status-badge")).toHaveAttribute(
+      "data-status",
+      "partial",
+    );
     await expect(parentRow.getByTestId("homework-status")).toHaveCount(0);
     await expect(parentRow.getByRole("link", { name: /Unirse a Meet|Meet/i })).toHaveCount(0);
     await expect(parentRow.getByTestId("class-notes")).toHaveCount(0);
@@ -220,8 +229,12 @@ test.describe("class table homework flow", () => {
     await logout(page);
 
     await login(page, e2eCreds.parent, /\/alumno\/?$/);
+    await expect(page.getByTestId("parent-dashboard")).toBeVisible();
     const parentRow = await rowWithText(page, marker);
-    await expect(parentRow.getByTestId("homework-status-badge")).toHaveCount(0);
+    await expect(parentRow.getByTestId("homework-status-badge")).toHaveAttribute(
+      "data-status",
+      "not_done",
+    );
     await expect(parentRow.getByTestId("homework-status")).toHaveCount(0);
     await expect(parentRow.getByTestId("session-homework-text")).toContainText(marker);
   });
