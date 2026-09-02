@@ -4,6 +4,8 @@ export const en: StudentContent = {
   metadata: {
     studentTitle: "My student area",
     studentDescription: "Access materials and classes Paulina shared with you.",
+    parentTitle: "Parent area",
+    parentDescription: "Follow the linked student's classes and homework.",
     teacherTitle: "Teacher area",
     teacherDescription: "Manage homework, classes, and student/parent access.",
   },
@@ -59,6 +61,27 @@ export const en: StudentContent = {
     notesLabel: "Class notes",
     notesPlaceholder: "Write anything you want to remember from class…",
     notesSaved: "Notes saved",
+  },
+  parent: {
+    title: "{name}'s progress",
+    titleFallback: "Your student's progress",
+    subtitle:
+      "See the linked student's classes and whether homework is done. Paulina marks the status after each class.",
+    linkedLabel: "Linked student",
+    unlinkedTitle: "No student is linked yet",
+    unlinkedBody:
+      "When Paulina links your account to a student, you will see their classes and whether homework was done.",
+    statUpcoming: "Upcoming classes",
+    statDone: "Homework done",
+    statPending: "Homework pending",
+    statOverdue: "Overdue homework",
+    homeworkBarTitle: "Homework progress",
+    homeworkBarEmpty: "No homework assigned yet.",
+    attentionTitle: "Needs attention",
+    attentionEmpty: "All caught up: no overdue homework.",
+    nextClassTitle: "Next class",
+    nextClassEmpty: "There is no upcoming class right now.",
+    noHomework: "No homework",
   },
   teacher: {
     title: "Classes and homework",

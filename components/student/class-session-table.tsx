@@ -14,6 +14,7 @@ import {
 } from "@/lib/materials/schedule-time";
 import { sessionRowDomId } from "@/lib/materials/class-calendar";
 import { externalLinkProps } from "@/lib/site-links";
+import { HomeworkStatusBadge } from "./homework-status-badge";
 
 export type ClassSessionTableCopy = {
   classesTitle: string;
@@ -55,6 +56,8 @@ type ClassSessionTableProps = {
   allowNotes?: boolean;
   /** Parents should not get the Meet join link. */
   showMeetLink?: boolean;
+  /** Parents see a read-only badge; students do not. */
+  showHomeworkStatus?: boolean;
 };
 
 const DEFAULT_TZ = "Europe/Warsaw";
@@ -73,6 +76,7 @@ export function ClassSessionTable({
   onSaveNotes,
   allowNotes = false,
   showMeetLink = true,
+  showHomeworkStatus = false,
 }: ClassSessionTableProps) {
   const [newClassAt, setNewClassAt] = useState("");
   const { upcoming, past } = useMemo(() => {
@@ -97,6 +101,7 @@ export function ClassSessionTable({
             onSaveNotes={onSaveNotes}
             allowNotes={allowNotes}
             showMeetLink={showMeetLink}
+            showHomeworkStatus={showHomeworkStatus}
           />
         ))}
       </ul>
@@ -188,6 +193,7 @@ function SessionRow({
   onSaveNotes,
   allowNotes,
   showMeetLink,
+  showHomeworkStatus,
 }: {
   session: Material;
   locale: Locale;
@@ -200,6 +206,7 @@ function SessionRow({
   onSaveNotes?: ClassSessionTableProps["onSaveNotes"];
   allowNotes: boolean;
   showMeetLink: boolean;
+  showHomeworkStatus: boolean;
 }) {
   const [homework, setHomework] = useState(session.description ?? "");
   const [scheduledAt, setScheduledAt] = useState(
@@ -286,6 +293,21 @@ function SessionRow({
                 <option value="not_done">{copy.statusNotDone}</option>
                 <option value="partial">{copy.statusPartial}</option>
               </select>
+          </div>
+        ) : showHomeworkStatus && hasHomework ? (
+          <div className="sm:text-right">
+            <p className="text-xs font-medium text-fg-faint">{copy.statusLabel}</p>
+            <div className="mt-1">
+              <HomeworkStatusBadge
+                status={status}
+                labels={{
+                  pending: copy.statusPending,
+                  done: copy.statusDone,
+                  notDone: copy.statusNotDone,
+                  partial: copy.statusPartial,
+                }}
+              />
+            </div>
           </div>
         ) : null}
       </div>

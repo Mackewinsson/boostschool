@@ -22,9 +22,11 @@ test.describe("portal auth by role", () => {
   test("parent lands on /alumno with class table", async ({ page }) => {
     await login(page, e2eCreds.parent, /\/alumno\/?$/);
     await expect(page).toHaveURL(/\/alumno\/?$/);
-    await expect(page.getByTestId("class-session-table")).toBeVisible({
+    await expect(page.getByTestId("parent-dashboard")).toBeVisible({
       timeout: 15_000,
     });
+    await expect(page.getByTestId("parent-linked-student")).toBeVisible();
+    await expect(page.getByTestId("class-session-table")).toBeVisible();
     await logout(page);
   });
 

@@ -4,6 +4,8 @@ export const es: StudentContent = {
   metadata: {
     studentTitle: "Mi área de alumno",
     studentDescription: "Accede a los materiales y clases que Paulina compartió contigo.",
+    parentTitle: "Área de madre/padre",
+    parentDescription: "Sigue las clases y los deberes del alumno vinculado.",
     teacherTitle: "Área de profesora",
     teacherDescription: "Gestiona deberes, clases y acceso de alumnos y padres.",
   },
@@ -59,6 +61,27 @@ export const es: StudentContent = {
     notesLabel: "Apuntes de clase",
     notesPlaceholder: "Escribe aquí lo que quieras recordar de la clase…",
     notesSaved: "Apuntes guardados",
+  },
+  parent: {
+    title: "El progreso de {name}",
+    titleFallback: "El progreso de tu alumno",
+    subtitle:
+      "Aquí ves las clases del alumno vinculado y si ya hizo los deberes. Paulina marca el estado después de cada clase.",
+    linkedLabel: "Alumno vinculado",
+    unlinkedTitle: "Todavía no hay un alumno vinculado",
+    unlinkedBody:
+      "Cuando Paulina vincule tu cuenta con un alumno, aquí verás sus clases y si hizo los deberes.",
+    statUpcoming: "Próximas clases",
+    statDone: "Deberes hechos",
+    statPending: "Deberes pendientes",
+    statOverdue: "Deberes atrasados",
+    homeworkBarTitle: "Cómo van los deberes",
+    homeworkBarEmpty: "Todavía no hay deberes asignados.",
+    attentionTitle: "Para revisar",
+    attentionEmpty: "Todo al día: no hay deberes atrasados.",
+    nextClassTitle: "Próxima clase",
+    nextClassEmpty: "No hay una clase próxima por ahora.",
+    noHomework: "Sin deberes",
   },
   teacher: {
     title: "Clases y deberes",
