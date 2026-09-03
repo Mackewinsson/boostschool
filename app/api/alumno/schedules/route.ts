@@ -9,6 +9,7 @@ import {
 } from "@/lib/materials/repository";
 import { generateSessionsForSchedule, realignFutureSessionsForSchedule } from "@/lib/materials/schedule-generate";
 import { parseHorizonWeeks } from "@/lib/materials/schedule-horizon";
+import { parseOptionalSlot, slotKey } from "@/lib/materials/schedule-slots";
 import { isValidHttpsUrl } from "@/lib/materials/validation";
 
 export async function GET() {
@@ -28,12 +29,32 @@ type UpsertPayload = {
   studentUserId?: string;
   weekday?: number | null;
   timeLocal?: string | null;
+  weekday2?: number | null;
+  timeLocal2?: string | null;
   timezone?: string;
   meetUrl?: string;
   titleTemplate?: string;
   horizonWeeks?: number;
   active?: boolean;
 };
+
+function slotErrorResponse(error: "incomplete" | "invalid", slot: "first" | "second") {
+  if (error === "incomplete") {
+    return NextResponse.json(
+      {
+        error:
+          slot === "second"
+            ? "Second weekday and time are both required"
+            : "Weekday and time are both required for a fixed schedule",
+      },
+      { status: 400 },
+    );
+  }
+  return NextResponse.json(
+    { error: slot === "second" ? "Invalid second weekday or time" : "Invalid weekday or time" },
+    { status: 400 },
+  );
+}
 
 export async function POST(request: Request) {
   try {
@@ -45,26 +66,28 @@ export async function POST(request: Request) {
     const body = (await request.json()) as UpsertPayload;
     const studentUserId = body.studentUserId?.trim() ?? "";
     const meetUrl = body.meetUrl?.trim() ?? "";
-    const timeLocalRaw = body.timeLocal?.trim() ?? "";
-    const hasWeekday =
-      body.weekday !== undefined && body.weekday !== null && body.weekday !== ("" as unknown);
-    const weekday = hasWeekday ? Number(body.weekday) : null;
 
     if (!studentUserId) {
       return NextResponse.json({ error: "Student is required" }, { status: 400 });
     }
 
-    const hasFixedSlot = weekday != null && Boolean(timeLocalRaw);
-    if (hasFixedSlot) {
-      if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) {
-        return NextResponse.json({ error: "Invalid weekday" }, { status: 400 });
-      }
-      if (!/^\d{2}:\d{2}$/.test(timeLocalRaw)) {
-        return NextResponse.json({ error: "Invalid time" }, { status: 400 });
-      }
-    } else if (weekday != null || timeLocalRaw) {
+    const first = parseOptionalSlot(body.weekday, body.timeLocal?.trim() ?? "");
+    if (!first.ok) {
+      return slotErrorResponse(first.error, "first");
+    }
+    const second = parseOptionalSlot(body.weekday2, body.timeLocal2?.trim() ?? "");
+    if (!second.ok) {
+      return slotErrorResponse(second.error, "second");
+    }
+    if (second.slot && !first.slot) {
       return NextResponse.json(
-        { error: "Weekday and time are both required for a fixed schedule" },
+        { error: "A first weekly slot is required before adding a second class" },
+        { status: 400 },
+      );
+    }
+    if (first.slot && second.slot && slotKey(first.slot) === slotKey(second.slot)) {
+      return NextResponse.json(
+        { error: "The two weekly classes must be on different days or times" },
         { status: 400 },
       );
     }
@@ -73,10 +96,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Valid https Meet URL is required" }, { status: 400 });
     }
 
+    const hasFixedSlot = Boolean(first.slot);
     const schedule = await upsertClassSchedule({
       studentUserId,
-      weekday: hasFixedSlot ? weekday : null,
-      timeLocal: hasFixedSlot ? timeLocalRaw : null,
+      weekday: first.slot?.weekday ?? null,
+      timeLocal: first.slot?.timeLocal ?? null,
+      weekday2: second.slot?.weekday ?? null,
+      timeLocal2: second.slot?.timeLocal ?? null,
       timezone: body.timezone?.trim() || "Europe/Warsaw",
       meetUrl: meetUrl || null,
       titleTemplate: body.titleTemplate?.trim() || "Clase",

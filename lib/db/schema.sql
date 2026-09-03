@@ -113,6 +113,8 @@ CREATE TABLE IF NOT EXISTS student_class_schedules (
   student_user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   weekday SMALLINT CHECK (weekday IS NULL OR weekday BETWEEN 0 AND 6),
   time_local TIME,
+  weekday_2 SMALLINT,
+  time_local_2 TIME,
   timezone TEXT NOT NULL DEFAULT 'Europe/Warsaw',
   meet_url TEXT,
   title_template TEXT NOT NULL DEFAULT 'Clase',
@@ -135,6 +137,30 @@ ALTER TABLE student_class_schedules
 ALTER TABLE student_class_schedules
   ADD CONSTRAINT student_class_schedules_weekday_check
   CHECK (weekday IS NULL OR weekday BETWEEN 0 AND 6);
+
+-- Optional second weekly slot (same Meet URL as the first slot)
+ALTER TABLE student_class_schedules
+  ADD COLUMN IF NOT EXISTS weekday_2 SMALLINT;
+
+ALTER TABLE student_class_schedules
+  ADD COLUMN IF NOT EXISTS time_local_2 TIME;
+
+ALTER TABLE student_class_schedules
+  DROP CONSTRAINT IF EXISTS student_class_schedules_weekday_2_check;
+
+ALTER TABLE student_class_schedules
+  ADD CONSTRAINT student_class_schedules_weekday_2_check
+  CHECK (weekday_2 IS NULL OR weekday_2 BETWEEN 0 AND 6);
+
+ALTER TABLE student_class_schedules
+  DROP CONSTRAINT IF EXISTS student_class_schedules_second_slot_check;
+
+ALTER TABLE student_class_schedules
+  ADD CONSTRAINT student_class_schedules_second_slot_check
+  CHECK (
+    (weekday_2 IS NULL AND time_local_2 IS NULL)
+    OR (weekday_2 IS NOT NULL AND time_local_2 IS NOT NULL)
+  );
 
 ALTER TABLE materials
   DROP CONSTRAINT IF EXISTS materials_schedule_id_fkey;

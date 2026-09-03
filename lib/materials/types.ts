@@ -23,12 +23,18 @@ export type Material = {
   notes?: string | null;
 };
 
-/** weekday: 0 = Sunday … 6 = Saturday (JS Date.getDay). Null = class-by-class (Meet only). */
+/**
+ * weekday / timeLocal: first weekly slot (0 = Sunday … 6 = Saturday).
+ * weekday2 / timeLocal2: optional second weekly slot (same Meet link).
+ * Null weekday + time = class-by-class (Meet only).
+ */
 export type StudentClassSchedule = {
   id: string;
   studentUserId: string;
   weekday: number | null;
   timeLocal: string | null;
+  weekday2: number | null;
+  timeLocal2: string | null;
   timezone: string;
   meetUrl: string | null;
   titleTemplate: string;

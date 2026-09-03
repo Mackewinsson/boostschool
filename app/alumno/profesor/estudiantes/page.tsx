@@ -27,17 +27,25 @@ function weekdayLabel(
 }
 
 function formatSchedule(
-  weekday: number | null,
-  timeLocal: string | null,
-  scheduleActive: boolean,
+  student: {
+    weekday: number | null;
+    timeLocal: string | null;
+    weekday2: number | null;
+    timeLocal2: string | null;
+    scheduleActive: boolean;
+  },
   copy: StudentContent["teacher"],
 ): string {
-  if (weekday == null || !timeLocal) {
+  if (student.weekday == null || !student.timeLocal) {
     return copy.studentsNoSchedule;
   }
-  const day = weekdayLabel(weekday, copy);
-  const base = `${day} ${timeLocal}`;
-  return scheduleActive ? base : `${base} (${copy.usersStatusInactive})`;
+  const first = `${weekdayLabel(student.weekday, copy)} ${student.timeLocal}`;
+  const second =
+    student.weekday2 != null && student.timeLocal2
+      ? ` · ${weekdayLabel(student.weekday2, copy)} ${student.timeLocal2}`
+      : "";
+  const base = `${first}${second}`;
+  return student.scheduleActive ? base : `${base} (${copy.usersStatusInactive})`;
 }
 
 export default async function TeacherStudentsPage() {
@@ -113,12 +121,7 @@ export default async function TeacherStudentsPage() {
                       : copy.studentsNoParent}
                   </td>
                   <td>
-                    {formatSchedule(
-                      student.weekday,
-                      student.timeLocal,
-                      student.scheduleActive,
-                      copy,
-                    )}
+                    {formatSchedule(student, copy)}
                   </td>
                   <td>
                     <Link

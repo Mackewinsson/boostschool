@@ -120,15 +120,16 @@ Deberes vacíos → copy `homeworkEmpty` (“Todavía no hay deberes…”).
 
 | Modo | Comportamiento |
 |---|---|
-| **Horario fijo** | Día + hora 24h (Warsaw) + Meet + “Generar próximas clases”. Al guardar, **realinea** todas las clases futuras a ese día/hora y conserva textos de deberes. |
+| **Horario fijo** | 1 o 2 días + hora 24h (Warsaw) + Meet (mismo enlace en todas) + “Generar próximas clases”. Al guardar, **realinea** todas las clases futuras a esos días/horas y conserva textos de deberes. |
 | **Clase a clase** | Solo Meet; profe añade fechas con “Crear clase”. `active` queda en false. |
 
 Al pasar de “clase a clase” → “horario fijo”, el checkbox de generar debe arrancar **activo** (si no, el upsert guarda `active: false` y **no realinea**).
 
-Lógica de slots / TZ / realign: `lib/materials/schedule-generate.ts`
+Lógica de slots / TZ / realign: `lib/materials/schedule-generate.ts` + `lib/materials/schedule-slots.ts`
 
 - Zona por defecto: `Europe/Warsaw`, hora en **24h** (`20:00` = 8 pm).
-- `realignFutureSessionsForSchedule`: mueve futuras (con y sin deberes), borra shells vacíos, rellena horizonte.
+- Segundo slot opcional (`weekday_2` / `time_local_2`): alumnos con 2 clases fijas por semana; el Meet es el mismo.
+- `realignFutureSessionsForSchedule`: mueve futuras (con y sin deberes), borra shells vacíos, rellena horizonte (semanas × número de slots).
 - Unique `(schedule_id, scheduled_at)` en materials — el realign desacopla `schedule_id` antes de reasignar.
 
 ### Datos clave
@@ -137,7 +138,7 @@ Lógica de slots / TZ / realign: `lib/materials/schedule-generate.ts`
 |---|---|
 | `materials` | Clase o extra (`scheduled_at`, `meet_url`, `description` = deberes, `schedule_id`) |
 | `student_materials` | Asignación + `completion_status` + `notes` |
-| `student_class_schedules` | Horario semanal o Meet-only por alumno |
+| `student_class_schedules` | Horario semanal (1 o 2 slots) o Meet-only por alumno |
 
 Schema: `lib/db/schema.sql`. Migrar: `npm run db:migrate`.
 
