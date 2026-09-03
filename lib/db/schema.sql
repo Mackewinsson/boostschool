@@ -16,6 +16,13 @@ ALTER TABLE materials
 ALTER TABLE materials
   ADD COLUMN IF NOT EXISTS schedule_id UUID;
 
+ALTER TABLE materials
+  ADD COLUMN IF NOT EXISTS original_scheduled_at TIMESTAMPTZ;
+
+CREATE INDEX IF NOT EXISTS materials_original_scheduled_at_idx
+  ON materials (original_scheduled_at)
+  WHERE original_scheduled_at IS NOT NULL;
+
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL UNIQUE,
@@ -161,6 +168,28 @@ ALTER TABLE student_class_schedules
     (weekday_2 IS NULL AND time_local_2 IS NULL)
     OR (weekday_2 IS NOT NULL AND time_local_2 IS NOT NULL)
   );
+
+ALTER TABLE student_class_schedules
+  ADD COLUMN IF NOT EXISTS weekly_slots JSONB NOT NULL DEFAULT '[]'::jsonb;
+
+UPDATE student_class_schedules
+SET weekly_slots = (
+  CASE
+    WHEN weekday IS NULL OR time_local IS NULL THEN '[]'::jsonb
+    ELSE jsonb_build_array(
+      jsonb_build_object('weekday', weekday, 'timeLocal', to_char(time_local, 'HH24:MI'))
+    ) || CASE
+      WHEN weekday_2 IS NOT NULL AND time_local_2 IS NOT NULL THEN
+        jsonb_build_array(
+          jsonb_build_object('weekday', weekday_2, 'timeLocal', to_char(time_local_2, 'HH24:MI'))
+        )
+      ELSE '[]'::jsonb
+    END
+  END
+)
+WHERE weekly_slots = '[]'::jsonb
+  AND weekday IS NOT NULL
+  AND time_local IS NOT NULL;
 
 ALTER TABLE materials
   DROP CONSTRAINT IF EXISTS materials_schedule_id_fkey;

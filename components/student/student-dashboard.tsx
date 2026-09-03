@@ -127,6 +127,7 @@ export function StudentDashboard({
               notesLabel: copy.notesLabel,
               notesPlaceholder: copy.notesPlaceholder,
               notesSaved: copy.notesSaved,
+              sessionRescheduled: copy.sessionRescheduled,
             }}
           />
 

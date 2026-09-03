@@ -17,6 +17,30 @@ import { ClassMonthCalendar } from "./class-month-calendar";
 import { ClassSessionTable } from "./class-session-table";
 import { MaterialKindIcon } from "./material-kind-icon";
 import { StudentSchedulePanel } from "./student-schedule-panel";
+import { SCHEDULE_ERROR } from "@/lib/materials/schedule-slots";
+
+async function teacherApiError(
+  response: Response,
+  copy: StudentContent["teacher"],
+): Promise<string> {
+  try {
+    const body = (await response.json()) as { error?: string };
+    if (body.error === SCHEDULE_ERROR.duplicateSlot) return copy.scheduleErrorDuplicateSlot;
+    if (body.error === SCHEDULE_ERROR.tooManySlots) return copy.scheduleErrorTooManySlots;
+    if (
+      body.error === SCHEDULE_ERROR.incompleteSlot ||
+      body.error === SCHEDULE_ERROR.invalidSlot
+    ) {
+      return copy.scheduleErrorIncompleteSlot;
+    }
+    if (body.error === SCHEDULE_ERROR.sessionTimeConflict) {
+      return copy.sessionErrorTimeConflict;
+    }
+  } catch {
+    // fall through
+  }
+  return copy.errorGeneric;
+}
 
 type TeacherDashboardProps = {
   copy: StudentContent["teacher"];
@@ -180,10 +204,7 @@ export function TeacherDashboard({
 
   async function handleSaveSchedule(input: {
     studentUserId: string;
-    weekday: number | null;
-    timeLocal: string | null;
-    weekday2: number | null;
-    timeLocal2: string | null;
+    slots: { weekday: number; timeLocal: string }[];
     meetUrl: string;
     horizonWeeks: number;
     active: boolean;
@@ -198,7 +219,7 @@ export function TeacherDashboard({
         body: JSON.stringify(input),
       });
       if (!response.ok) {
-        setError(copy.errorGeneric);
+        setError(await teacherApiError(response, copy));
         return;
       }
       // Refresh before toast so class times match the new schedule when the
@@ -266,7 +287,7 @@ export function TeacherDashboard({
         }),
       });
       if (!response.ok) {
-        setError(copy.errorGeneric);
+        setError(await teacherApiError(response, copy));
         return;
       }
       setMessage(copy.successUpdated);
@@ -463,7 +484,7 @@ export function TeacherDashboard({
           {selectedStudentId && dashTab === "classes" ? (
             <>
               <StudentSchedulePanel
-                key={`${selectedStudentId}-${selectedSchedule?.weekday ?? "x"}-${selectedSchedule?.timeLocal ?? "none"}-${selectedSchedule?.weekday2 ?? "x2"}-${selectedSchedule?.timeLocal2 ?? "none2"}-${selectedSchedule?.horizonWeeks ?? "h"}-${selectedSchedule?.active ? "1" : "0"}`}
+                key={`${selectedStudentId}-${JSON.stringify(selectedSchedule?.slots ?? [])}-${selectedSchedule?.horizonWeeks ?? "h"}-${selectedSchedule?.active ? "1" : "0"}`}
                 studentId={selectedStudentId}
                 schedule={selectedSchedule}
                 saving={busyKey === "schedule"}
@@ -509,6 +530,7 @@ export function TeacherDashboard({
                   statusPartial: copy.statusPartial,
                   addClassLabel: copy.addClassLabel,
                   addClassButton: copy.addClassButton,
+                  sessionRescheduled: copy.sessionRescheduled,
                 }}
                 onSaveHomework={handleSaveHomework}
                 onStatusChange={handleStatusChange}
