@@ -82,6 +82,8 @@ export async function saveWeeklySchedule(
   input: {
     weekday: string;
     timeLocal: string;
+    weekday2?: string;
+    timeLocal2?: string;
     meetUrl?: string;
     horizonWeeks?: string;
   },
@@ -93,6 +95,20 @@ export async function saveWeeklySchedule(
   await timeInput.click();
   await timeInput.fill(input.timeLocal);
   await expect(timeInput).toHaveValue(input.timeLocal);
+
+  const secondToggle = page.getByTestId("schedule-second-slot");
+  if (input.weekday2 != null && input.timeLocal2) {
+    await secondToggle.check();
+    await expect(secondToggle).toBeChecked();
+    await page.locator('select[name="weekday2"]').selectOption(input.weekday2);
+    const time2 = page.locator('input[name="timeLocal2"]');
+    await time2.click();
+    await time2.fill(input.timeLocal2);
+    await expect(time2).toHaveValue(input.timeLocal2);
+  } else {
+    await secondToggle.uncheck();
+    await expect(secondToggle).not.toBeChecked();
+  }
 
   const meetInput = page.locator('input[name="meetUrl"]');
   await meetInput.fill(input.meetUrl ?? MEET_URL);
@@ -117,13 +133,23 @@ export async function saveWeeklySchedule(
     schedule?: {
       timeLocal?: string | null;
       weekday?: number | null;
+      timeLocal2?: string | null;
+      weekday2?: number | null;
       active?: boolean;
       horizonWeeks?: number;
+      meetUrl?: string | null;
     };
   };
   expect(body.schedule?.timeLocal).toBe(input.timeLocal);
   expect(body.schedule?.weekday).toBe(Number(input.weekday));
   expect(body.schedule?.active).toBe(true);
+  if (input.weekday2 != null && input.timeLocal2) {
+    expect(body.schedule?.weekday2).toBe(Number(input.weekday2));
+    expect(body.schedule?.timeLocal2).toBe(input.timeLocal2);
+  } else {
+    expect(body.schedule?.weekday2 ?? null).toBeNull();
+    expect(body.schedule?.timeLocal2 ?? null).toBeNull();
+  }
   if (input.horizonWeeks) {
     expect(body.schedule?.horizonWeeks).toBe(Number(input.horizonWeeks));
   }
@@ -141,7 +167,11 @@ export async function saveWeeklySchedule(
           .evaluateAll((inputs) =>
             inputs.map((el) => (el as HTMLInputElement).value).filter(Boolean),
           );
-        return values.some((value) => value.endsWith(`T${input.timeLocal}`));
+        const hasFirst = values.some((value) => value.endsWith(`T${input.timeLocal}`));
+        if (!input.timeLocal2) return hasFirst;
+        return (
+          hasFirst && values.some((value) => value.endsWith(`T${input.timeLocal2}`))
+        );
       },
       { timeout: 15_000 },
     )
@@ -155,6 +185,13 @@ export async function saveAdhocMeet(page: Page, meetUrl = MEET_URL) {
   await expect(page.getByText(/Horario guardado/)).toBeVisible({
     timeout: 15_000,
   });
+}
+
+/** JS weekday (0=Sun) from a datetime-local date part, timezone-safe. */
+export function weekdayFromDatetimeLocal(value: string): number {
+  const datePart = value.split("T")[0] ?? "";
+  const [year, month, day] = datePart.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0)).getUTCDay();
 }
 
 export function classTable(page: Page) {

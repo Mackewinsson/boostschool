@@ -8,7 +8,14 @@ import {
   listClassSchedules,
 } from "./repository";
 import {
+  hasFixedWeeklySlot,
+  parseClock,
+  pickSlotForDay,
+  weeklySlotsOf,
+} from "./schedule-slots";
+import {
   partsInZone,
+  toDatetimeLocalValueInZone,
   wallTimeInZoneToUtc,
 } from "./schedule-time";
 import type { Material, StudentClassSchedule } from "./types";
@@ -19,54 +26,54 @@ export {
   wallTimeInZoneToUtc,
 } from "./schedule-time";
 
-export function hasFixedWeeklySlot(schedule: StudentClassSchedule): boolean {
-  return (
-    schedule.weekday != null &&
-    Boolean(schedule.timeLocal) &&
-    /^\d{2}:\d{2}$/.test(schedule.timeLocal ?? "")
-  );
-}
+export { hasFixedWeeklySlot };
 
 export function upcomingOccurrences(
   schedule: StudentClassSchedule,
   from: Date = new Date(),
 ): Date[] {
-  if (!hasFixedWeeklySlot(schedule) || !schedule.timeLocal) {
-    return [];
-  }
-
-  const [hourStr, minuteStr] = schedule.timeLocal.split(":");
-  const hour = Number(hourStr);
-  const minute = Number(minuteStr);
-  if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
+  const slots = weeklySlotsOf(schedule)
+    .map((slot) => {
+      const clock = parseClock(slot.timeLocal);
+      if (!clock) return null;
+      return { weekday: slot.weekday, ...clock };
+    })
+    .filter((slot): slot is { weekday: number; hour: number; minute: number } =>
+      Boolean(slot),
+    );
+  if (slots.length === 0) {
     return [];
   }
 
   const results: Date[] = [];
   const cursor = new Date(from.getTime());
   const maxDays = Math.max(1, schedule.horizonWeeks) * 7 + 1;
+  const maxResults = schedule.horizonWeeks * slots.length;
 
-  for (let i = 0; i < maxDays && results.length < schedule.horizonWeeks; i += 1) {
+  for (let i = 0; i < maxDays && results.length < maxResults; i += 1) {
     const day = new Date(cursor.getTime() + i * 24 * 60 * 60 * 1000);
     const parts = partsInZone(day, schedule.timezone);
-    if (parts.weekday !== schedule.weekday) {
-      continue;
+    for (const slot of slots) {
+      if (parts.weekday !== slot.weekday) {
+        continue;
+      }
+      const occurrence = wallTimeInZoneToUtc(
+        parts.year,
+        parts.month,
+        parts.day,
+        slot.hour,
+        slot.minute,
+        schedule.timezone,
+      );
+      if (occurrence.getTime() < from.getTime() - 60_000) {
+        continue;
+      }
+      results.push(occurrence);
     }
-    const occurrence = wallTimeInZoneToUtc(
-      parts.year,
-      parts.month,
-      parts.day,
-      hour,
-      minute,
-      schedule.timezone,
-    );
-    if (occurrence.getTime() < from.getTime() - 60_000) {
-      continue;
-    }
-    results.push(occurrence);
   }
 
-  return results;
+  results.sort((a, b) => a.getTime() - b.getTime());
+  return results.slice(0, maxResults);
 }
 
 function formatTitleDate(date: Date, locale: Locale, timeZone: string): string {
@@ -105,14 +112,12 @@ export async function realignFutureSessionsForSchedule(
   schedule: StudentClassSchedule,
   locale: Locale = "es",
 ): Promise<number> {
-  if (!schedule.active || !hasFixedWeeklySlot(schedule) || !schedule.timeLocal) {
+  if (!schedule.active || !hasFixedWeeklySlot(schedule)) {
     return 0;
   }
 
-  const [hourStr, minuteStr] = schedule.timeLocal.split(":");
-  const hour = Number(hourStr);
-  const minute = Number(minuteStr);
-  if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
+  const slots = weeklySlotsOf(schedule);
+  if (slots.length === 0) {
     return 0;
   }
 
@@ -178,16 +183,27 @@ export async function realignFutureSessionsForSchedule(
     `;
   }
 
-  // Extra homework beyond the horizon: keep text, snap clock to new time on same day
+  // Extra homework beyond the horizon: keep text, snap clock to matching slot
   for (let i = pairCount; i < withHomework.length; i += 1) {
     const row = withHomework[i];
     const parts = partsInZone(new Date(row.scheduled_at), schedule.timezone);
+    const local = toDatetimeLocalValueInZone(row.scheduled_at, schedule.timezone);
+    const originalHour = Number(local.slice(11, 13));
+    const originalMinute = Number(local.slice(14, 16));
+    const slot = pickSlotForDay(
+      slots,
+      parts.weekday,
+      Number.isFinite(originalHour) ? originalHour : 0,
+      Number.isFinite(originalMinute) ? originalMinute : 0,
+    );
+    const clock = parseClock(slot.timeLocal);
+    if (!clock) continue;
     const occurrence = wallTimeInZoneToUtc(
       parts.year,
       parts.month,
       parts.day,
-      hour,
-      minute,
+      clock.hour,
+      clock.minute,
       schedule.timezone,
     );
     const dateLabel = formatTitleDate(occurrence, locale, schedule.timezone);

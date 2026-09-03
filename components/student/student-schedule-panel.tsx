@@ -19,6 +19,8 @@ type StudentSchedulePanelProps = {
     studentUserId: string;
     weekday: number | null;
     timeLocal: string | null;
+    weekday2: number | null;
+    timeLocal2: string | null;
     meetUrl: string;
     horizonWeeks: number;
     active: boolean;
@@ -47,6 +49,12 @@ export function StudentSchedulePanel({
   const [mode, setMode] = useState<"weekly" | "adhoc">(
     initialWeekly ? "weekly" : "adhoc",
   );
+  const [hasSecondSlot, setHasSecondSlot] = useState(
+    schedule?.weekday2 != null && Boolean(schedule.timeLocal2),
+  );
+
+  const defaultSecondWeekday =
+    schedule?.weekday2 ?? (schedule?.weekday === 4 ? 1 : 4);
 
   return (
     <section className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
@@ -85,16 +93,20 @@ export function StudentSchedulePanel({
           const form = event.currentTarget;
           const data = new FormData(form);
           const activeInput = form.querySelector<HTMLInputElement>('input[name="active"]');
+          const weekly = mode === "weekly";
+          const second = weekly && hasSecondSlot;
           void onSave({
             studentUserId: studentId,
-            weekday: mode === "weekly" ? Number(data.get("weekday")) : null,
-            timeLocal: mode === "weekly" ? String(data.get("timeLocal") ?? "") : null,
+            weekday: weekly ? Number(data.get("weekday")) : null,
+            timeLocal: weekly ? String(data.get("timeLocal") ?? "") : null,
+            weekday2: second ? Number(data.get("weekday2")) : null,
+            timeLocal2: second ? String(data.get("timeLocal2") ?? "") : null,
             meetUrl: String(data.get("meetUrl") ?? ""),
             horizonWeeks:
-              mode === "weekly"
+              weekly
                 ? parseHorizonWeeks(data.get("horizonWeeks"))
                 : parseHorizonWeeks(schedule?.horizonWeeks),
-            active: mode === "weekly" ? (activeInput?.checked ?? true) : false,
+            active: weekly ? (activeInput?.checked ?? true) : false,
           });
         }}
       >
@@ -151,6 +163,44 @@ export function StudentSchedulePanel({
                 })}
               </select>
             </label>
+            <label className="flex items-center gap-2 text-sm text-fg-muted sm:col-span-2 lg:col-span-3">
+              <input
+                type="checkbox"
+                data-testid="schedule-second-slot"
+                checked={hasSecondSlot}
+                onChange={(event) => setHasSecondSlot(event.target.checked)}
+                className="rounded border-border"
+              />
+              {copy.scheduleSecondSlotToggle}
+            </label>
+            {hasSecondSlot ? (
+              <>
+                <label className="block text-sm">
+                  <span className="font-medium text-fg">{copy.scheduleWeekday2Label}</span>
+                  <select
+                    name="weekday2"
+                    defaultValue={defaultSecondWeekday}
+                    className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+                  >
+                    {WEEKDAYS.map((key, index) => (
+                      <option key={key} value={index}>
+                        {copy[key]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-sm">
+                  <span className="font-medium text-fg">{copy.scheduleTime2Label}</span>
+                  <input
+                    name="timeLocal2"
+                    type="time"
+                    required
+                    defaultValue={schedule?.timeLocal2 ?? schedule?.timeLocal ?? "18:00"}
+                    className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+                  />
+                </label>
+              </>
+            ) : null}
           </>
         ) : null}
 

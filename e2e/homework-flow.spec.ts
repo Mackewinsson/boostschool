@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
+  MEET_URL,
   STUDENT_LABEL,
   classRows,
   classTable,
@@ -15,6 +16,7 @@ import {
   uniqueFutureScheduledLocal,
   uniqueMarker,
   uniqueTitle,
+  weekdayFromDatetimeLocal,
 } from "./helpers";
 
 test.describe("class table homework flow", () => {
@@ -237,6 +239,42 @@ test.describe("class table homework flow", () => {
     );
     await expect(parentRow.getByTestId("homework-status")).toHaveCount(0);
     await expect(parentRow.getByTestId("session-homework-text")).toContainText(marker);
+  });
+
+  test("twice-weekly schedule generates both days with the same Meet link", async ({
+    page,
+  }) => {
+    await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
+    await selectStudent(page, STUDENT_LABEL);
+    await saveWeeklySchedule(page, {
+      weekday: "1",
+      timeLocal: "18:00",
+      weekday2: "4",
+      timeLocal2: "18:00",
+      horizonWeeks: "6",
+    });
+
+    const values = await classRows(page)
+      .locator('[data-testid="session-datetime"]')
+      .evaluateAll((inputs) =>
+        inputs.map((el) => (el as HTMLInputElement).value).filter(Boolean),
+      );
+    const weekdays = new Set(
+      values
+        .filter((value) => value.endsWith("T18:00"))
+        .map((value) => weekdayFromDatetimeLocal(value)),
+    );
+    expect(weekdays.has(1)).toBe(true);
+    expect(weekdays.has(4)).toBe(true);
+
+    const meetLinks = classRows(page).getByRole("link", { name: /Meet/i });
+    await expect(meetLinks.first()).toBeVisible();
+    const hrefs = await meetLinks.evaluateAll((anchors) =>
+      anchors.map((el) => (el as HTMLAnchorElement).href),
+    );
+    expect(hrefs.length).toBeGreaterThan(1);
+    expect(hrefs.every((href) => href.includes(MEET_URL))).toBe(true);
+    expect(new Set(hrefs).size).toBe(1);
   });
 
   test("extras stay outside class table and can be deleted", async ({ page }) => {

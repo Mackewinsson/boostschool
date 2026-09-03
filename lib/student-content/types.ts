@@ -132,6 +132,9 @@ export type StudentContent = {
     scheduleModeAdhoc: string;
     scheduleWeekdayLabel: string;
     scheduleTimeLabel: string;
+    scheduleSecondSlotToggle: string;
+    scheduleWeekday2Label: string;
+    scheduleTime2Label: string;
     scheduleHorizonLabel: string;
     scheduleHorizonWeeks: string;
     scheduleHorizonMonths: string;

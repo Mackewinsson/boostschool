@@ -1,6 +1,7 @@
 import type { Locale } from "@/lib/locale";
 import { getDb } from "@/lib/db/client";
 import { parseHorizonWeeks } from "./schedule-horizon";
+import { formatTimeLocal } from "./schedule-slots";
 import type {
   Assignment,
   CompletionStatus,
@@ -38,6 +39,8 @@ type ScheduleRow = {
   student_user_id: string;
   weekday: number | null;
   time_local: string | null;
+  weekday_2: number | null;
+  time_local_2: string | null;
   timezone: string;
   meet_url: string | null;
   title_template: string;
@@ -66,17 +69,13 @@ function mapMaterial(row: MaterialRow): Material {
 }
 
 function mapSchedule(row: ScheduleRow): StudentClassSchedule {
-  const timeLocal =
-    row.time_local == null
-      ? null
-      : typeof row.time_local === "string"
-        ? row.time_local.slice(0, 5)
-        : String(row.time_local).slice(0, 5);
   return {
     id: row.id,
     studentUserId: row.student_user_id,
     weekday: row.weekday == null ? null : Number(row.weekday),
-    timeLocal,
+    timeLocal: formatTimeLocal(row.time_local),
+    weekday2: row.weekday_2 == null ? null : Number(row.weekday_2),
+    timeLocal2: formatTimeLocal(row.time_local_2),
     timezone: row.timezone,
     meetUrl: row.meet_url,
     titleTemplate: row.title_template,
@@ -282,8 +281,8 @@ export async function setStudentNotes(
 export async function listClassSchedules(): Promise<StudentClassSchedule[]> {
   const sql = getDb();
   const rows = (await sql`
-    SELECT id, student_user_id, weekday, time_local, timezone, meet_url,
-           title_template, horizon_weeks, active
+    SELECT id, student_user_id, weekday, time_local, weekday_2, time_local_2,
+           timezone, meet_url, title_template, horizon_weeks, active
     FROM student_class_schedules
     ORDER BY created_at ASC
   `) as ScheduleRow[];
@@ -295,8 +294,8 @@ export async function getClassScheduleByStudentId(
 ): Promise<StudentClassSchedule | null> {
   const sql = getDb();
   const rows = (await sql`
-    SELECT id, student_user_id, weekday, time_local, timezone, meet_url,
-           title_template, horizon_weeks, active
+    SELECT id, student_user_id, weekday, time_local, weekday_2, time_local_2,
+           timezone, meet_url, title_template, horizon_weeks, active
     FROM student_class_schedules
     WHERE student_user_id = ${studentUserId}::uuid
     LIMIT 1
@@ -308,6 +307,8 @@ export async function upsertClassSchedule(input: {
   studentUserId: string;
   weekday?: number | null;
   timeLocal?: string | null;
+  weekday2?: number | null;
+  timeLocal2?: string | null;
   timezone?: string;
   meetUrl?: string | null;
   titleTemplate?: string;
@@ -322,16 +323,20 @@ export async function upsertClassSchedule(input: {
   const meetUrl = input.meetUrl?.trim() || null;
   const weekday = input.weekday ?? null;
   const timeLocal = input.timeLocal?.trim() || null;
+  const weekday2 = input.weekday2 ?? null;
+  const timeLocal2 = input.timeLocal2?.trim() || null;
 
   const rows = (await sql`
     INSERT INTO student_class_schedules (
-      student_user_id, weekday, time_local, timezone, meet_url,
-      title_template, horizon_weeks, active, updated_at
+      student_user_id, weekday, time_local, weekday_2, time_local_2,
+      timezone, meet_url, title_template, horizon_weeks, active, updated_at
     )
     VALUES (
       ${input.studentUserId}::uuid,
       ${weekday},
       ${timeLocal}::time,
+      ${weekday2},
+      ${timeLocal2}::time,
       ${timezone},
       ${meetUrl},
       ${titleTemplate},
@@ -342,14 +347,16 @@ export async function upsertClassSchedule(input: {
     ON CONFLICT (student_user_id) DO UPDATE SET
       weekday = EXCLUDED.weekday,
       time_local = EXCLUDED.time_local,
+      weekday_2 = EXCLUDED.weekday_2,
+      time_local_2 = EXCLUDED.time_local_2,
       timezone = EXCLUDED.timezone,
       meet_url = EXCLUDED.meet_url,
       title_template = EXCLUDED.title_template,
       horizon_weeks = EXCLUDED.horizon_weeks,
       active = EXCLUDED.active,
       updated_at = now()
-    RETURNING id, student_user_id, weekday, time_local, timezone, meet_url,
-              title_template, horizon_weeks, active
+    RETURNING id, student_user_id, weekday, time_local, weekday_2, time_local_2,
+              timezone, meet_url, title_template, horizon_weeks, active
   `) as ScheduleRow[];
   return mapSchedule(rows[0]);
 }

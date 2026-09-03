@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db/client";
+import { formatTimeLocal } from "./schedule-slots";
 
 export type StudentRosterRow = {
   id: string;
@@ -7,6 +8,8 @@ export type StudentRosterRow = {
   parentEmails: string[];
   weekday: number | null;
   timeLocal: string | null;
+  weekday2: number | null;
+  timeLocal2: string | null;
   scheduleActive: boolean;
   meetUrl: string | null;
 };
@@ -18,6 +21,8 @@ type RosterDbRow = {
   parent_emails: string | null;
   weekday: number | null;
   time_local: string | null;
+  weekday_2: number | null;
+  time_local_2: string | null;
   schedule_active: boolean | null;
   meet_url: string | null;
 };
@@ -38,6 +43,8 @@ export async function listStudentRoster(): Promise<StudentRosterRow[]> {
       ) AS parent_emails,
       sc.weekday,
       sc.time_local::text AS time_local,
+      sc.weekday_2,
+      sc.time_local_2::text AS time_local_2,
       sc.active AS schedule_active,
       sc.meet_url
     FROM users s
@@ -47,12 +54,6 @@ export async function listStudentRoster(): Promise<StudentRosterRow[]> {
   `) as RosterDbRow[];
 
   return rows.map((row) => {
-    const timeLocal =
-      row.time_local == null
-        ? null
-        : typeof row.time_local === "string"
-          ? row.time_local.slice(0, 5)
-          : String(row.time_local).slice(0, 5);
     return {
       id: row.id,
       name: row.name,
@@ -61,7 +62,9 @@ export async function listStudentRoster(): Promise<StudentRosterRow[]> {
         ? row.parent_emails.split(", ").filter(Boolean)
         : [],
       weekday: row.weekday == null ? null : Number(row.weekday),
-      timeLocal,
+      timeLocal: formatTimeLocal(row.time_local),
+      weekday2: row.weekday_2 == null ? null : Number(row.weekday_2),
+      timeLocal2: formatTimeLocal(row.time_local_2),
       scheduleActive: Boolean(row.schedule_active),
       meetUrl: row.meet_url,
     };

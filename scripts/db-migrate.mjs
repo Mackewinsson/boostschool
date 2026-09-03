@@ -1,7 +1,12 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { config as loadEnv } from "dotenv";
 import { neon } from "@neondatabase/serverless";
+
+const root = dirname(fileURLToPath(import.meta.url));
+loadEnv({ path: join(root, "../.env.local") });
+loadEnv({ path: join(root, "../.env") });
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
 if (!databaseUrl) {
@@ -9,7 +14,6 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
-const root = dirname(fileURLToPath(import.meta.url));
 const schemaPath = join(root, "../lib/db/schema.sql");
 const schema = readFileSync(schemaPath, "utf8");
 
