@@ -61,7 +61,7 @@ export const pl: StudentContent = {
     notesLabel: "Notatki z zajęć",
     notesPlaceholder: "Zapisz tu to, co chcesz zapamiętać z zajęć…",
     notesSaved: "Notatki zapisane",
-    sessionRescheduled: "Zmieniono datę (tylko te zajęcia)",
+    sessionRescheduled: "Przełożone",
   },
   parent: {
     title: "Postępy: {name}",
@@ -209,7 +209,7 @@ export const pl: StudentContent = {
     errorContent: "Dodaj opis lub link.",
     errorClassDate: "Wybierz datę i godzinę zajęć.",
     sessionErrorTimeConflict: "Są już zajęcia w tej dacie i godzinie.",
-    sessionRescheduled: "Zmieniono datę (tylko te zajęcia)",
+    sessionRescheduled: "Przełożone",
     navMaterials: "Materialy",
     navStudents: "Studenci",
     navLeads: "Leady",

@@ -20,6 +20,7 @@ export type CalendarSessionChip = {
   timeLabel: string;
   iso: string;
   isPast: boolean;
+  isRescheduled: boolean;
 };
 
 const DEFAULT_TZ = "Europe/Warsaw";
@@ -157,6 +158,7 @@ export function sessionsByDateKey(
       timeLabel: timeLabelInZone(session.scheduledAt, timeZone),
       iso: session.scheduledAt,
       isPast: date.getTime() < nowMs,
+      isRescheduled: Boolean(session.originalScheduledAt),
     });
     grouped.set(key, list);
   }

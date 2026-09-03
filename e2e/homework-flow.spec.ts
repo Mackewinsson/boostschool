@@ -355,13 +355,15 @@ test.describe("class table homework flow", () => {
 
     const moved = page.locator(`[data-session-id="${sessionId}"]`);
     await expect(moved.getByTestId("session-datetime")).toHaveValue(when);
-    await expect(moved.getByTestId("session-rescheduled")).toBeVisible();
+    await expect(moved.getByTestId("session-rescheduled")).toHaveText("Reprogramada");
 
     await saveWeeklySchedule(page, { weekday: "1", timeLocal: "18:00" });
 
     const stillMoved = page.locator(`[data-session-id="${sessionId}"]`);
     await expect(stillMoved.getByTestId("session-datetime")).toHaveValue(when);
-    await expect(stillMoved.getByTestId("session-rescheduled")).toBeVisible();
+    await expect(stillMoved.getByTestId("session-rescheduled")).toHaveText(
+      "Reprogramada",
+    );
   });
 
   test("extras stay outside class table and can be deleted", async ({ page }) => {
