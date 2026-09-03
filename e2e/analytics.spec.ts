@@ -13,6 +13,11 @@ test.describe("teacher analytics tab", () => {
     await expect(panel.getByRole("heading", { name: "Resumen" })).toBeVisible();
     await expect(panel.getByText("Clases esta semana")).toBeVisible();
     await expect(panel.getByText("Deberes hechos")).toBeVisible();
+    await expect(page.getByTestId("class-month-calendar")).toBeVisible();
+    await expect(page.getByTestId("class-month-calendar")).toHaveAttribute(
+      "data-calendar-variant",
+      "allStudents",
+    );
     await logout(page);
   });
 });

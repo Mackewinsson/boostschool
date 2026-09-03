@@ -1,4 +1,3 @@
-import type { Material } from "./types";
 import { partsInZone } from "./schedule-time";
 
 export type CivilMonth = {
@@ -15,12 +14,22 @@ export type CalendarDay = {
   isToday: boolean;
 };
 
+export type CalendarSessionSource = {
+  id: string;
+  scheduledAt: string | null;
+  originalScheduledAt?: string | null;
+  studentId?: string;
+  studentLabel?: string;
+};
+
 export type CalendarSessionChip = {
   id: string;
   timeLabel: string;
   iso: string;
   isPast: boolean;
   isRescheduled: boolean;
+  studentId?: string;
+  studentLabel?: string;
 };
 
 const DEFAULT_TZ = "Europe/Warsaw";
@@ -140,7 +149,7 @@ function makeDay(
 }
 
 export function sessionsByDateKey(
-  sessions: Material[],
+  sessions: CalendarSessionSource[],
   timeZone: string = DEFAULT_TZ,
   now: Date = new Date(),
 ): Map<string, CalendarSessionChip[]> {
@@ -159,6 +168,8 @@ export function sessionsByDateKey(
       iso: session.scheduledAt,
       isPast: date.getTime() < nowMs,
       isRescheduled: Boolean(session.originalScheduledAt),
+      studentId: session.studentId,
+      studentLabel: session.studentLabel,
     });
     grouped.set(key, list);
   }
@@ -172,7 +183,7 @@ export function sessionsByDateKey(
 
 /** Month of the next upcoming class, else current month in `timeZone`. */
 export function initialVisibleMonth(
-  sessions: Material[],
+  sessions: CalendarSessionSource[],
   timeZone: string = DEFAULT_TZ,
   now: Date = new Date(),
 ): CivilMonth {

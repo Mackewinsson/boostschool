@@ -165,6 +165,7 @@ export const en: StudentContent = {
     calendarEmptyMonth: "No classes this month.",
     calendarMore: "+{count} more",
     calendarSessionAria: "Go to the {time} class",
+    calendarSessionOverviewAria: "Open {student}'s class at {time}",
     weekdaySunday: "Sunday",
     weekdayMonday: "Monday",
     weekdayTuesday: "Tuesday",
@@ -300,6 +301,9 @@ export const en: StudentContent = {
     analyticsOpenLabel: "Open",
     analyticsNeedsOverdue: "Overdue homework ({when})",
     analyticsNeedsNoClass: "No upcoming class",
+    analyticsCalendarTitle: "All-class calendar",
+    analyticsCalendarHint:
+      "Every student's classes in one view. Tap a time to open their page and assign homework.",
   },
   mail: {
     homeworkSubject: "Paulina assigned you homework",

@@ -154,6 +154,7 @@ export type StudentContent = {
     calendarEmptyMonth: string;
     calendarMore: string;
     calendarSessionAria: string;
+    calendarSessionOverviewAria: string;
     weekdaySunday: string;
     weekdayMonday: string;
     weekdayTuesday: string;
@@ -287,6 +288,8 @@ export type StudentContent = {
     analyticsOpenLabel: string;
     analyticsNeedsOverdue: string;
     analyticsNeedsNoClass: string;
+    analyticsCalendarTitle: string;
+    analyticsCalendarHint: string;
   };
   mail: {
     homeworkSubject: string;
