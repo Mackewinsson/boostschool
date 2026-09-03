@@ -61,7 +61,7 @@ export const es: StudentContent = {
     notesLabel: "Apuntes de clase",
     notesPlaceholder: "Escribe aquí lo que quieras recordar de la clase…",
     notesSaved: "Apuntes guardados",
-    sessionRescheduled: "Fecha cambiada (solo esta clase)",
+    sessionRescheduled: "Reprogramada",
   },
   parent: {
     title: "El progreso de {name}",
@@ -208,7 +208,7 @@ export const es: StudentContent = {
     errorContent: "Añade una descripción o un enlace.",
     errorClassDate: "Elige fecha y hora de la clase.",
     sessionErrorTimeConflict: "Ya hay una clase en esa fecha y hora.",
-    sessionRescheduled: "Fecha cambiada (solo esta clase)",
+    sessionRescheduled: "Reprogramada",
     navMaterials: "Materiales",
     navStudents: "Estudiantes",
     navLeads: "Leads",

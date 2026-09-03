@@ -106,7 +106,7 @@ Componente compartido: `components/student/class-session-table.tsx`.
 
 Cada fila = una clase con fecha/hora:
 
-- **Profe:** edita fecha/hora + deberes (`description`) → botón **Guardar** (guarda ambos). Cambiar la fecha de **una** fila la deja fija (`original_scheduled_at`): el próximo “Guardar horario” no la devuelve al slot semanal ni recrea esa ocurrencia. Marca hecho: Pendiente / Sí / No / Parcial.
+- **Profe:** edita fecha/hora + deberes (`description`) → botón **Guardar** (guarda ambos). Cambiar la fecha de **una** fila la deja fija (`original_scheduled_at`): el próximo “Guardar horario” no la devuelve al slot semanal ni recrea esa ocurrencia. La fila lleva un label amarillo **Reprogramada** (`sessionRescheduled`). Marca hecho: Pendiente / Sí / No / Parcial.
 - **Alumno:** ve deberes o mensaje vacío; puede unirse a Meet; apuntes. **Sin** estado hecho/pendiente.
 - **Padre:** dashboard del alumno vinculado: ve deberes y badge de estado (Pendiente / Sí / No / Parcial). **Sin** Meet, sin apuntes, sin editar estado.
 - Estado hecho lo marca solo la profe (`student_materials.completion_status`); el padre lo ve, el alumno no.
