@@ -154,7 +154,7 @@ Schema: `lib/db/schema.sql`. Migrar: `npm run db:migrate`. En Vercel el deploy c
 | `/api/alumno/my-materials` | Vista alumno/padre |
 | `/api/alumno/assignments` | Estado de deberes; **POST** asigna un extra y avisa por correo |
 
-Correos transaccionales: `lib/mail/assignment-notify.ts`. No se envían a inboxes `.test` (e2e). Fallar el correo no bloquea el guardado. Copy: `mail` en `lib/student-content/`.
+Correos transaccionales: `lib/mail/assignment-notify.ts`. No se envían a inboxes `.test` (e2e). Fallar el correo no bloquea el guardado. Copy: `mail` en `lib/student-content/`. En **Emails** (`/alumno/profesor/emails`) se puede enviar una prueba a cualquier correo y ver la vista previa.
 
 ### E2E
 

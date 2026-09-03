@@ -66,7 +66,7 @@ function htmlToText(html: string): string {
     .trim();
 }
 
-function buildEmail(input: {
+export function buildAssignmentEmail(input: {
   locale: Locale;
   recipientName: string;
   studentName: string;
@@ -141,7 +141,7 @@ async function sendToInbox(input: {
   preview: string | null;
 }): Promise<void> {
   if (!shouldSendAssignmentEmail(input.email)) return;
-  const content = buildEmail(input);
+  const content = buildAssignmentEmail(input);
   await sendResendEmail({
     to: input.email,
     subject: content.subject,
@@ -229,4 +229,41 @@ export async function notifyHomeworkSaved(input: { materialId: string }): Promis
   } catch (error) {
     console.error("Homework notify failed:", error);
   }
+}
+
+function isSendableAddress(email: string): boolean {
+  const normalized = email.trim();
+  return normalized.includes("@") && normalized.length >= 5;
+}
+
+/** Admin/teacher preview: send a sample homework or material email to `to`. */
+export async function sendAssignmentPreviewEmail(input: {
+  to: string;
+  kind: "homework" | "material";
+  forParent: boolean;
+  locale: Locale;
+}): Promise<"ok" | "not_configured" | "invalid_email" | "send_failed"> {
+  if (!isTransactionalEmailConfigured()) return "not_configured";
+  if (!isSendableAddress(input.to)) return "invalid_email";
+
+  const copy = getStudentContent(input.locale).mail;
+  const when = input.kind === "homework" ? formatWhen("2026-09-10T16:00:00.000Z", input.locale) : null;
+  const content = buildAssignmentEmail({
+    locale: input.locale,
+    recipientName: input.forParent ? copy.sampleParentName : copy.sampleStudentName,
+    studentName: copy.sampleStudentName,
+    forParent: input.forParent,
+    kind: input.kind,
+    title: input.kind === "homework" ? copy.sampleClassTitle : copy.sampleMaterialTitle,
+    when,
+    preview: input.kind === "homework" ? copy.sampleHomeworkPreview : null,
+  });
+
+  const sent = await sendResendEmail({
+    to: input.to.trim(),
+    subject: `${copy.testSubjectPrefix}${content.subject}`,
+    html: content.html,
+    text: content.text,
+  });
+  return sent ? "ok" : "send_failed";
 }
