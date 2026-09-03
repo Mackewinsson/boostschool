@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { apiError } from "@/lib/api-error";
 import { isDatabaseConfigured } from "@/lib/db/client";
+import { notifyMaterialAssigned } from "@/lib/mail/assignment-notify";
 import { requireTeacher } from "@/lib/materials/auth";
 import {
   assignMaterial,
@@ -43,7 +44,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "userId and materialId are required" }, { status: 400 });
     }
 
-    await assignMaterial(userId, materialId);
+    const inserted = await assignMaterial(userId, materialId);
+    if (inserted) {
+      after(() => notifyMaterialAssigned({ studentUserId: userId, materialId }));
+    }
     return NextResponse.json({ ok: true });
   } catch (error) {
     return apiError(error);

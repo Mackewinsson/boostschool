@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { apiError } from "@/lib/api-error";
 import { isDatabaseConfigured } from "@/lib/db/client";
+import { notifyHomeworkSaved } from "@/lib/mail/assignment-notify";
 import { requireTeacher } from "@/lib/materials/auth";
 import {
   deleteMaterial,
@@ -97,6 +98,10 @@ export async function PATCH(request: Request, context: RouteContext) {
       });
       if (!material) {
         return NextResponse.json({ error: "Material not found" }, { status: 404 });
+      }
+      const previousHomework = (current.description ?? "").trim();
+      if (description && description !== previousHomework) {
+        after(() => notifyHomeworkSaved({ materialId: id }));
       }
       return NextResponse.json({ material });
     } catch (error) {
