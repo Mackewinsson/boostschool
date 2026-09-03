@@ -299,6 +299,7 @@ export function ParentDashboard({
           statusDone: tableCopy.statusDone,
           statusNotDone: tableCopy.statusNotDone,
           statusPartial: tableCopy.statusPartial,
+          sessionRescheduled: tableCopy.sessionRescheduled,
         }}
       />
 

@@ -9,12 +9,14 @@ import {
 } from "./repository";
 import {
   hasFixedWeeklySlot,
+  isUniqueViolation,
   parseClock,
   pickSlotForDay,
   weeklySlotsOf,
 } from "./schedule-slots";
 import {
   partsInZone,
+  formatClassTitle,
   toDatetimeLocalValueInZone,
   wallTimeInZoneToUtc,
 } from "./schedule-time";
@@ -76,22 +78,20 @@ export function upcomingOccurrences(
   return results.slice(0, maxResults);
 }
 
-function formatTitleDate(date: Date, locale: Locale, timeZone: string): string {
-  return new Intl.DateTimeFormat(locale, {
-    timeZone,
-    dateStyle: "medium",
-  }).format(date);
-}
-
 async function materialExistsForOccurrence(
-  scheduleId: string,
+  schedule: StudentClassSchedule,
   scheduledAtIso: string,
 ): Promise<boolean> {
   const sql = getDb();
   const rows = (await sql`
-    SELECT id FROM materials
-    WHERE schedule_id = ${scheduleId}::uuid
-      AND scheduled_at = ${scheduledAtIso}::timestamptz
+    SELECT m.id
+    FROM materials m
+    INNER JOIN student_materials sm ON sm.material_id = m.id
+    WHERE sm.user_id = ${schedule.studentUserId}::uuid
+      AND (
+        m.scheduled_at = ${scheduledAtIso}::timestamptz
+        OR m.original_scheduled_at = ${scheduledAtIso}::timestamptz
+      )
     LIMIT 1
   `) as { id: string }[];
   return rows.length > 0;
@@ -106,7 +106,8 @@ type FutureSessionRow = {
 /**
  * Rebuild upcoming class slots for a student from their fixed weekly schedule.
  * Keeps homework text (oldest homework → next occurrence), deletes empty
- * leftovers (including one-offs), then fills the horizon.
+ * weekly shells, then fills the horizon. Manual extras and one-off
+ * reschedules (original_scheduled_at) are left alone.
  */
 export async function realignFutureSessionsForSchedule(
   schedule: StudentClassSchedule,
@@ -122,13 +123,16 @@ export async function realignFutureSessionsForSchedule(
   }
 
   const sql = getDb();
-  // Include weekly shells AND detached one-offs assigned to this student
+  // Only weekly shells for this schedule. Manual extras (schedule_id null)
+  // and pinned reschedules stay put.
   const future = (await sql`
     SELECT m.id, m.description, m.scheduled_at
     FROM materials m
     INNER JOIN student_materials sm ON sm.material_id = m.id
     WHERE sm.user_id = ${schedule.studentUserId}::uuid
       AND m.scheduled_at >= now()
+      AND m.schedule_id = ${schedule.id}::uuid
+      AND m.original_scheduled_at IS NULL
     ORDER BY m.scheduled_at ASC
   `) as FutureSessionRow[];
 
@@ -136,21 +140,13 @@ export async function realignFutureSessionsForSchedule(
   const empty = future.filter((row) => !row.description?.trim());
   const occurrences = upcomingOccurrences(schedule);
 
-  // Detach this student's future rows and any leftover weekly shells for the
-  // schedule so unique (schedule_id, scheduled_at) cannot block reattach.
   await sql`
     UPDATE materials
     SET schedule_id = NULL
     WHERE schedule_id = ${schedule.id}::uuid
       AND scheduled_at >= now()
+      AND original_scheduled_at IS NULL
   `;
-  for (const row of future) {
-    await sql`
-      UPDATE materials
-      SET schedule_id = NULL
-      WHERE id = ${row.id}::uuid
-    `;
-  }
 
   // Empty future classes are regenerated cleanly from the schedule
   for (const row of empty) {
@@ -162,8 +158,7 @@ export async function realignFutureSessionsForSchedule(
     const row = withHomework[i];
     const occurrence = occurrences[i];
     const scheduledAt = occurrence.toISOString();
-    const dateLabel = formatTitleDate(occurrence, locale, schedule.timezone);
-    const title = `${schedule.titleTemplate} — ${dateLabel}`;
+    const title = formatClassTitle(schedule.titleTemplate, occurrence, locale, schedule.timezone);
     // Drop empty shells that still claim this slot (orphans / races)
     await sql`
       DELETE FROM materials
@@ -206,8 +201,7 @@ export async function realignFutureSessionsForSchedule(
       clock.minute,
       schedule.timezone,
     );
-    const dateLabel = formatTitleDate(occurrence, locale, schedule.timezone);
-    const title = `${schedule.titleTemplate} — ${dateLabel}`;
+    const title = formatClassTitle(schedule.titleTemplate, occurrence, locale, schedule.timezone);
     await sql`
       UPDATE materials
       SET
@@ -233,23 +227,27 @@ export async function generateSessionsForSchedule(
   let created = 0;
   for (const occurrence of upcomingOccurrences(schedule)) {
     const scheduledAt = occurrence.toISOString();
-    if (await materialExistsForOccurrence(schedule.id, scheduledAt)) {
+    if (await materialExistsForOccurrence(schedule, scheduledAt)) {
       continue;
     }
 
-    const dateLabel = formatTitleDate(occurrence, locale, schedule.timezone);
-    const title = `${schedule.titleTemplate} — ${dateLabel}`;
-    const material = await createMaterial({
-      title,
-      description: null,
-      url: null,
-      locale,
-      scheduledAt,
-      meetUrl: schedule.meetUrl,
-      scheduleId: schedule.id,
-    });
-    await assignMaterial(schedule.studentUserId, material.id);
-    created += 1;
+    const title = formatClassTitle(schedule.titleTemplate, occurrence, locale, schedule.timezone);
+    try {
+      const material = await createMaterial({
+        title,
+        description: null,
+        url: null,
+        locale,
+        scheduledAt,
+        meetUrl: schedule.meetUrl,
+        scheduleId: schedule.id,
+      });
+      await assignMaterial(schedule.studentUserId, material.id);
+      created += 1;
+    } catch (error) {
+      if (isUniqueViolation(error)) continue;
+      throw error;
+    }
   }
   return created;
 }
@@ -286,10 +284,10 @@ export async function createClassSessionForStudent(input: {
   const timezone = schedule?.timezone ?? "Europe/Warsaw";
   const titleTemplate = schedule?.titleTemplate ?? "Clase";
   const meetUrl = schedule?.meetUrl ?? null;
-  const dateLabel = formatTitleDate(input.scheduledAt, locale, timezone);
+  const title = formatClassTitle(titleTemplate, input.scheduledAt, locale, timezone);
 
   const material = await createMaterial({
-    title: `${titleTemplate} — ${dateLabel}`,
+    title,
     description: null,
     url: null,
     locale,

@@ -58,6 +58,7 @@ export type StudentContent = {
     notesLabel: string;
     notesPlaceholder: string;
     notesSaved: string;
+    sessionRescheduled: string;
   };
   parent: {
     title: string;
@@ -132,9 +133,12 @@ export type StudentContent = {
     scheduleModeAdhoc: string;
     scheduleWeekdayLabel: string;
     scheduleTimeLabel: string;
-    scheduleSecondSlotToggle: string;
-    scheduleWeekday2Label: string;
-    scheduleTime2Label: string;
+    scheduleSlotHeading: string;
+    scheduleAddSlot: string;
+    scheduleRemoveSlot: string;
+    scheduleErrorDuplicateSlot: string;
+    scheduleErrorTooManySlots: string;
+    scheduleErrorIncompleteSlot: string;
     scheduleHorizonLabel: string;
     scheduleHorizonWeeks: string;
     scheduleHorizonMonths: string;
@@ -192,6 +196,8 @@ export type StudentContent = {
     errorTitle: string;
     errorContent: string;
     errorClassDate: string;
+    sessionErrorTimeConflict: string;
+    sessionRescheduled: string;
     navMaterials: string;
     navStudents: string;
     navLeads: string;

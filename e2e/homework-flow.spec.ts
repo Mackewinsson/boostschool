@@ -5,6 +5,7 @@ import {
   classRows,
   classTable,
   e2eCreds,
+  futureThursdayAt,
   login,
   logout,
   rowWithDatetimeEnding,
@@ -275,6 +276,92 @@ test.describe("class table homework flow", () => {
     expect(hrefs.length).toBeGreaterThan(1);
     expect(hrefs.every((href) => href.includes(MEET_URL))).toBe(true);
     expect(new Set(hrefs).size).toBe(1);
+  });
+
+  test("duplicate weekday and time shows a clear error and does not save", async ({
+    page,
+  }) => {
+    await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
+    await selectStudent(page, STUDENT_LABEL);
+    await saveWeeklySchedule(page, { weekday: "1", timeLocal: "18:00" });
+
+    await page.getByTestId("schedule-add-slot").click();
+    await page.locator('select[name="weekday-1"]').selectOption("1");
+    const time2 = page.locator('input[name="timeLocal-1"]');
+    await time2.click();
+    await time2.fill("18:00");
+    await expect(time2).toHaveValue("18:00");
+
+    await page.getByRole("button", { name: "Guardar horario" }).click();
+    await expect(page.getByTestId("schedule-form-error")).toHaveText(
+      "Dos clases no pueden ser el mismo día a la misma hora.",
+    );
+    await expect(page.getByTestId("schedule-slot-1")).toBeVisible();
+  });
+
+  test("saving the weekly schedule does not delete a manual extra class", async ({
+    page,
+  }) => {
+    const when = futureThursdayAt("15:17");
+
+    await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
+    await selectStudent(page, STUDENT_LABEL);
+    await saveWeeklySchedule(page, { weekday: "1", timeLocal: "18:00" });
+
+    await page.getByTestId("add-class-datetime").fill(when);
+    await page.getByRole("button", { name: "Crear clase" }).click();
+    await expect(page.getByText("Clase añadida.")).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect
+      .poll(async () => {
+        const values = await classRows(page)
+          .locator('[data-testid="session-datetime"]')
+          .evaluateAll((inputs) =>
+            inputs.map((el) => (el as HTMLInputElement).value),
+          );
+        return values.includes(when);
+      })
+      .toBe(true);
+
+    await saveWeeklySchedule(page, { weekday: "1", timeLocal: "18:00" });
+
+    const valuesAfter = await classRows(page)
+      .locator('[data-testid="session-datetime"]')
+      .evaluateAll((inputs) =>
+        inputs.map((el) => (el as HTMLInputElement).value),
+      );
+    expect(valuesAfter).toContain(when);
+  });
+
+  test("moving one class keeps that date after saving the weekly schedule", async ({
+    page,
+  }) => {
+    const when = futureThursdayAt("15:13");
+
+    await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
+    await selectStudent(page, STUDENT_LABEL);
+    await saveWeeklySchedule(page, { weekday: "1", timeLocal: "18:00" });
+
+    const weeklyRow = await rowWithDatetimeEnding(page, "T18:00");
+    const sessionId = await weeklyRow.getAttribute("data-session-id");
+    expect(sessionId).toBeTruthy();
+
+    await weeklyRow.getByTestId("session-datetime").fill(when);
+    await weeklyRow.getByRole("button", { name: "Guardar" }).click();
+    await expect(page.getByText("Cambios guardados.")).toBeVisible({
+      timeout: 15_000,
+    });
+
+    const moved = page.locator(`[data-session-id="${sessionId}"]`);
+    await expect(moved.getByTestId("session-datetime")).toHaveValue(when);
+    await expect(moved.getByTestId("session-rescheduled")).toBeVisible();
+
+    await saveWeeklySchedule(page, { weekday: "1", timeLocal: "18:00" });
+
+    const stillMoved = page.locator(`[data-session-id="${sessionId}"]`);
+    await expect(stillMoved.getByTestId("session-datetime")).toHaveValue(when);
+    await expect(stillMoved.getByTestId("session-rescheduled")).toBeVisible();
   });
 
   test("extras stay outside class table and can be deleted", async ({ page }) => {

@@ -8,6 +8,14 @@ import {
   horizonMonths,
   parseHorizonWeeks,
 } from "@/lib/materials/schedule-horizon";
+import {
+  MAX_WEEKLY_SLOTS,
+  formatTimeLocal,
+  nextDefaultSlot,
+  slotKey,
+  weeklySlotsOf,
+  type WeeklySlot,
+} from "@/lib/materials/schedule-slots";
 import type { StudentClassSchedule } from "@/lib/materials/types";
 
 type StudentSchedulePanelProps = {
@@ -17,10 +25,7 @@ type StudentSchedulePanelProps = {
   copy: StudentContent["teacher"];
   onSave: (input: {
     studentUserId: string;
-    weekday: number | null;
-    timeLocal: string | null;
-    weekday2: number | null;
-    timeLocal2: string | null;
+    slots: WeeklySlot[];
     meetUrl: string;
     horizonWeeks: number;
     active: boolean;
@@ -44,17 +49,24 @@ export function StudentSchedulePanel({
   copy,
   onSave,
 }: StudentSchedulePanelProps) {
-  const initialWeekly =
-    schedule?.weekday != null && Boolean(schedule.timeLocal);
+  const initialSlots = weeklySlotsOf(schedule ?? { weekday: null, timeLocal: null });
+  const initialWeekly = initialSlots.length > 0;
   const [mode, setMode] = useState<"weekly" | "adhoc">(
     initialWeekly ? "weekly" : "adhoc",
   );
-  const [hasSecondSlot, setHasSecondSlot] = useState(
-    schedule?.weekday2 != null && Boolean(schedule.timeLocal2),
+  const [slots, setSlots] = useState<WeeklySlot[]>(
+    initialWeekly ? initialSlots : [{ weekday: 1, timeLocal: "18:00" }],
   );
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  const defaultSecondWeekday =
-    schedule?.weekday2 ?? (schedule?.weekday === 4 ? 1 : 4);
+  function updateSlot(index: number, patch: Partial<WeeklySlot>) {
+    setLocalError(null);
+    setSlots((current) =>
+      current.map((slot, slotIndex) =>
+        slotIndex === index ? { ...slot, ...patch } : slot,
+      ),
+    );
+  }
 
   return (
     <section className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
@@ -94,13 +106,20 @@ export function StudentSchedulePanel({
           const data = new FormData(form);
           const activeInput = form.querySelector<HTMLInputElement>('input[name="active"]');
           const weekly = mode === "weekly";
-          const second = weekly && hasSecondSlot;
+          const keys = slots.map((slot) =>
+            slotKey({
+              weekday: slot.weekday,
+              timeLocal: formatTimeLocal(slot.timeLocal) ?? slot.timeLocal,
+            }),
+          );
+          if (weekly && new Set(keys).size !== keys.length) {
+            setLocalError(copy.scheduleErrorDuplicateSlot);
+            return;
+          }
+          setLocalError(null);
           void onSave({
             studentUserId: studentId,
-            weekday: weekly ? Number(data.get("weekday")) : null,
-            timeLocal: weekly ? String(data.get("timeLocal") ?? "") : null,
-            weekday2: second ? Number(data.get("weekday2")) : null,
-            timeLocal2: second ? String(data.get("timeLocal2") ?? "") : null,
+            slots: weekly ? slots : [],
             meetUrl: String(data.get("meetUrl") ?? ""),
             horizonWeeks:
               weekly
@@ -112,30 +131,79 @@ export function StudentSchedulePanel({
       >
         {mode === "weekly" ? (
           <>
-            <label className="block text-sm">
-              <span className="font-medium text-fg">{copy.scheduleWeekdayLabel}</span>
-              <select
-                name="weekday"
-                defaultValue={schedule?.weekday ?? 1}
-                className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+            {slots.map((slot, index) => (
+              <div
+                key={`slot-${index}`}
+                data-testid={`schedule-slot-${index}`}
+                className="sm:col-span-2 lg:col-span-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto] lg:items-end"
               >
-                {WEEKDAYS.map((key, index) => (
-                  <option key={key} value={index}>
-                    {copy[key]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-sm">
-              <span className="font-medium text-fg">{copy.scheduleTimeLabel}</span>
-              <input
-                name="timeLocal"
-                type="time"
-                required
-                defaultValue={schedule?.timeLocal ?? "18:00"}
-                className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
-              />
-            </label>
+                <label className="block text-sm">
+                  <span className="font-medium text-fg">
+                    {copy.scheduleSlotHeading.replace("{n}", String(index + 1))}
+                    {" · "}
+                    {copy.scheduleWeekdayLabel}
+                  </span>
+                  <select
+                    name={`weekday-${index}`}
+                    value={slot.weekday}
+                    onChange={(event) =>
+                      updateSlot(index, { weekday: Number(event.target.value) })
+                    }
+                    className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+                  >
+                    {WEEKDAYS.map((key, dayIndex) => (
+                      <option key={key} value={dayIndex}>
+                        {copy[key]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-sm">
+                  <span className="font-medium text-fg">{copy.scheduleTimeLabel}</span>
+                  <input
+                    name={`timeLocal-${index}`}
+                    type="time"
+                    required
+                    value={slot.timeLocal}
+                    onChange={(event) =>
+                      updateSlot(index, {
+                        timeLocal:
+                          formatTimeLocal(event.target.value) ?? event.target.value,
+                      })
+                    }
+                    className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
+                  />
+                </label>
+                {slots.length > 1 ? (
+                  <button
+                    type="button"
+                    data-testid={`schedule-remove-slot-${index}`}
+                    onClick={() => {
+                      setLocalError(null);
+                      setSlots((current) =>
+                        current.filter((_, slotIndex) => slotIndex !== index),
+                      );
+                    }}
+                    className="rounded-xl border border-border px-3 py-2 text-sm text-fg-muted transition hover:border-accent/30 hover:text-accent"
+                  >
+                    {copy.scheduleRemoveSlot}
+                  </button>
+                ) : null}
+              </div>
+            ))}
+            {slots.length < MAX_WEEKLY_SLOTS ? (
+              <button
+                type="button"
+                data-testid="schedule-add-slot"
+                onClick={() => {
+                  setLocalError(null);
+                  setSlots((current) => [...current, nextDefaultSlot(current)]);
+                }}
+                className="sm:col-span-2 lg:col-span-3 justify-self-start rounded-xl border border-dashed border-border px-3 py-2 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent"
+              >
+                {copy.scheduleAddSlot}
+              </button>
+            ) : null}
             <label className="block text-sm">
               <span className="font-medium text-fg">{copy.scheduleHorizonLabel}</span>
               <select
@@ -163,44 +231,6 @@ export function StudentSchedulePanel({
                 })}
               </select>
             </label>
-            <label className="flex items-center gap-2 text-sm text-fg-muted sm:col-span-2 lg:col-span-3">
-              <input
-                type="checkbox"
-                data-testid="schedule-second-slot"
-                checked={hasSecondSlot}
-                onChange={(event) => setHasSecondSlot(event.target.checked)}
-                className="rounded border-border"
-              />
-              {copy.scheduleSecondSlotToggle}
-            </label>
-            {hasSecondSlot ? (
-              <>
-                <label className="block text-sm">
-                  <span className="font-medium text-fg">{copy.scheduleWeekday2Label}</span>
-                  <select
-                    name="weekday2"
-                    defaultValue={defaultSecondWeekday}
-                    className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
-                  >
-                    {WEEKDAYS.map((key, index) => (
-                      <option key={key} value={index}>
-                        {copy[key]}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="block text-sm">
-                  <span className="font-medium text-fg">{copy.scheduleTime2Label}</span>
-                  <input
-                    name="timeLocal2"
-                    type="time"
-                    required
-                    defaultValue={schedule?.timeLocal2 ?? schedule?.timeLocal ?? "18:00"}
-                    className="mt-1.5 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
-                  />
-                </label>
-              </>
-            ) : null}
           </>
         ) : null}
 
@@ -220,17 +250,21 @@ export function StudentSchedulePanel({
             <input
               name="active"
               type="checkbox"
-              // Ad-hoc saves store active=false; switching back to weekly must
-              // start active so "Guardar horario" realigns class times.
-              defaultChecked={
-                schedule?.weekday != null && Boolean(schedule.timeLocal)
-                  ? Boolean(schedule.active)
-                  : true
-              }
+              defaultChecked={initialWeekly ? Boolean(schedule?.active) : true}
               className="rounded border-border"
             />
             {copy.scheduleActiveLabel}
           </label>
+        ) : null}
+
+        {localError ? (
+          <p
+            className="sm:col-span-2 lg:col-span-3 text-sm text-red-400"
+            role="alert"
+            data-testid="schedule-form-error"
+          >
+            {localError}
+          </p>
         ) : null}
 
         <button

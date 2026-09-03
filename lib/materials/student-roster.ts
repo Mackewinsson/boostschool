@@ -1,15 +1,12 @@
 import { getDb } from "@/lib/db/client";
-import { formatTimeLocal } from "./schedule-slots";
+import { formatTimeLocal, parseWeeklySlotsJson, weeklySlotsOf, type WeeklySlot } from "./schedule-slots";
 
 export type StudentRosterRow = {
   id: string;
   name: string;
   email: string;
   parentEmails: string[];
-  weekday: number | null;
-  timeLocal: string | null;
-  weekday2: number | null;
-  timeLocal2: string | null;
+  slots: WeeklySlot[];
   scheduleActive: boolean;
   meetUrl: string | null;
 };
@@ -23,11 +20,12 @@ type RosterDbRow = {
   time_local: string | null;
   weekday_2: number | null;
   time_local_2: string | null;
+  weekly_slots: unknown;
   schedule_active: boolean | null;
   meet_url: string | null;
 };
 
-/** Active students with linked parent emails and weekly class slot (for teacher roster). */
+/** Active students with linked parent emails and weekly class slots (for teacher roster). */
 export async function listStudentRoster(): Promise<StudentRosterRow[]> {
   const sql = getDb();
   const rows = (await sql`
@@ -45,6 +43,7 @@ export async function listStudentRoster(): Promise<StudentRosterRow[]> {
       sc.time_local::text AS time_local,
       sc.weekday_2,
       sc.time_local_2::text AS time_local_2,
+      sc.weekly_slots,
       sc.active AS schedule_active,
       sc.meet_url
     FROM users s
@@ -54,6 +53,13 @@ export async function listStudentRoster(): Promise<StudentRosterRow[]> {
   `) as RosterDbRow[];
 
   return rows.map((row) => {
+    const slots = weeklySlotsOf({
+      weekday: row.weekday == null ? null : Number(row.weekday),
+      timeLocal: formatTimeLocal(row.time_local),
+      weekday2: row.weekday_2 == null ? null : Number(row.weekday_2),
+      timeLocal2: formatTimeLocal(row.time_local_2),
+      slots: parseWeeklySlotsJson(row.weekly_slots),
+    });
     return {
       id: row.id,
       name: row.name,
@@ -61,10 +67,7 @@ export async function listStudentRoster(): Promise<StudentRosterRow[]> {
       parentEmails: row.parent_emails
         ? row.parent_emails.split(", ").filter(Boolean)
         : [],
-      weekday: row.weekday == null ? null : Number(row.weekday),
-      timeLocal: formatTimeLocal(row.time_local),
-      weekday2: row.weekday_2 == null ? null : Number(row.weekday_2),
-      timeLocal2: formatTimeLocal(row.time_local_2),
+      slots,
       scheduleActive: Boolean(row.schedule_active),
       meetUrl: row.meet_url,
     };

@@ -9,7 +9,13 @@ import {
 } from "@/lib/materials/repository";
 import { generateSessionsForSchedule, realignFutureSessionsForSchedule } from "@/lib/materials/schedule-generate";
 import { parseHorizonWeeks } from "@/lib/materials/schedule-horizon";
-import { parseOptionalSlot, slotKey } from "@/lib/materials/schedule-slots";
+import {
+  MAX_WEEKLY_SLOTS,
+  SCHEDULE_ERROR,
+  parseOptionalSlot,
+  slotKey,
+  type WeeklySlot,
+} from "@/lib/materials/schedule-slots";
 import { isValidHttpsUrl } from "@/lib/materials/validation";
 
 export async function GET() {
@@ -25,8 +31,14 @@ export async function GET() {
   }
 }
 
+type SlotInput = {
+  weekday?: number | null;
+  timeLocal?: string | null;
+};
+
 type UpsertPayload = {
   studentUserId?: string;
+  slots?: SlotInput[];
   weekday?: number | null;
   timeLocal?: string | null;
   weekday2?: number | null;
@@ -38,22 +50,42 @@ type UpsertPayload = {
   active?: boolean;
 };
 
-function slotErrorResponse(error: "incomplete" | "invalid", slot: "first" | "second") {
-  if (error === "incomplete") {
-    return NextResponse.json(
-      {
+function parseSlotList(body: UpsertPayload):
+  | { ok: true; slots: WeeklySlot[] }
+  | { ok: false; error: string } {
+  const rawSlots = Array.isArray(body.slots) ? body.slots : null;
+  const sources: SlotInput[] = rawSlots
+    ? rawSlots
+    : [
+        { weekday: body.weekday, timeLocal: body.timeLocal },
+        { weekday: body.weekday2, timeLocal: body.timeLocal2 },
+      ];
+
+  const slots: WeeklySlot[] = [];
+  const seen = new Set<string>();
+  for (const source of sources) {
+    const parsed = parseOptionalSlot(source.weekday, source.timeLocal?.trim() ?? "");
+    if (!parsed.ok) {
+      return {
+        ok: false,
         error:
-          slot === "second"
-            ? "Second weekday and time are both required"
-            : "Weekday and time are both required for a fixed schedule",
-      },
-      { status: 400 },
-    );
+          parsed.error === "incomplete"
+            ? SCHEDULE_ERROR.incompleteSlot
+            : SCHEDULE_ERROR.invalidSlot,
+      };
+    }
+    if (!parsed.slot) continue;
+    const key = slotKey(parsed.slot);
+    if (seen.has(key)) {
+      return { ok: false, error: SCHEDULE_ERROR.duplicateSlot };
+    }
+    seen.add(key);
+    slots.push(parsed.slot);
   }
-  return NextResponse.json(
-    { error: slot === "second" ? "Invalid second weekday or time" : "Invalid weekday or time" },
-    { status: 400 },
-  );
+  if (slots.length > MAX_WEEKLY_SLOTS) {
+    return { ok: false, error: SCHEDULE_ERROR.tooManySlots };
+  }
+  return { ok: true, slots };
 }
 
 export async function POST(request: Request) {
@@ -71,38 +103,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Student is required" }, { status: 400 });
     }
 
-    const first = parseOptionalSlot(body.weekday, body.timeLocal?.trim() ?? "");
-    if (!first.ok) {
-      return slotErrorResponse(first.error, "first");
-    }
-    const second = parseOptionalSlot(body.weekday2, body.timeLocal2?.trim() ?? "");
-    if (!second.ok) {
-      return slotErrorResponse(second.error, "second");
-    }
-    if (second.slot && !first.slot) {
-      return NextResponse.json(
-        { error: "A first weekly slot is required before adding a second class" },
-        { status: 400 },
-      );
-    }
-    if (first.slot && second.slot && slotKey(first.slot) === slotKey(second.slot)) {
-      return NextResponse.json(
-        { error: "The two weekly classes must be on different days or times" },
-        { status: 400 },
-      );
+    const parsed = parseSlotList(body);
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
     if (meetUrl && !isValidHttpsUrl(meetUrl)) {
       return NextResponse.json({ error: "Valid https Meet URL is required" }, { status: 400 });
     }
 
-    const hasFixedSlot = Boolean(first.slot);
+    const hasFixedSlot = parsed.slots.length > 0;
     const schedule = await upsertClassSchedule({
       studentUserId,
-      weekday: first.slot?.weekday ?? null,
-      timeLocal: first.slot?.timeLocal ?? null,
-      weekday2: second.slot?.weekday ?? null,
-      timeLocal2: second.slot?.timeLocal ?? null,
+      slots: parsed.slots,
       timezone: body.timezone?.trim() || "Europe/Warsaw",
       meetUrl: meetUrl || null,
       titleTemplate: body.titleTemplate?.trim() || "Clase",

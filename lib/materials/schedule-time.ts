@@ -97,6 +97,19 @@ export function toDatetimeLocalValueInZone(
   return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
 }
 
+export function formatClassTitle(
+  template: string,
+  date: Date,
+  locale: string,
+  timeZone: string,
+): string {
+  const dateLabel = new Intl.DateTimeFormat(locale, {
+    timeZone,
+    dateStyle: "medium",
+  }).format(date);
+  return `${template} — ${dateLabel}`;
+}
+
 export function partsInZone(date: Date, timeZone: string) {
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone,

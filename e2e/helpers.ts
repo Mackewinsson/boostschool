@@ -52,6 +52,18 @@ export function uniqueFutureScheduledLocal(): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+/** datetime-local a few days ahead on Thursday (off a typical Mon/Tue weekly slot). */
+export function futureThursdayAt(timeLocal = "15:00"): string {
+  const date = new Date();
+  date.setDate(date.getDate() + 1);
+  for (let i = 0; i < 14; i += 1) {
+    if (date.getDay() === 4) break;
+    date.setDate(date.getDate() + 1);
+  }
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${timeLocal}`;
+}
+
 export async function login(
   page: Page,
   creds: PortalCreds,
@@ -89,25 +101,25 @@ export async function saveWeeklySchedule(
   },
 ) {
   await page.getByRole("button", { name: "Horario fijo (cada semana)" }).click();
-  await page.locator('select[name="weekday"]').selectOption(input.weekday);
 
-  const timeInput = page.locator('input[name="timeLocal"]');
+  while ((await page.getByTestId(/schedule-slot-/).count()) > 1) {
+    const count = await page.getByTestId(/schedule-slot-/).count();
+    await page.getByTestId(`schedule-remove-slot-${count - 1}`).click();
+  }
+
+  await page.locator('select[name="weekday-0"]').selectOption(input.weekday);
+  const timeInput = page.locator('input[name="timeLocal-0"]');
   await timeInput.click();
   await timeInput.fill(input.timeLocal);
   await expect(timeInput).toHaveValue(input.timeLocal);
 
-  const secondToggle = page.getByTestId("schedule-second-slot");
   if (input.weekday2 != null && input.timeLocal2) {
-    await secondToggle.check();
-    await expect(secondToggle).toBeChecked();
-    await page.locator('select[name="weekday2"]').selectOption(input.weekday2);
-    const time2 = page.locator('input[name="timeLocal2"]');
+    await page.getByTestId("schedule-add-slot").click();
+    await page.locator('select[name="weekday-1"]').selectOption(input.weekday2);
+    const time2 = page.locator('input[name="timeLocal-1"]');
     await time2.click();
     await time2.fill(input.timeLocal2);
     await expect(time2).toHaveValue(input.timeLocal2);
-  } else {
-    await secondToggle.uncheck();
-    await expect(secondToggle).not.toBeChecked();
   }
 
   const meetInput = page.locator('input[name="meetUrl"]');
@@ -135,6 +147,7 @@ export async function saveWeeklySchedule(
       weekday?: number | null;
       timeLocal2?: string | null;
       weekday2?: number | null;
+      slots?: { weekday: number; timeLocal: string }[];
       active?: boolean;
       horizonWeeks?: number;
       meetUrl?: string | null;
@@ -146,9 +159,11 @@ export async function saveWeeklySchedule(
   if (input.weekday2 != null && input.timeLocal2) {
     expect(body.schedule?.weekday2).toBe(Number(input.weekday2));
     expect(body.schedule?.timeLocal2).toBe(input.timeLocal2);
+    expect(body.schedule?.slots?.length).toBe(2);
   } else {
     expect(body.schedule?.weekday2 ?? null).toBeNull();
     expect(body.schedule?.timeLocal2 ?? null).toBeNull();
+    expect(body.schedule?.slots?.length).toBe(1);
   }
   if (input.horizonWeeks) {
     expect(body.schedule?.horizonWeeks).toBe(Number(input.horizonWeeks));
@@ -158,7 +173,6 @@ export async function saveWeeklySchedule(
     timeout: 15_000,
   });
 
-  // At least one class row should show the new weekly time (adhoc one-offs may differ).
   await expect
     .poll(
       async () => {

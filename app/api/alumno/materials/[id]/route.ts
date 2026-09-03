@@ -2,7 +2,18 @@ import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-error";
 import { isDatabaseConfigured } from "@/lib/db/client";
 import { requireTeacher } from "@/lib/materials/auth";
-import { deleteMaterial, updateMaterial } from "@/lib/materials/repository";
+import {
+  deleteMaterial,
+  getClassScheduleById,
+  getMaterial,
+  updateMaterial,
+} from "@/lib/materials/repository";
+import { formatClassTitle } from "@/lib/materials/schedule-time";
+import {
+  isUniqueViolation,
+  nextOriginalScheduledAt,
+  SCHEDULE_ERROR,
+} from "@/lib/materials/schedule-slots";
 import { isValidHttpsUrl } from "@/lib/materials/validation";
 
 type RouteContext = {
@@ -24,6 +35,11 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
     await requireTeacher();
     const { id } = await context.params;
+    const current = await getMaterial(id);
+    if (!current) {
+      return NextResponse.json({ error: "Material not found" }, { status: 404 });
+    }
+
     const body = (await request.json()) as UpdatePayload;
 
     const title = body.title?.trim() ?? "";
@@ -54,17 +70,44 @@ export async function PATCH(request: Request, context: RouteContext) {
       scheduledAt = parsed.toISOString();
     }
 
-    const material = await updateMaterial(id, {
-      title,
-      description: description || null,
-      url: url || null,
+    const originalScheduledAt = nextOriginalScheduledAt(
+      current.originalScheduledAt,
+      current.scheduledAt,
       scheduledAt,
-      meetUrl: meetUrl || null,
-    });
-    if (!material) {
-      return NextResponse.json({ error: "Material not found" }, { status: 404 });
+    );
+
+    let nextTitle = title;
+    if (scheduledAt) {
+      const schedule = current.scheduleId
+        ? await getClassScheduleById(current.scheduleId)
+        : null;
+      const timezone = schedule?.timezone ?? "Europe/Warsaw";
+      const template = schedule?.titleTemplate ?? "Clase";
+      nextTitle = formatClassTitle(template, new Date(scheduledAt), current.locale, timezone);
     }
-    return NextResponse.json({ material });
+
+    try {
+      const material = await updateMaterial(id, {
+        title: nextTitle,
+        description: description || null,
+        url: url || null,
+        scheduledAt,
+        meetUrl: meetUrl || null,
+        originalScheduledAt,
+      });
+      if (!material) {
+        return NextResponse.json({ error: "Material not found" }, { status: 404 });
+      }
+      return NextResponse.json({ material });
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        return NextResponse.json(
+          { error: SCHEDULE_ERROR.sessionTimeConflict },
+          { status: 409 },
+        );
+      }
+      throw error;
+    }
   } catch (error) {
     return apiError(error);
   }

@@ -34,6 +34,7 @@ export type ClassSessionTableCopy = {
   statusPartial: string;
   addClassLabel?: string;
   addClassButton?: string;
+  sessionRescheduled?: string;
   notesLabel?: string;
   notesPlaceholder?: string;
   notesSaved?: string;
@@ -258,10 +259,20 @@ function SessionRow({
                 data-testid="session-datetime"
                 className="mt-1.5 w-full max-w-xs rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
               />
+              {session.originalScheduledAt && copy.sessionRescheduled ? (
+                <p className="mt-1.5 text-xs text-accent" data-testid="session-rescheduled">
+                  {copy.sessionRescheduled}
+                </p>
+              ) : null}
             </label>
           ) : (
             <p className="text-base font-semibold text-accent">{dateLabel}</p>
           )}
+          {mode !== "teacher" && session.originalScheduledAt && copy.sessionRescheduled ? (
+            <p className="mt-1 text-xs text-accent" data-testid="session-rescheduled">
+              {copy.sessionRescheduled}
+            </p>
+          ) : null}
           {showMeetLink && session.meetUrl ? (
             <a
               href={session.meetUrl}

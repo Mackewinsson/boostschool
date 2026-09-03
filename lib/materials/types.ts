@@ -1,5 +1,6 @@
 import type { UserRole } from "@/lib/auth/constants";
 import type { Locale } from "@/lib/locale";
+import type { WeeklySlot } from "./schedule-slots";
 
 export type Role = UserRole;
 
@@ -16,6 +17,7 @@ export type Material = {
   scheduledAt: string | null;
   meetUrl: string | null;
   scheduleId?: string | null;
+  originalScheduledAt?: string | null;
   createdAt: string;
   assignedAt?: string;
   completionStatus?: CompletionStatus | null;
@@ -24,9 +26,8 @@ export type Material = {
 };
 
 /**
- * weekday / timeLocal: first weekly slot (0 = Sunday … 6 = Saturday).
- * weekday2 / timeLocal2: optional second weekly slot (same Meet link).
- * Null weekday + time = class-by-class (Meet only).
+ * slots: weekly class times (same Meet). Empty = class-by-class.
+ * weekday / timeLocal / weekday2 / timeLocal2 mirror the first two slots.
  */
 export type StudentClassSchedule = {
   id: string;
@@ -35,6 +36,7 @@ export type StudentClassSchedule = {
   timeLocal: string | null;
   weekday2: number | null;
   timeLocal2: string | null;
+  slots: WeeklySlot[];
   timezone: string;
   meetUrl: string | null;
   titleTemplate: string;
