@@ -10,6 +10,7 @@
   --brand-to:       #8b5cf6;   /* fin del gradiente     */
   --accent:         #22d3ee;   /* acento primario       */
   --accent-alt:     #a78bfa;   /* acento secundario     */
+  --warn:           #fbbf24;   /* aviso (clase reprogramada) */
 
   /* RGB de --brand-from para sombras con alpha.
      Actualizar si cambias --brand-from.          */
@@ -63,6 +64,7 @@
   /* Ajustar acentos para mayor contraste sobre fondo claro */
   --accent:         #0891b2;
   --accent-alt:     #7c3aed;
+  --warn:           #ca8a04;
   --brand-from:     #0891b2;
   --brand-to:       #7c3aed;
   --brand-from-rgb: 8 145 178;
@@ -81,6 +83,7 @@
   --color-brand-to:       var(--brand-to);
   --color-accent:         var(--accent);
   --color-accent-alt:     var(--accent-alt);
+  --color-warn:           var(--warn);
 
   /* Fondos */
   --color-canvas:         var(--canvas);

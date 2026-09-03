@@ -61,7 +61,7 @@ export const en: StudentContent = {
     notesLabel: "Class notes",
     notesPlaceholder: "Write anything you want to remember from class…",
     notesSaved: "Notes saved",
-    sessionRescheduled: "Rescheduled (this class only)",
+    sessionRescheduled: "Rescheduled",
   },
   parent: {
     title: "{name}'s progress",
@@ -208,7 +208,7 @@ export const en: StudentContent = {
     errorContent: "Add a description or a link.",
     errorClassDate: "Choose a class date and time.",
     sessionErrorTimeConflict: "There is already a class at that date and time.",
-    sessionRescheduled: "Rescheduled (this class only)",
+    sessionRescheduled: "Rescheduled",
     navMaterials: "Materials",
     navStudents: "Students",
     navLeads: "Leads",

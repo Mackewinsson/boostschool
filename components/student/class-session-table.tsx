@@ -63,6 +63,18 @@ type ClassSessionTableProps = {
 
 const DEFAULT_TZ = "Europe/Warsaw";
 
+function SessionRescheduledBadge({ label }: { label?: string }) {
+  if (!label) return null;
+  return (
+    <span
+      data-testid="session-rescheduled"
+      className="inline-flex items-center rounded-full bg-warn/20 px-2.5 py-0.5 text-xs font-semibold text-warn"
+    >
+      {label}
+    </span>
+  );
+}
+
 export function ClassSessionTable({
   sessions,
   locale,
@@ -231,6 +243,7 @@ function SessionRow({
   const status = session.completionStatus ?? null;
   const homeworkText = (session.description ?? "").trim();
   const hasHomework = Boolean(homeworkText);
+  const rescheduled = Boolean(session.originalScheduledAt);
 
   async function handleNotesBlur() {
     if (!allowNotes || !onSaveNotes) return;
@@ -245,13 +258,23 @@ function SessionRow({
       id={sessionRowDomId(session.id)}
       data-testid="class-session-row"
       data-session-id={session.id}
-      className="scroll-mt-28 rounded-2xl border border-border bg-card p-4 sm:p-5 transition ring-accent/70 data-[calendar-focus=true]:ring-2"
+      data-rescheduled={rescheduled ? "true" : "false"}
+      className={`scroll-mt-28 rounded-2xl border p-4 sm:p-5 transition ring-accent/70 data-[calendar-focus=true]:ring-2 ${
+        rescheduled
+          ? "border-warn/50 bg-warn/5"
+          : "border-border bg-card"
+      }`}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           {mode === "teacher" ? (
             <label className="block text-sm">
-              <span className="font-medium text-fg">{copy.scheduledAtLabel}</span>
+              <span className="flex flex-wrap items-center gap-2">
+                <span className="font-medium text-fg">{copy.scheduledAtLabel}</span>
+                {rescheduled ? (
+                  <SessionRescheduledBadge label={copy.sessionRescheduled} />
+                ) : null}
+              </span>
               <input
                 type="datetime-local"
                 value={scheduledAt}
@@ -259,20 +282,15 @@ function SessionRow({
                 data-testid="session-datetime"
                 className="mt-1.5 w-full max-w-xs rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
               />
-              {session.originalScheduledAt && copy.sessionRescheduled ? (
-                <p className="mt-1.5 text-xs text-accent" data-testid="session-rescheduled">
-                  {copy.sessionRescheduled}
-                </p>
-              ) : null}
             </label>
           ) : (
-            <p className="text-base font-semibold text-accent">{dateLabel}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-base font-semibold text-accent">{dateLabel}</p>
+              {rescheduled ? (
+                <SessionRescheduledBadge label={copy.sessionRescheduled} />
+              ) : null}
+            </div>
           )}
-          {mode !== "teacher" && session.originalScheduledAt && copy.sessionRescheduled ? (
-            <p className="mt-1 text-xs text-accent" data-testid="session-rescheduled">
-              {copy.sessionRescheduled}
-            </p>
-          ) : null}
           {showMeetLink && session.meetUrl ? (
             <a
               href={session.meetUrl}
