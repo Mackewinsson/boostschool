@@ -6,10 +6,13 @@ import type {
   AnalyticsHomeworkStatus,
   TeacherAnalytics,
 } from "@/lib/teacher/analytics";
+import type { TeacherCalendarSession } from "@/lib/teacher/calendar-sessions";
 import { teacherPaths } from "@/lib/teacher/paths";
+import { TeacherOverviewCalendar } from "./teacher-overview-calendar";
 
 type TeacherAnalyticsProps = {
   data: TeacherAnalytics;
+  calendarSessions: TeacherCalendarSession[];
   copy: StudentContent["teacher"];
   locale: Locale;
 };
@@ -45,6 +48,7 @@ function barWidth(count: number, total: number): string {
 
 export function TeacherAnalyticsDashboard({
   data,
+  calendarSessions,
   copy,
   locale,
 }: TeacherAnalyticsProps) {
@@ -147,6 +151,13 @@ export function TeacherAnalyticsDashboard({
           </>
         )}
       </div>
+
+      <TeacherOverviewCalendar
+        sessions={calendarSessions}
+        locale={locale}
+        timeZone={data.timeZone}
+        copy={copy}
+      />
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <section className="admin-card admin-card--flush">

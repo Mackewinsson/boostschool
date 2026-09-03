@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Locale } from "@/lib/locale";
@@ -12,18 +13,20 @@ import {
   sessionRowDomId,
   sessionsByDateKey,
   weekdayLabels,
+  type CalendarSessionSource,
 } from "@/lib/materials/class-calendar";
 import { partsInZone } from "@/lib/materials/schedule-time";
-import type { Material } from "@/lib/materials/types";
 import type { StudentContent } from "@/lib/student-content/types";
+import { teacherPaths } from "@/lib/teacher/paths";
 
 const DEFAULT_TZ = "Europe/Warsaw";
 const MAX_CHIPS = 3;
 
 type ClassMonthCalendarProps = {
-  sessions: Material[];
+  sessions: CalendarSessionSource[];
   locale: Locale;
   timeZone?: string;
+  variant?: "student" | "allStudents";
   copy: Pick<
     StudentContent["teacher"],
     | "calendarTitle"
@@ -34,6 +37,7 @@ type ClassMonthCalendarProps = {
     | "calendarEmptyMonth"
     | "calendarMore"
     | "calendarSessionAria"
+    | "calendarSessionOverviewAria"
   >;
 };
 
@@ -47,12 +51,37 @@ function scrollToSession(sessionId: string) {
   }, 1600);
 }
 
+function chipLabel(chip: { timeLabel: string; studentLabel?: string }): string {
+  if (chip.studentLabel) {
+    return `${chip.timeLabel} · ${chip.studentLabel}`;
+  }
+  return chip.timeLabel;
+}
+
+function chipClassName(
+  chip: { isRescheduled: boolean; isPast: boolean },
+  interactive: boolean,
+): string {
+  const base =
+    "block w-full truncate rounded-md px-1 py-0.5 text-left text-[11px] font-semibold tabular-nums transition sm:px-1.5";
+  const tone = chip.isRescheduled
+    ? chip.isPast
+      ? "bg-warn/10 text-warn/80 hover:bg-warn/20"
+      : "bg-warn/20 text-warn hover:bg-warn/30"
+    : chip.isPast
+      ? "bg-border/80 text-fg-muted hover:bg-border"
+      : "bg-accent/15 text-accent hover:bg-accent/25";
+  return interactive ? `${base} ${tone}` : base;
+}
+
 export function ClassMonthCalendar({
   sessions,
   locale,
   timeZone = DEFAULT_TZ,
+  variant = "student",
   copy,
 }: ClassMonthCalendarProps) {
+  const isOverview = variant === "allStudents";
   const [visible, setVisible] = useState(() =>
     initialVisibleMonth(sessions, timeZone),
   );
@@ -76,10 +105,23 @@ export function ClassMonthCalendar({
     setVisible({ year: today.year, month: today.month });
   }
 
+  function sessionAriaLabel(chip: {
+    timeLabel: string;
+    studentLabel?: string;
+  }): string {
+    if (isOverview && chip.studentLabel) {
+      return copy.calendarSessionOverviewAria
+        .replace("{time}", chip.timeLabel)
+        .replace("{student}", chip.studentLabel);
+    }
+    return copy.calendarSessionAria.replace("{time}", chip.timeLabel);
+  }
+
   return (
     <section
       className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8"
       data-testid="class-month-calendar"
+      data-calendar-variant={variant}
       aria-labelledby="class-month-calendar-title"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -179,29 +221,32 @@ export function ClassMonthCalendar({
                   {hasClass ? (
                     <ul className="mt-1 space-y-0.5">
                       {visibleChips.map((chip) => (
-                        <li key={chip.id}>
-                          <button
-                            type="button"
-                            data-testid="calendar-session-chip"
-                            data-session-id={chip.id}
-                            data-rescheduled={chip.isRescheduled ? "true" : "false"}
-                            onClick={() => scrollToSession(chip.id)}
-                            aria-label={copy.calendarSessionAria.replace(
-                              "{time}",
-                              chip.timeLabel,
-                            )}
-                            className={`block w-full truncate rounded-md px-1 py-0.5 text-left text-[11px] font-semibold tabular-nums transition sm:px-1.5 ${
-                              chip.isRescheduled
-                                ? chip.isPast
-                                  ? "bg-warn/10 text-warn/80 hover:bg-warn/20"
-                                  : "bg-warn/20 text-warn hover:bg-warn/30"
-                                : chip.isPast
-                                  ? "bg-border/80 text-fg-muted hover:bg-border"
-                                  : "bg-accent/15 text-accent hover:bg-accent/25"
-                            }`}
-                          >
-                            {chip.timeLabel}
-                          </button>
+                        <li key={`${chip.id}-${chip.studentId ?? "student"}`}>
+                          {isOverview && chip.studentId ? (
+                            <Link
+                              href={`${teacherPaths.home}?student=${chip.studentId}#${sessionRowDomId(chip.id)}`}
+                              data-testid="calendar-session-chip"
+                              data-session-id={chip.id}
+                              data-student-id={chip.studentId}
+                              data-rescheduled={chip.isRescheduled ? "true" : "false"}
+                              aria-label={sessionAriaLabel(chip)}
+                              className={chipClassName(chip, true)}
+                            >
+                              {chipLabel(chip)}
+                            </Link>
+                          ) : (
+                            <button
+                              type="button"
+                              data-testid="calendar-session-chip"
+                              data-session-id={chip.id}
+                              data-rescheduled={chip.isRescheduled ? "true" : "false"}
+                              onClick={() => scrollToSession(chip.id)}
+                              aria-label={sessionAriaLabel(chip)}
+                              className={chipClassName(chip, true)}
+                            >
+                              {chipLabel(chip)}
+                            </button>
+                          )}
                         </li>
                       ))}
                       {extra > 0 ? (

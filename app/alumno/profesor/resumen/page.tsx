@@ -4,6 +4,7 @@ import { isDatabaseConfigured } from "@/lib/db/client";
 import { getLocaleFromCookies } from "@/lib/locale-server";
 import { getStudentContent } from "@/lib/student-content";
 import { getTeacherAnalytics } from "@/lib/teacher/analytics";
+import { getTeacherCalendarSessions } from "@/lib/teacher/calendar-sessions";
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +35,17 @@ export default async function TeacherAnalyticsPage() {
     );
   }
 
-  const data = await getTeacherAnalytics();
+  const [data, calendarSessions] = await Promise.all([
+    getTeacherAnalytics(),
+    getTeacherCalendarSessions(),
+  ]);
 
   return (
-    <TeacherAnalyticsDashboard data={data} copy={copy} locale={locale} />
+    <TeacherAnalyticsDashboard
+      data={data}
+      calendarSessions={calendarSessions}
+      copy={copy}
+      locale={locale}
+    />
   );
 }

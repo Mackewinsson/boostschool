@@ -202,6 +202,23 @@ export function TeacherDashboard({
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash.slice(1);
+    if (!hash.startsWith("session-") || sessions.length === 0 || !selectedStudentId) {
+      return;
+    }
+    const row = document.getElementById(hash);
+    if (!row) return;
+    window.requestAnimationFrame(() => {
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      row.setAttribute("data-calendar-focus", "true");
+      window.setTimeout(() => {
+        row.removeAttribute("data-calendar-focus");
+      }, 1600);
+    });
+  }, [sessions, selectedStudentId]);
+
   async function handleSaveSchedule(input: {
     studentUserId: string;
     slots: { weekday: number; timeLocal: string }[];

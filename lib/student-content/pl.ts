@@ -166,6 +166,7 @@ export const pl: StudentContent = {
     calendarEmptyMonth: "Brak zajęć w tym miesiącu.",
     calendarMore: "+{count} więcej",
     calendarSessionAria: "Przejdź do zajęć o {time}",
+    calendarSessionOverviewAria: "Otwórz zajęcia {student} o {time}",
     weekdaySunday: "Niedziela",
     weekdayMonday: "Poniedziałek",
     weekdayTuesday: "Wtorek",
@@ -301,6 +302,9 @@ export const pl: StudentContent = {
     analyticsOpenLabel: "Otworz",
     analyticsNeedsOverdue: "Zalegle zadania ({when})",
     analyticsNeedsNoClass: "Brak nastepnych zajec",
+    analyticsCalendarTitle: "Kalendarz wszystkich zajec",
+    analyticsCalendarHint:
+      "Wszystkie zajecia Twoich uczniów. Dotknij godziny, aby otworzyc ich profil i zadac prace domowa.",
   },
   mail: {
     homeworkSubject: "Paulina zadała Ci pracę",
