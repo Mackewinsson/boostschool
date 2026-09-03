@@ -140,7 +140,7 @@ Lógica de slots / TZ / realign: `lib/materials/schedule-generate.ts` + `lib/mat
 | `student_materials` | Asignación + `completion_status` + `notes` |
 | `student_class_schedules` | Horario semanal (1 o 2 slots) o Meet-only por alumno |
 
-Schema: `lib/db/schema.sql`. Migrar: `npm run db:migrate`.
+Schema: `lib/db/schema.sql`. Migrar: `npm run db:migrate`. En Vercel el deploy corre `vercel-build` (migrate + `next build`) con el `DATABASE_URL` del proyecto.
 
 ### APIs relevantes
 
@@ -226,6 +226,8 @@ npm run db:migrate
 npm run db:seed-test-users
 npm run test:e2e
 ```
+
+En Vercel el deploy usa `vercel-build` (`db:migrate` + `next build`) con el `DATABASE_URL` del proyecto.
 
 ---
 
