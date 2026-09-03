@@ -106,7 +106,7 @@ Componente compartido: `components/student/class-session-table.tsx`.
 
 Cada fila = una clase con fecha/hora:
 
-- **Profe:** edita fecha/hora + deberes (`description`) → botón **Guardar** (guarda ambos). Marca hecho: Pendiente / Sí / No / Parcial.
+- **Profe:** edita fecha/hora + deberes (`description`) → botón **Guardar** (guarda ambos). Cambiar la fecha de **una** fila la deja fija (`original_scheduled_at`): el próximo “Guardar horario” no la devuelve al slot semanal ni recrea esa ocurrencia. Marca hecho: Pendiente / Sí / No / Parcial.
 - **Alumno:** ve deberes o mensaje vacío; puede unirse a Meet; apuntes. **Sin** estado hecho/pendiente.
 - **Padre:** dashboard del alumno vinculado: ve deberes y badge de estado (Pendiente / Sí / No / Parcial). **Sin** Meet, sin apuntes, sin editar estado.
 - Estado hecho lo marca solo la profe (`student_materials.completion_status`); el padre lo ve, el alumno no.
@@ -120,25 +120,27 @@ Deberes vacíos → copy `homeworkEmpty` (“Todavía no hay deberes…”).
 
 | Modo | Comportamiento |
 |---|---|
-| **Horario fijo** | 1 o 2 días + hora 24h (Warsaw) + Meet (mismo enlace en todas) + “Generar próximas clases”. Al guardar, **realinea** todas las clases futuras a esos días/horas y conserva textos de deberes. |
+| **Horario fijo** | Lista de **N** clases por semana (máx. 7): día + hora 24h (Warsaw) + Meet (mismo enlace en todas) + “Generar próximas clases”. Al guardar, **realinea** las clases semanales futuras a esos días/horas y conserva textos de deberes. |
 | **Clase a clase** | Solo Meet; profe añade fechas con “Crear clase”. `active` queda en false. |
 
 Al pasar de “clase a clase” → “horario fijo”, el checkbox de generar debe arrancar **activo** (si no, el upsert guarda `active: false` y **no realinea**).
 
+Dos slots con el mismo día y hora → error `duplicate_slot` / copy `scheduleErrorDuplicateSlot` (en el formulario, no un genérico).
+
 Lógica de slots / TZ / realign: `lib/materials/schedule-generate.ts` + `lib/materials/schedule-slots.ts`
 
 - Zona por defecto: `Europe/Warsaw`, hora en **24h** (`20:00` = 8 pm).
-- Segundo slot opcional (`weekday_2` / `time_local_2`): alumnos con 2 clases fijas por semana; el Meet es el mismo.
-- `realignFutureSessionsForSchedule`: mueve futuras (con y sin deberes), borra shells vacíos, rellena horizonte (semanas × número de slots).
+- Slots en `student_class_schedules.weekly_slots` (JSONB). Las columnas `weekday` / `time_local` / `weekday_2` / `time_local_2` duplican los dos primeros por compatibilidad.
+- `realignFutureSessionsForSchedule`: solo toca filas con `schedule_id` de ese horario y **sin** `original_scheduled_at`. No borra extras ni clases creadas a mano (`Crear clase`, `schedule_id` null).
 - Unique `(schedule_id, scheduled_at)` en materials — el realign desacopla `schedule_id` antes de reasignar.
 
 ### Datos clave
 
 | Tabla | Uso |
 |---|---|
-| `materials` | Clase o extra (`scheduled_at`, `meet_url`, `description` = deberes, `schedule_id`) |
+| `materials` | Clase o extra (`scheduled_at`, `meet_url`, `description` = deberes, `schedule_id`, `original_scheduled_at` si se movió una sola fecha) |
 | `student_materials` | Asignación + `completion_status` + `notes` |
-| `student_class_schedules` | Horario semanal (1 o 2 slots) o Meet-only por alumno |
+| `student_class_schedules` | Horario semanal (`weekly_slots`) o Meet-only por alumno |
 
 Schema: `lib/db/schema.sql`. Migrar: `npm run db:migrate`. En Vercel el deploy corre `vercel-build` (migrate + `next build`) con el `DATABASE_URL` del proyecto.
 

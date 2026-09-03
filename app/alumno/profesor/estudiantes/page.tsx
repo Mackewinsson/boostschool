@@ -28,23 +28,17 @@ function weekdayLabel(
 
 function formatSchedule(
   student: {
-    weekday: number | null;
-    timeLocal: string | null;
-    weekday2: number | null;
-    timeLocal2: string | null;
+    slots: { weekday: number; timeLocal: string }[];
     scheduleActive: boolean;
   },
   copy: StudentContent["teacher"],
 ): string {
-  if (student.weekday == null || !student.timeLocal) {
+  if (student.slots.length === 0) {
     return copy.studentsNoSchedule;
   }
-  const first = `${weekdayLabel(student.weekday, copy)} ${student.timeLocal}`;
-  const second =
-    student.weekday2 != null && student.timeLocal2
-      ? ` · ${weekdayLabel(student.weekday2, copy)} ${student.timeLocal2}`
-      : "";
-  const base = `${first}${second}`;
+  const base = student.slots
+    .map((slot) => `${weekdayLabel(slot.weekday, copy)} ${slot.timeLocal}`)
+    .join(" · ");
   return student.scheduleActive ? base : `${base} (${copy.usersStatusInactive})`;
 }
 

@@ -1,7 +1,7 @@
 import type { Locale } from "@/lib/locale";
 import { getDb } from "@/lib/db/client";
 import { parseHorizonWeeks } from "./schedule-horizon";
-import { formatTimeLocal } from "./schedule-slots";
+import { formatTimeLocal, parseWeeklySlotsJson, weeklySlotsOf, type WeeklySlot } from "./schedule-slots";
 import type {
   Assignment,
   CompletionStatus,
@@ -18,6 +18,7 @@ type MaterialRow = {
   scheduled_at: string | null;
   meet_url: string | null;
   schedule_id?: string | null;
+  original_scheduled_at?: string | null;
   created_at: string;
   assigned_at?: string;
   completion_status?: CompletionStatus | null;
@@ -41,6 +42,7 @@ type ScheduleRow = {
   time_local: string | null;
   weekday_2: number | null;
   time_local_2: string | null;
+  weekly_slots?: unknown;
   timezone: string;
   meet_url: string | null;
   title_template: string;
@@ -58,6 +60,7 @@ function mapMaterial(row: MaterialRow): Material {
     scheduledAt: row.scheduled_at,
     meetUrl: row.meet_url,
     scheduleId: row.schedule_id ?? null,
+    originalScheduledAt: row.original_scheduled_at ?? null,
     createdAt: row.created_at,
     ...(row.assigned_at !== undefined ? { assignedAt: row.assigned_at } : {}),
     ...(row.completion_status !== undefined
@@ -69,13 +72,25 @@ function mapMaterial(row: MaterialRow): Material {
 }
 
 function mapSchedule(row: ScheduleRow): StudentClassSchedule {
+  const weekday = row.weekday == null ? null : Number(row.weekday);
+  const timeLocal = formatTimeLocal(row.time_local);
+  const weekday2 = row.weekday_2 == null ? null : Number(row.weekday_2);
+  const timeLocal2 = formatTimeLocal(row.time_local_2);
+  const slots = weeklySlotsOf({
+    weekday,
+    timeLocal,
+    weekday2,
+    timeLocal2,
+    slots: parseWeeklySlotsJson(row.weekly_slots),
+  });
   return {
     id: row.id,
     studentUserId: row.student_user_id,
-    weekday: row.weekday == null ? null : Number(row.weekday),
-    timeLocal: formatTimeLocal(row.time_local),
-    weekday2: row.weekday_2 == null ? null : Number(row.weekday_2),
-    timeLocal2: formatTimeLocal(row.time_local_2),
+    weekday: slots[0]?.weekday ?? null,
+    timeLocal: slots[0]?.timeLocal ?? null,
+    weekday2: slots[1]?.weekday ?? null,
+    timeLocal2: slots[1]?.timeLocal ?? null,
+    slots,
     timezone: row.timezone,
     meetUrl: row.meet_url,
     titleTemplate: row.title_template,
@@ -87,7 +102,8 @@ function mapSchedule(row: ScheduleRow): StudentClassSchedule {
 export async function listMaterials(): Promise<Material[]> {
   const sql = getDb();
   const rows = (await sql`
-    SELECT id, title, description, url, locale, scheduled_at, meet_url, schedule_id, created_at
+    SELECT id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
+           original_scheduled_at, created_at
     FROM materials
     ORDER BY scheduled_at ASC NULLS LAST, created_at DESC
   `) as MaterialRow[];
@@ -97,7 +113,8 @@ export async function listMaterials(): Promise<Material[]> {
 export async function getMaterial(id: string): Promise<Material | null> {
   const sql = getDb();
   const rows = (await sql`
-    SELECT id, title, description, url, locale, scheduled_at, meet_url, schedule_id, created_at
+    SELECT id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
+           original_scheduled_at, created_at
     FROM materials
     WHERE id = ${id}::uuid
     LIMIT 1
@@ -119,7 +136,8 @@ export async function patchMaterialClassDetails(
       scheduled_at = ${input.scheduledAt},
       meet_url = ${input.meetUrl}
     WHERE id = ${id}::uuid
-    RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id, created_at
+    RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
+              original_scheduled_at, created_at
   `) as MaterialRow[];
   return rows[0] ? mapMaterial(rows[0]) : null;
 }
@@ -145,7 +163,8 @@ export async function createMaterial(input: {
       ${input.meetUrl ?? null},
       ${input.scheduleId ?? null}
     )
-    RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id, created_at
+    RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
+              original_scheduled_at, created_at
   `) as MaterialRow[];
   return mapMaterial(rows[0]);
 }
@@ -158,6 +177,7 @@ export async function updateMaterial(
     url?: string | null;
     scheduledAt?: string | null;
     meetUrl?: string | null;
+    originalScheduledAt?: string | null;
   },
 ): Promise<Material | null> {
   const sql = getDb();
@@ -168,9 +188,11 @@ export async function updateMaterial(
       description = ${input.description ?? null},
       url = ${input.url ?? null},
       scheduled_at = ${input.scheduledAt ?? null},
-      meet_url = ${input.meetUrl ?? null}
+      meet_url = ${input.meetUrl ?? null},
+      original_scheduled_at = ${input.originalScheduledAt ?? null}
     WHERE id = ${id}::uuid
-    RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id, created_at
+    RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
+              original_scheduled_at, created_at
   `) as MaterialRow[];
   return rows[0] ? mapMaterial(rows[0]) : null;
 }
@@ -237,7 +259,8 @@ export async function listMaterialsForStudent(userId: string): Promise<Material[
   const sql = getDb();
   const rows = (await sql`
     SELECT m.id, m.title, m.description, m.url, m.locale, m.scheduled_at, m.meet_url,
-           m.schedule_id, m.created_at, sm.assigned_at, sm.completion_status, sm.reviewed_at, sm.notes
+           m.schedule_id, m.original_scheduled_at, m.created_at, sm.assigned_at,
+           sm.completion_status, sm.reviewed_at, sm.notes
     FROM materials m
     INNER JOIN student_materials sm ON sm.material_id = m.id
     WHERE sm.user_id = ${userId}::uuid
@@ -282,7 +305,7 @@ export async function listClassSchedules(): Promise<StudentClassSchedule[]> {
   const sql = getDb();
   const rows = (await sql`
     SELECT id, student_user_id, weekday, time_local, weekday_2, time_local_2,
-           timezone, meet_url, title_template, horizon_weeks, active
+           weekly_slots, timezone, meet_url, title_template, horizon_weeks, active
     FROM student_class_schedules
     ORDER BY created_at ASC
   `) as ScheduleRow[];
@@ -295,7 +318,7 @@ export async function getClassScheduleByStudentId(
   const sql = getDb();
   const rows = (await sql`
     SELECT id, student_user_id, weekday, time_local, weekday_2, time_local_2,
-           timezone, meet_url, title_template, horizon_weeks, active
+           weekly_slots, timezone, meet_url, title_template, horizon_weeks, active
     FROM student_class_schedules
     WHERE student_user_id = ${studentUserId}::uuid
     LIMIT 1
@@ -303,8 +326,23 @@ export async function getClassScheduleByStudentId(
   return rows[0] ? mapSchedule(rows[0]) : null;
 }
 
+export async function getClassScheduleById(
+  scheduleId: string,
+): Promise<StudentClassSchedule | null> {
+  const sql = getDb();
+  const rows = (await sql`
+    SELECT id, student_user_id, weekday, time_local, weekday_2, time_local_2,
+           weekly_slots, timezone, meet_url, title_template, horizon_weeks, active
+    FROM student_class_schedules
+    WHERE id = ${scheduleId}::uuid
+    LIMIT 1
+  `) as ScheduleRow[];
+  return rows[0] ? mapSchedule(rows[0]) : null;
+}
+
 export async function upsertClassSchedule(input: {
   studentUserId: string;
+  slots?: WeeklySlot[];
   weekday?: number | null;
   timeLocal?: string | null;
   weekday2?: number | null;
@@ -321,14 +359,22 @@ export async function upsertClassSchedule(input: {
   const horizonWeeks = parseHorizonWeeks(input.horizonWeeks);
   const active = input.active ?? true;
   const meetUrl = input.meetUrl?.trim() || null;
-  const weekday = input.weekday ?? null;
-  const timeLocal = input.timeLocal?.trim() || null;
-  const weekday2 = input.weekday2 ?? null;
-  const timeLocal2 = input.timeLocal2?.trim() || null;
+  const slots = weeklySlotsOf({
+    weekday: input.weekday ?? null,
+    timeLocal: input.timeLocal ?? null,
+    weekday2: input.weekday2 ?? null,
+    timeLocal2: input.timeLocal2 ?? null,
+    slots: input.slots,
+  });
+  const weekday = slots[0]?.weekday ?? null;
+  const timeLocal = slots[0]?.timeLocal ?? null;
+  const weekday2 = slots[1]?.weekday ?? null;
+  const timeLocal2 = slots[1]?.timeLocal ?? null;
+  const weeklySlotsJson = JSON.stringify(slots);
 
   const rows = (await sql`
     INSERT INTO student_class_schedules (
-      student_user_id, weekday, time_local, weekday_2, time_local_2,
+      student_user_id, weekday, time_local, weekday_2, time_local_2, weekly_slots,
       timezone, meet_url, title_template, horizon_weeks, active, updated_at
     )
     VALUES (
@@ -337,6 +383,7 @@ export async function upsertClassSchedule(input: {
       ${timeLocal}::time,
       ${weekday2},
       ${timeLocal2}::time,
+      ${weeklySlotsJson}::jsonb,
       ${timezone},
       ${meetUrl},
       ${titleTemplate},
@@ -349,6 +396,7 @@ export async function upsertClassSchedule(input: {
       time_local = EXCLUDED.time_local,
       weekday_2 = EXCLUDED.weekday_2,
       time_local_2 = EXCLUDED.time_local_2,
+      weekly_slots = EXCLUDED.weekly_slots,
       timezone = EXCLUDED.timezone,
       meet_url = EXCLUDED.meet_url,
       title_template = EXCLUDED.title_template,
@@ -356,7 +404,7 @@ export async function upsertClassSchedule(input: {
       active = EXCLUDED.active,
       updated_at = now()
     RETURNING id, student_user_id, weekday, time_local, weekday_2, time_local_2,
-              timezone, meet_url, title_template, horizon_weeks, active
+              weekly_slots, timezone, meet_url, title_template, horizon_weeks, active
   `) as ScheduleRow[];
   return mapSchedule(rows[0]);
 }
