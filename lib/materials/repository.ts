@@ -233,13 +233,27 @@ export async function listAssignments(userId?: string): Promise<Assignment[]> {
 export async function assignMaterial(
   userId: string,
   materialId: string,
-): Promise<void> {
+): Promise<boolean> {
   const sql = getDb();
-  await sql`
+  const rows = (await sql`
     INSERT INTO student_materials (user_id, material_id)
     VALUES (${userId}::uuid, ${materialId}::uuid)
     ON CONFLICT (user_id, material_id) DO NOTHING
-  `;
+    RETURNING user_id
+  `) as { user_id: string }[];
+  return rows.length > 0;
+}
+
+export async function listStudentUserIdsForMaterial(
+  materialId: string,
+): Promise<string[]> {
+  const sql = getDb();
+  const rows = (await sql`
+    SELECT user_id
+    FROM student_materials
+    WHERE material_id = ${materialId}::uuid
+  `) as { user_id: string }[];
+  return rows.map((row) => row.user_id);
 }
 
 export async function unassignMaterial(

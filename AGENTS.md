@@ -150,9 +150,11 @@ Schema: `lib/db/schema.sql`. Migrar: `npm run db:migrate`. En Vercel el deploy c
 |---|---|
 | `/api/alumno/schedules` | GET/POST horario; POST dispara realign si hay slot fijo |
 | `/api/alumno/sessions` | POST clase puntual |
-| `/api/alumno/materials` | CRUD materiales (+ genera shells semanales en GET) |
+| `/api/alumno/materials` | CRUD materiales. **PATCH** de deberes nuevos/cambiados avisa al alumno (Resend) |
 | `/api/alumno/my-materials` | Vista alumno/padre |
-| `/api/alumno/assignments` | Estado de deberes |
+| `/api/alumno/assignments` | Estado de deberes; **POST** asigna un extra y avisa por correo |
+
+Correos transaccionales: `lib/mail/assignment-notify.ts`. No se envían a inboxes `.test` (e2e). Fallar el correo no bloquea el guardado. Copy: `mail` en `lib/student-content/`.
 
 ### E2E
 

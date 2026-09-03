@@ -288,4 +288,19 @@ export type StudentContent = {
     analyticsNeedsOverdue: string;
     analyticsNeedsNoClass: string;
   };
+  mail: {
+    homeworkSubject: string;
+    homeworkBody: string;
+    materialSubject: string;
+    materialBody: string;
+    parentHomeworkSubject: string;
+    parentHomeworkBody: string;
+    parentMaterialSubject: string;
+    parentMaterialBody: string;
+    greeting: string;
+    whenLabel: string;
+    previewLabel: string;
+    ctaLabel: string;
+    footer: string;
+  };
 };

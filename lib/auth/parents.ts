@@ -104,3 +104,19 @@ export async function createParentForStudent(input: {
   await linkParentToStudent(parent.id, input.studentId);
   return parent;
 }
+
+export async function listParentsForStudent(
+  studentUserId: string,
+): Promise<{ id: string; email: string; name: string }[]> {
+  const sql = getDb();
+  const rows = (await sql`
+    SELECT p.id, p.email, p.name
+    FROM parent_students ps
+    INNER JOIN users p ON p.id = ps.parent_user_id
+    WHERE ps.student_user_id = ${studentUserId}::uuid
+      AND p.active = true
+      AND p.role = 'parent'
+    ORDER BY p.email ASC
+  `) as { id: string; email: string; name: string }[];
+  return rows;
+}
