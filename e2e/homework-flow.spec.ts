@@ -5,15 +5,19 @@ import {
   classRows,
   classTable,
   e2eCreds,
+  firstRowWithWeekday,
   futureThursdayAt,
   login,
   logout,
+  nextRowAfterDatetime,
   rowWithDatetimeEnding,
+  rowWithDatetimeValue,
   rowWithMeet,
   rowWithText,
   saveAdhocMeet,
   saveWeeklySchedule,
   selectStudent,
+  todayPastDatetimeLocalInWarsaw,
   uniqueFutureScheduledLocal,
   uniqueMarker,
   uniqueTitle,
@@ -110,6 +114,83 @@ test.describe("class table homework flow", () => {
     await expect(parentRow.getByTestId("class-notes")).toHaveCount(0);
     await expect(parentRow.getByTestId("homework-status")).toHaveCount(0);
     await expect(page.getByLabel("Apuntes de clase")).toHaveCount(0);
+  });
+
+  test("homework for next class shows on the following session", async ({
+    page,
+  }) => {
+    const marker = uniqueMarker("carry");
+    const exercise = `La prima haz p53 sb (${marker}) https://example.com/hw-${marker}`;
+
+    await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
+    await selectStudent(page, STUDENT_LABEL);
+    await saveWeeklySchedule(page, {
+      weekday: "1",
+      timeLocal: "18:00",
+      weekday2: "4",
+      timeLocal2: "18:00",
+      horizonWeeks: "6",
+    });
+
+    const mondayRow = await firstRowWithWeekday(page, 1, "T18:00");
+    await mondayRow.getByTestId("session-homework").fill(exercise);
+    await mondayRow.getByRole("button", { name: "Guardar" }).click();
+    await expect(page.getByText("Cambios guardados.")).toBeVisible({
+      timeout: 15_000,
+    });
+
+    const mondayWhen = await mondayRow.getByTestId("session-datetime").inputValue();
+    const nextRow = await nextRowAfterDatetime(page, mondayWhen);
+    await expect(nextRow.getByTestId("session-homework-this-text")).toContainText(
+      marker,
+    );
+    await expect(
+      nextRow.getByTestId("session-homework-this-text").getByRole("link"),
+    ).toHaveAttribute("href", `https://example.com/hw-${marker}`);
+
+    await logout(page);
+
+    await login(page, e2eCreds.student, /\/alumno\/?$/);
+    await expect(
+      page.getByTestId("session-homework-text").filter({ hasText: marker }),
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("session-homework-this-text").filter({ hasText: marker }),
+    ).toBeVisible();
+  });
+
+  test("today's already-started class stays at the top, not in Past", async ({
+    page,
+  }) => {
+    const when = todayPastDatetimeLocalInWarsaw();
+
+    await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
+    await selectStudent(page, STUDENT_LABEL);
+    await saveAdhocMeet(page);
+
+    await page.getByTestId("add-class-datetime").fill(when);
+    await page.getByRole("button", { name: "Crear clase" }).click();
+    await expect(page.getByText("Clase añadida.")).toBeVisible({
+      timeout: 15_000,
+    });
+
+    const todayRow = await rowWithDatetimeValue(page, when);
+    const sessionId = await todayRow.getAttribute("data-session-id");
+    expect(sessionId).toBeTruthy();
+    await expect(
+      page.getByTestId("today-sessions").locator(`[data-session-id="${sessionId}"]`),
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("past-sessions").locator(`[data-session-id="${sessionId}"]`),
+    ).toHaveCount(0);
+
+    await page.getByTestId("class-month-calendar").getByRole("button", { name: "Hoy" }).click();
+    const chip = page.locator(
+      `[data-testid="calendar-session-chip"][data-session-id="${sessionId}"]`,
+    );
+    await expect(chip).toBeVisible();
+    await chip.click();
+    await expect(todayRow).toHaveAttribute("data-calendar-focus", "true");
   });
 
   test("class-by-class: add session, homework, student and parent see it", async ({

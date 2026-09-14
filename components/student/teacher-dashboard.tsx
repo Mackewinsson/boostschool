@@ -533,10 +533,13 @@ export function TeacherDashboard({
                 copy={{
                   classesTitle: copy.classesTableTitle,
                   classesEmpty: copy.classesEmpty,
+                  todayTitle: copy.todayTitle,
                   upcomingTitle: copy.upcomingTitle,
                   pastTitle: copy.pastTitle,
                   homeworkLabel: copy.homeworkLabel,
                   homeworkPlaceholder: copy.homeworkPlaceholder,
+                  homeworkForThisClassLabel: copy.homeworkForThisClassLabel,
+                  homeworkForThisClassEmpty: copy.homeworkForThisClassEmpty,
                   saveHomeworkButton: copy.saveHomeworkButton,
                   scheduledAtLabel: copy.scheduledAtLabel,
                   joinMeetLabel: copy.meetUrlLabel,

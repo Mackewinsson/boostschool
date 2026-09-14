@@ -1,28 +1,38 @@
 "use client";
 
 import { Video } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Locale } from "@/lib/locale";
 import type { CompletionStatus, Material } from "@/lib/materials/types";
 import {
   formatScheduledAt,
   groupMaterialsBySchedule,
+  homeworkFromPreviousClass,
+  previousSessionById,
 } from "@/lib/materials/schedule-groups";
 import {
   datetimeLocalInZoneToUtcIso,
   toDatetimeLocalValueInZone,
 } from "@/lib/materials/schedule-time";
-import { sessionRowDomId } from "@/lib/materials/class-calendar";
+import {
+  focusSessionRow,
+  sessionIdFromRowDomId,
+  sessionRowDomId,
+} from "@/lib/materials/class-calendar";
 import { externalLinkProps } from "@/lib/site-links";
 import { HomeworkStatusBadge } from "./homework-status-badge";
+import { HomeworkText } from "./homework-text";
 
 export type ClassSessionTableCopy = {
   classesTitle: string;
   classesEmpty: string;
+  todayTitle?: string;
   upcomingTitle?: string;
   pastTitle?: string;
   homeworkLabel: string;
   homeworkEmpty?: string;
+  homeworkForThisClassLabel?: string;
+  homeworkForThisClassEmpty?: string;
   homeworkPlaceholder?: string;
   saveHomeworkButton?: string;
   scheduledAtLabel?: string;
@@ -92,9 +102,22 @@ export function ClassSessionTable({
   showHomeworkStatus = false,
 }: ClassSessionTableProps) {
   const [newClassAt, setNewClassAt] = useState("");
-  const { upcoming, past } = useMemo(() => {
-    const grouped = groupMaterialsBySchedule(sessions);
-    return { upcoming: grouped.upcoming, past: grouped.past };
+  const previousById = useMemo(() => previousSessionById(sessions), [sessions]);
+  const { today, upcoming, past } = useMemo(
+    () => groupMaterialsBySchedule(sessions, { timeZone }),
+    [sessions, timeZone],
+  );
+
+  useEffect(() => {
+    const hashId =
+      typeof window === "undefined"
+        ? null
+        : sessionIdFromRowDomId(window.location.hash.replace(/^#/, ""));
+    if (!hashId) return;
+    const frame = window.requestAnimationFrame(() => {
+      focusSessionRow(hashId);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [sessions]);
 
   function renderRows(items: Material[]) {
@@ -104,6 +127,7 @@ export function ClassSessionTable({
           <SessionRow
             key={session.id}
             session={session}
+            previousSession={previousById.get(session.id)}
             locale={locale}
             copy={copy}
             mode={mode}
@@ -161,21 +185,34 @@ export function ClassSessionTable({
         <p className="mt-4 text-sm text-fg-muted">{copy.classesEmpty}</p>
       ) : (
         <>
-          <div className="mt-6">
+          {today.length > 0 ? (
+            <div className="mt-6" data-testid="today-sessions">
+              {copy.todayTitle ? (
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-accent">
+                  {copy.todayTitle}
+                </h3>
+              ) : null}
+              {renderRows(today)}
+            </div>
+          ) : null}
+
+          <div className="mt-6" data-testid="upcoming-sessions">
             {copy.upcomingTitle ? (
               <h3 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
                 {copy.upcomingTitle}
               </h3>
             ) : null}
             {upcoming.length === 0 ? (
-              <p className="mt-3 text-sm text-fg-muted">{copy.classesEmpty}</p>
+              today.length === 0 ? (
+                <p className="mt-3 text-sm text-fg-muted">{copy.classesEmpty}</p>
+              ) : null
             ) : (
               renderRows(upcoming)
             )}
           </div>
 
           {past.length > 0 ? (
-            <details className="mt-8 group">
+            <details className="mt-8 group" data-testid="past-sessions">
               <summary className="cursor-pointer list-none text-sm font-semibold uppercase tracking-wide text-fg-muted marker:content-none [&::-webkit-details-marker]:hidden">
                 <span className="inline-flex items-center gap-2">
                   {copy.pastTitle ?? "Past"}
@@ -196,6 +233,7 @@ export function ClassSessionTable({
 
 function SessionRow({
   session,
+  previousSession,
   locale,
   copy,
   mode,
@@ -209,6 +247,7 @@ function SessionRow({
   showHomeworkStatus,
 }: {
   session: Material;
+  previousSession: Material | undefined;
   locale: Locale;
   copy: ClassSessionTableCopy;
   mode: "teacher" | "readonly";
@@ -243,6 +282,10 @@ function SessionRow({
   const status = session.completionStatus ?? null;
   const homeworkText = (session.description ?? "").trim();
   const hasHomework = Boolean(homeworkText);
+  const thisClassHomework = homeworkFromPreviousClass(previousSession);
+  const hasThisClassHomework = Boolean(thisClassHomework);
+  const thisClassLabel = copy.homeworkForThisClassLabel;
+  const thisClassEmpty = copy.homeworkForThisClassEmpty ?? copy.homeworkEmpty;
   const rescheduled = Boolean(session.originalScheduledAt);
 
   async function handleNotesBlur() {
@@ -341,6 +384,22 @@ function SessionRow({
         ) : null}
       </div>
 
+      {thisClassLabel ? (
+        <div className="mt-4 rounded-xl border border-border/80 bg-canvas/60 p-3">
+          <p className="text-sm font-medium text-fg">{thisClassLabel}</p>
+          {hasThisClassHomework ? (
+            <HomeworkText text={thisClassHomework} testId="session-homework-this-text" />
+          ) : (
+            <p
+              data-testid="session-homework-this-empty"
+              className="mt-1.5 text-sm text-fg-faint"
+            >
+              {thisClassEmpty}
+            </p>
+          )}
+        </div>
+      ) : null}
+
       <div className="mt-4">
         <p className="text-sm font-medium text-fg">{copy.homeworkLabel}</p>
         {mode === "teacher" && onSaveHomework ? (
@@ -367,12 +426,7 @@ function SessionRow({
             </button>
           </>
         ) : hasHomework ? (
-          <p
-            data-testid="session-homework-text"
-            className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-fg-muted"
-          >
-            {homeworkText}
-          </p>
+          <HomeworkText text={homeworkText} testId="session-homework-text" />
         ) : (
           <p className="mt-1.5 text-sm text-fg-faint">{copy.homeworkEmpty}</p>
         )}

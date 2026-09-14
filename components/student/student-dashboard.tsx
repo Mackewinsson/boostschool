@@ -114,10 +114,13 @@ export function StudentDashboard({
             copy={{
               classesTitle: copy.classesTitle,
               classesEmpty: copy.emptyBody,
+              todayTitle: copy.todayTitle,
               upcomingTitle: copy.upcomingTitle,
               pastTitle: copy.pastTitle,
               homeworkLabel: copy.homeworkLabel,
               homeworkEmpty: copy.homeworkEmpty,
+              homeworkForThisClassLabel: copy.homeworkForThisClassLabel,
+              homeworkForThisClassEmpty: copy.homeworkForThisClassEmpty,
               joinMeetLabel: copy.joinMeetLabel,
               statusLabel: copy.statusLabel,
               statusPending: copy.statusPending,

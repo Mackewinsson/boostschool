@@ -52,6 +52,28 @@ export function uniqueFutureScheduledLocal(): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+/** datetime-local for today in Warsaw, early morning (already past, first chips of the day). */
+export function todayPastDatetimeLocalInWarsaw(): string {
+  const todayDate = datetimeLocalInWarsaw(new Date()).slice(0, 10);
+  const minute = String(10 + (Date.now() % 49)).padStart(2, "0");
+  return `${todayDate}T00:${minute}`;
+}
+
+function datetimeLocalInWarsaw(date: Date): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Warsaw",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "00";
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
+}
+
 /** datetime-local a few days ahead on Thursday (off a typical Mon/Tue weekly slot). */
 export function futureThursdayAt(timeLocal = "15:00"): string {
   const date = new Date();
@@ -236,6 +258,60 @@ export async function rowWithDatetimeEnding(page: Page, timeSuffix: string) {
     }
   }
   throw new Error(`No class row with datetime ending in ${timeSuffix}`);
+}
+
+export async function rowWithDatetimeValue(page: Page, datetimeLocal: string) {
+  const rows = classRows(page);
+  await expect(rows.first()).toBeVisible({ timeout: 15_000 });
+  const count = await rows.count();
+  for (let i = 0; i < count; i += 1) {
+    const candidate = rows.nth(i);
+    const value = await candidate.getByTestId("session-datetime").inputValue();
+    if (value === datetimeLocal) {
+      return candidate;
+    }
+  }
+  throw new Error(`No class row with datetime ${datetimeLocal}`);
+}
+
+export async function firstRowWithWeekday(
+  page: Page,
+  weekday: number,
+  timeSuffix?: string,
+) {
+  const rows = classRows(page);
+  await expect(rows.first()).toBeVisible({ timeout: 15_000 });
+  const count = await rows.count();
+  for (let i = 0; i < count; i += 1) {
+    const candidate = rows.nth(i);
+    const value = await candidate.getByTestId("session-datetime").inputValue();
+    if (timeSuffix && !value.endsWith(timeSuffix)) continue;
+    if (weekdayFromDatetimeLocal(value) === weekday) {
+      return candidate;
+    }
+  }
+  throw new Error(
+    `No class row with weekday ${weekday}${timeSuffix ? ` ending ${timeSuffix}` : ""}`,
+  );
+}
+
+export async function nextRowAfterDatetime(page: Page, afterValue: string) {
+  const rows = classRows(page);
+  await expect(rows.first()).toBeVisible({ timeout: 15_000 });
+  const count = await rows.count();
+  let best: { row: ReturnType<typeof rows.nth>; value: string } | null = null;
+  for (let i = 0; i < count; i += 1) {
+    const candidate = rows.nth(i);
+    const value = await candidate.getByTestId("session-datetime").inputValue();
+    if (!value || value <= afterValue) continue;
+    if (!best || value < best.value) {
+      best = { row: candidate, value };
+    }
+  }
+  if (!best) {
+    throw new Error(`No class row after ${afterValue}`);
+  }
+  return best.row;
 }
 
 export async function rowWithText(page: Page, text: string | RegExp) {
