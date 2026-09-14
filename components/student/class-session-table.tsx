@@ -1,7 +1,7 @@
 "use client";
 
 import { Video } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "@/lib/locale";
 import type { CompletionStatus, Material } from "@/lib/materials/types";
 import {
@@ -108,14 +108,19 @@ export function ClassSessionTable({
     [sessions, timeZone],
   );
 
+  const focusedHash = useRef(false);
+
   useEffect(() => {
+    if (focusedHash.current) return;
     const hashId =
       typeof window === "undefined"
         ? null
         : sessionIdFromRowDomId(window.location.hash.replace(/^#/, ""));
     if (!hashId) return;
     const frame = window.requestAnimationFrame(() => {
-      focusSessionRow(hashId);
+      if (focusSessionRow(hashId)) {
+        focusedHash.current = true;
+      }
     });
     return () => window.cancelAnimationFrame(frame);
   }, [sessions]);
