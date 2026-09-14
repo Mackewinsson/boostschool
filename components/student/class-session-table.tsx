@@ -33,6 +33,8 @@ export type ClassSessionTableCopy = {
   homeworkEmpty?: string;
   homeworkForThisClassLabel?: string;
   homeworkForThisClassEmpty?: string;
+  homeworkForThisClassHint?: string;
+  homeworkForNextClassHint?: string;
   homeworkPlaceholder?: string;
   saveHomeworkButton?: string;
   scheduledAtLabel?: string;
@@ -291,6 +293,8 @@ function SessionRow({
   const hasThisClassHomework = Boolean(thisClassHomework);
   const thisClassLabel = copy.homeworkForThisClassLabel;
   const thisClassEmpty = copy.homeworkForThisClassEmpty ?? copy.homeworkEmpty;
+  const thisClassHint = copy.homeworkForThisClassHint;
+  const nextClassHint = copy.homeworkForNextClassHint;
   const rescheduled = Boolean(session.originalScheduledAt);
 
   async function handleNotesBlur() {
@@ -313,7 +317,7 @@ function SessionRow({
           : "border-border bg-card"
       }`}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           {mode === "teacher" ? (
             <label className="block text-sm">
@@ -351,10 +355,11 @@ function SessionRow({
           ) : null}
         </div>
 
-        {mode === "teacher" && onStatusChange ? (
-          <div className="sm:text-right">
-            <p className="text-xs font-medium text-fg-faint">{copy.statusLabel}</p>
-            <select
+        <div className="flex w-full min-w-0 flex-col gap-3 lg:max-w-lg">
+          {mode === "teacher" && onStatusChange ? (
+            <div className="self-start lg:self-end lg:text-right">
+              <p className="text-xs font-medium text-fg-faint">{copy.statusLabel}</p>
+              <select
                 data-testid="homework-status"
                 value={status ?? ""}
                 disabled={saving}
@@ -370,71 +375,85 @@ function SessionRow({
                 <option value="not_done">{copy.statusNotDone}</option>
                 <option value="partial">{copy.statusPartial}</option>
               </select>
-          </div>
-        ) : showHomeworkStatus && hasHomework ? (
-          <div className="sm:text-right">
-            <p className="text-xs font-medium text-fg-faint">{copy.statusLabel}</p>
-            <div className="mt-1">
-              <HomeworkStatusBadge
-                status={status}
-                labels={{
-                  pending: copy.statusPending,
-                  done: copy.statusDone,
-                  notDone: copy.statusNotDone,
-                  partial: copy.statusPartial,
-                }}
-              />
             </div>
+          ) : showHomeworkStatus && hasHomework ? (
+            <div className="self-start lg:self-end lg:text-right">
+              <p className="text-xs font-medium text-fg-faint">{copy.statusLabel}</p>
+              <div className="mt-1">
+                <HomeworkStatusBadge
+                  status={status}
+                  labels={{
+                    pending: copy.statusPending,
+                    done: copy.statusDone,
+                    notDone: copy.statusNotDone,
+                    partial: copy.statusPartial,
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          {thisClassLabel ? (
+            <div data-testid="session-homework-this">
+              <p className="text-sm font-medium text-fg">{thisClassLabel}</p>
+              {thisClassHint ? (
+                <p className="mt-0.5 text-xs text-fg-faint">{thisClassHint}</p>
+              ) : null}
+              <div className="mt-1.5 min-h-[7.5rem] rounded-xl border border-border bg-canvas px-3 py-2.5">
+                {hasThisClassHomework ? (
+                  <HomeworkText text={thisClassHomework} testId="session-homework-this-text" />
+                ) : (
+                  <p
+                    data-testid="session-homework-this-empty"
+                    className="text-sm text-fg-faint"
+                  >
+                    {thisClassEmpty}
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : null}
+
+          <div>
+            <p className="text-sm font-medium text-fg">{copy.homeworkLabel}</p>
+            {nextClassHint ? (
+              <p className="mt-0.5 text-xs text-fg-faint">{nextClassHint}</p>
+            ) : null}
+            {mode === "teacher" && onSaveHomework ? (
+              <>
+                <textarea
+                  data-testid="session-homework"
+                  value={homework}
+                  onChange={(event) => setHomework(event.target.value)}
+                  rows={5}
+                  placeholder={copy.homeworkPlaceholder}
+                  className="mt-1.5 w-full resize-y rounded-xl border border-border bg-canvas px-3 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => {
+                    const iso =
+                      datetimeLocalInZoneToUtcIso(scheduledAt, timeZone) ??
+                      scheduledAt;
+                    void onSaveHomework(session.id, homework, iso);
+                  }}
+                  className="mt-2 rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                >
+                  {copy.saveHomeworkButton}
+                </button>
+              </>
+            ) : hasHomework ? (
+              <div className="mt-1.5 min-h-[7.5rem] rounded-xl border border-border bg-canvas px-3 py-2.5">
+                <HomeworkText text={homeworkText} testId="session-homework-text" />
+              </div>
+            ) : (
+              <div className="mt-1.5 min-h-[7.5rem] rounded-xl border border-border bg-canvas px-3 py-2.5">
+                <p className="text-sm text-fg-faint">{copy.homeworkEmpty}</p>
+              </div>
+            )}
           </div>
-        ) : null}
-      </div>
-
-      {thisClassLabel ? (
-        <div className="mt-4 rounded-xl border border-border/80 bg-canvas/60 p-3">
-          <p className="text-sm font-medium text-fg">{thisClassLabel}</p>
-          {hasThisClassHomework ? (
-            <HomeworkText text={thisClassHomework} testId="session-homework-this-text" />
-          ) : (
-            <p
-              data-testid="session-homework-this-empty"
-              className="mt-1.5 text-sm text-fg-faint"
-            >
-              {thisClassEmpty}
-            </p>
-          )}
         </div>
-      ) : null}
-
-      <div className="mt-4">
-        <p className="text-sm font-medium text-fg">{copy.homeworkLabel}</p>
-        {mode === "teacher" && onSaveHomework ? (
-          <>
-            <textarea
-              data-testid="session-homework"
-              value={homework}
-              onChange={(event) => setHomework(event.target.value)}
-              rows={5}
-              placeholder={copy.homeworkPlaceholder}
-              className="mt-1.5 w-full resize-y rounded-xl border border-border bg-canvas px-3 py-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent/50 focus:outline-none"
-            />
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => {
-                const iso =
-                  datetimeLocalInZoneToUtcIso(scheduledAt, timeZone) ?? scheduledAt;
-                void onSaveHomework(session.id, homework, iso);
-              }}
-              className="mt-2 rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-            >
-              {copy.saveHomeworkButton}
-            </button>
-          </>
-        ) : hasHomework ? (
-          <HomeworkText text={homeworkText} testId="session-homework-text" />
-        ) : (
-          <p className="mt-1.5 text-sm text-fg-faint">{copy.homeworkEmpty}</p>
-        )}
       </div>
 
       {allowNotes && onSaveNotes ? (

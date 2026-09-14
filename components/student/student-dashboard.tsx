@@ -121,6 +121,8 @@ export function StudentDashboard({
               homeworkEmpty: copy.homeworkEmpty,
               homeworkForThisClassLabel: copy.homeworkForThisClassLabel,
               homeworkForThisClassEmpty: copy.homeworkForThisClassEmpty,
+              homeworkForThisClassHint: copy.homeworkForThisClassHint,
+              homeworkForNextClassHint: copy.homeworkForNextClassHint,
               joinMeetLabel: copy.joinMeetLabel,
               statusLabel: copy.statusLabel,
               statusPending: copy.statusPending,

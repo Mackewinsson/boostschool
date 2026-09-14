@@ -17,9 +17,14 @@ function splitUrl(raw: string): { href: string; trailing: string } {
 type HomeworkTextProps = {
   text: string;
   testId?: string;
+  className?: string;
 };
 
-export function HomeworkText({ text, testId }: HomeworkTextProps) {
+export function HomeworkText({
+  text,
+  testId,
+  className = "whitespace-pre-wrap text-sm leading-relaxed text-fg-muted",
+}: HomeworkTextProps) {
   const nodes: ReactNode[] = [];
   const pattern = new RegExp(URL_PATTERN.source, "gi");
   let lastIndex = 0;
@@ -56,10 +61,7 @@ export function HomeworkText({ text, testId }: HomeworkTextProps) {
   }
 
   return (
-    <p
-      data-testid={testId}
-      className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-fg-muted"
-    >
+    <p data-testid={testId} className={className}>
       {nodes}
     </p>
   );

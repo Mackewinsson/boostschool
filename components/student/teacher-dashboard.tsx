@@ -540,6 +540,8 @@ export function TeacherDashboard({
                   homeworkPlaceholder: copy.homeworkPlaceholder,
                   homeworkForThisClassLabel: copy.homeworkForThisClassLabel,
                   homeworkForThisClassEmpty: copy.homeworkForThisClassEmpty,
+                  homeworkForThisClassHint: copy.homeworkForThisClassHint,
+                  homeworkForNextClassHint: copy.homeworkForNextClassHint,
                   saveHomeworkButton: copy.saveHomeworkButton,
                   scheduledAtLabel: copy.scheduledAtLabel,
                   joinMeetLabel: copy.meetUrlLabel,

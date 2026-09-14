@@ -53,6 +53,8 @@ export type StudentContent = {
     homeworkEmpty: string;
     homeworkForThisClassLabel: string;
     homeworkForThisClassEmpty: string;
+    homeworkForThisClassHint: string;
+    homeworkForNextClassHint: string;
     statusLabel: string;
     statusPending: string;
     statusDone: string;
@@ -112,6 +114,8 @@ export type StudentContent = {
     homeworkPlaceholder: string;
     homeworkForThisClassLabel: string;
     homeworkForThisClassEmpty: string;
+    homeworkForThisClassHint: string;
+    homeworkForNextClassHint: string;
     saveHomeworkButton: string;
     addClassLabel: string;
     addClassButton: string;

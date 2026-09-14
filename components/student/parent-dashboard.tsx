@@ -296,6 +296,8 @@ export function ParentDashboard({
           homeworkEmpty: tableCopy.homeworkEmpty,
           homeworkForThisClassLabel: tableCopy.homeworkForThisClassLabel,
           homeworkForThisClassEmpty: tableCopy.homeworkForThisClassEmpty,
+          homeworkForThisClassHint: tableCopy.homeworkForThisClassHint,
+          homeworkForNextClassHint: tableCopy.homeworkForNextClassHint,
           joinMeetLabel: tableCopy.joinMeetLabel,
           statusLabel: tableCopy.statusLabel,
           statusPending: tableCopy.statusPending,
