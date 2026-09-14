@@ -244,7 +244,7 @@ export function ParentDashboard({
           )}
           {summary.nextClass ? (
             <p className="mt-2 text-sm text-fg-muted">
-              {summary.nextClass.description?.trim() || copy.noHomework}
+              {summary.nextClassHomework || copy.noHomework}
             </p>
           ) : null}
         </section>
@@ -289,10 +289,15 @@ export function ParentDashboard({
         copy={{
           classesTitle: tableCopy.classesTitle,
           classesEmpty: tableCopy.emptyBody,
+          todayTitle: tableCopy.todayTitle,
           upcomingTitle: tableCopy.upcomingTitle,
           pastTitle: tableCopy.pastTitle,
           homeworkLabel: tableCopy.homeworkLabel,
           homeworkEmpty: tableCopy.homeworkEmpty,
+          homeworkForThisClassLabel: tableCopy.homeworkForThisClassLabel,
+          homeworkForThisClassEmpty: tableCopy.homeworkForThisClassEmpty,
+          homeworkForThisClassHint: tableCopy.homeworkForThisClassHint,
+          homeworkForNextClassHint: tableCopy.homeworkForNextClassHint,
           joinMeetLabel: tableCopy.joinMeetLabel,
           statusLabel: tableCopy.statusLabel,
           statusPending: tableCopy.statusPending,

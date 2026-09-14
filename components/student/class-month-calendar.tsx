@@ -8,6 +8,7 @@ import {
   addMonths,
   buildMonthGrid,
   chunkWeeks,
+  focusSessionRow,
   initialVisibleMonth,
   monthTitle,
   sessionRowDomId,
@@ -42,13 +43,7 @@ type ClassMonthCalendarProps = {
 };
 
 function scrollToSession(sessionId: string) {
-  const row = document.getElementById(sessionRowDomId(sessionId));
-  if (!row) return;
-  row.scrollIntoView({ behavior: "smooth", block: "center" });
-  row.setAttribute("data-calendar-focus", "true");
-  window.setTimeout(() => {
-    row.removeAttribute("data-calendar-focus");
-  }, 1600);
+  focusSessionRow(sessionId);
 }
 
 function chipLabel(chip: { timeLabel: string; studentLabel?: string }): string {

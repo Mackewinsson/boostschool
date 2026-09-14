@@ -38,6 +38,29 @@ export function sessionRowDomId(sessionId: string): string {
   return `session-${sessionId}`;
 }
 
+export function sessionIdFromRowDomId(domId: string): string | null {
+  if (!domId.startsWith("session-")) return null;
+  const id = domId.slice("session-".length);
+  return id || null;
+}
+
+/** Open a collapsed Past section if needed, then scroll the class row into view. */
+export function focusSessionRow(sessionId: string): boolean {
+  if (typeof document === "undefined") return false;
+  const row = document.getElementById(sessionRowDomId(sessionId));
+  if (!row) return false;
+  const details = row.closest("details");
+  if (details && !details.open) {
+    details.open = true;
+  }
+  row.scrollIntoView({ behavior: "smooth", block: "start" });
+  row.setAttribute("data-calendar-focus", "true");
+  window.setTimeout(() => {
+    row.removeAttribute("data-calendar-focus");
+  }, 1600);
+  return true;
+}
+
 export function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }

@@ -1,3 +1,7 @@
+import {
+  homeworkFromPreviousClass,
+  previousSessionById,
+} from "./schedule-groups";
 import type { CompletionStatus, Material } from "./types";
 
 export type ParentHomeworkKind =
@@ -27,6 +31,8 @@ export type ParentHomeworkSummary = {
   overdue: number;
   assigned: number;
   nextClass: Material | null;
+  /** Homework to do for the next class (previous class text, else the row itself). */
+  nextClassHomework: string;
   attention: Material[];
 };
 
@@ -73,6 +79,14 @@ export function summarizeParentHomework(
       new Date(a.scheduledAt as string).getTime(),
   );
 
+  const nextClass = upcoming[0] ?? null;
+  const previousById = previousSessionById(dated);
+  const broughtForward = nextClass
+    ? homeworkFromPreviousClass(previousById.get(nextClass.id))
+    : "";
+  const nextClassHomework =
+    broughtForward || (nextClass?.description ?? "").trim();
+
   return {
     upcomingCount: upcoming.length,
     done,
@@ -81,7 +95,8 @@ export function summarizeParentHomework(
     partial,
     overdue,
     assigned: done + pending + notDone + partial,
-    nextClass: upcoming[0] ?? null,
+    nextClass,
+    nextClassHomework,
     attention: attention.slice(0, ATTENTION_LIMIT),
   };
 }
