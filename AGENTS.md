@@ -107,6 +107,8 @@ Componente compartido: `components/student/class-session-table.tsx`.
 Cada fila = una clase con fecha/hora:
 
 - **Profe:** edita fecha/hora + deberes (`description`) → botón **Guardar** (guarda ambos). Cambiar la fecha de **una** fila la deja fija (`original_scheduled_at`): el próximo “Guardar horario” no la devuelve al slot semanal ni recrea esa ocurrencia. La fila lleva un label amarillo **Reprogramada** (`sessionRescheduled`). Marca hecho: Pendiente / Sí / No / Parcial.
+- **Cancelar una clase suelta:** botón **Cancelar clase** en la fila (`PATCH /api/alumno/sessions/[id]` con `{ canceled: true }`). La fila **no se borra**: se marca `materials.canceled_at`, queda tachada con el label rojo **Cancelada** (`sessionCanceled`) y un botón **Reactivar clase**. Mantener la fila es lo que impide que el horario semanal vuelva a crear esa fecha.
+- **Añadir una clase aparte:** “Crear clase” (`POST /api/alumno/sessions`) crea una clase con `schedule_id = null`, así que el realign del horario fijo no la toca.
 - **Alumno:** ve deberes o mensaje vacío; puede unirse a Meet; apuntes. **Sin** estado hecho/pendiente.
 - **Padre:** dashboard del alumno vinculado: ve deberes y badge de estado (Pendiente / Sí / No / Parcial). **Sin** Meet, sin apuntes, sin editar estado.
 - Estado hecho lo marca solo la profe (`student_materials.completion_status`); el padre lo ve, el alumno no.
@@ -131,14 +133,15 @@ Lógica de slots / TZ / realign: `lib/materials/schedule-generate.ts` + `lib/mat
 
 - Zona por defecto: `Europe/Warsaw`, hora en **24h** (`20:00` = 8 pm).
 - Slots en `student_class_schedules.weekly_slots` (JSONB). Las columnas `weekday` / `time_local` / `weekday_2` / `time_local_2` duplican los dos primeros por compatibilidad.
-- `realignFutureSessionsForSchedule`: solo toca filas con `schedule_id` de ese horario y **sin** `original_scheduled_at`. No borra extras ni clases creadas a mano (`Crear clase`, `schedule_id` null).
+- `realignFutureSessionsForSchedule`: solo toca filas con `schedule_id` de ese horario y **sin** `original_scheduled_at` ni `canceled_at`. No borra extras ni clases creadas a mano (`Crear clase`, `schedule_id` null).
+- Fechas canceladas: `generateSessionsForSchedule` y el realign las saltan (`canceledOccurrenceTimes`), así que el hueco se queda vacío hasta que la profe reactive la clase.
 - Unique `(schedule_id, scheduled_at)` en materials — el realign desacopla `schedule_id` antes de reasignar.
 
 ### Datos clave
 
 | Tabla | Uso |
 |---|---|
-| `materials` | Clase o extra (`scheduled_at`, `meet_url`, `description` = deberes, `schedule_id`, `original_scheduled_at` si se movió una sola fecha) |
+| `materials` | Clase o extra (`scheduled_at`, `meet_url`, `description` = deberes, `schedule_id`, `original_scheduled_at` si se movió una sola fecha, `canceled_at` si la profe la canceló) |
 | `student_materials` | Asignación + `completion_status` + `notes` |
 | `student_class_schedules` | Horario semanal (`weekly_slots`) o Meet-only por alumno |
 
@@ -150,6 +153,7 @@ Schema: `lib/db/schema.sql`. Migrar: `npm run db:migrate`. En Vercel el deploy c
 |---|---|
 | `/api/alumno/schedules` | GET/POST horario; POST dispara realign si hay slot fijo |
 | `/api/alumno/sessions` | POST clase puntual |
+| `/api/alumno/sessions/[id]` | PATCH `{ canceled }` — cancela o reactiva una clase (solo profe) |
 | `/api/alumno/materials` | CRUD materiales. **PATCH** de deberes nuevos/cambiados avisa al alumno (Resend) |
 | `/api/alumno/my-materials` | Vista alumno/padre |
 | `/api/alumno/assignments` | Estado de deberes; **POST** asigna un extra y avisa por correo |
