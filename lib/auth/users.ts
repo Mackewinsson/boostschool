@@ -20,7 +20,8 @@ export type ManagedUser = {
   name: string;
   role: UserRole;
   active: boolean;
-  linkedStudentId: string | null;
+  linkedStudentIds: string[];
+  linkedStudentNames: string[];
 };
 
 type UserRow = {
@@ -39,7 +40,12 @@ type ManagedUserRow = {
   name: string;
   role: UserRole;
   active: boolean;
-  linked_student_id: string | null;
+};
+
+type ParentLinkRow = {
+  parent_user_id: string;
+  student_user_id: string;
+  student_name: string;
 };
 
 type StudentRow = {
@@ -60,15 +66,32 @@ function mapUser(row: UserRow): AuthUser {
   };
 }
 
-function mapManagedUser(row: ManagedUserRow): ManagedUser {
+function mapManagedUser(
+  row: ManagedUserRow,
+  links?: { ids: string[]; names: string[] },
+): ManagedUser {
   return {
     id: row.id,
     email: row.email,
     name: row.name,
     role: row.role,
     active: Boolean(row.active),
-    linkedStudentId: row.linked_student_id,
+    linkedStudentIds: links?.ids ?? [],
+    linkedStudentNames: links?.names ?? [],
   };
+}
+
+function groupParentLinks(
+  rows: ParentLinkRow[],
+): Map<string, { ids: string[]; names: string[] }> {
+  const grouped = new Map<string, { ids: string[]; names: string[] }>();
+  for (const row of rows) {
+    const current = grouped.get(row.parent_user_id) ?? { ids: [], names: [] };
+    current.ids.push(row.student_user_id);
+    current.names.push(row.student_name);
+    grouped.set(row.parent_user_id, current);
+  }
+  return grouped;
 }
 
 function splitName(name: string): { firstName: string | null; lastName: string | null } {
@@ -113,47 +136,51 @@ export async function findUserById(id: string): Promise<AuthUser | null> {
 
 export async function listUsers(): Promise<ManagedUser[]> {
   const sql = getDb();
-  const rows = (await sql`
-    SELECT
-      u.id,
-      u.email,
-      u.name,
-      u.role,
-      u.active,
-      (
-        SELECT ps.student_user_id
-        FROM parent_students ps
-        WHERE ps.parent_user_id = u.id
-        LIMIT 1
-      ) AS linked_student_id
-    FROM users u
-    ORDER BY u.email ASC
-  `) as ManagedUserRow[];
+  const [userRows, linkRows] = await Promise.all([
+    sql`
+      SELECT u.id, u.email, u.name, u.role, u.active
+      FROM users u
+      ORDER BY u.email ASC
+    `,
+    sql`
+      SELECT ps.parent_user_id, ps.student_user_id, u.name AS student_name
+      FROM parent_students ps
+      INNER JOIN users u ON u.id = ps.student_user_id
+      ORDER BY u.name ASC, u.email ASC
+    `,
+  ]);
+  const rows = userRows as ManagedUserRow[];
+  const links = linkRows as ParentLinkRow[];
 
-  return rows.map(mapManagedUser);
+  const grouped = groupParentLinks(links);
+  return rows.map((row) => mapManagedUser(row, grouped.get(row.id)));
 }
 
 export async function getManagedUserById(id: string): Promise<ManagedUser | null> {
   const sql = getDb();
-  const rows = (await sql`
-    SELECT
-      u.id,
-      u.email,
-      u.name,
-      u.role,
-      u.active,
-      (
-        SELECT ps.student_user_id
-        FROM parent_students ps
-        WHERE ps.parent_user_id = u.id
-        LIMIT 1
-      ) AS linked_student_id
-    FROM users u
-    WHERE u.id = ${id}::uuid
-    LIMIT 1
-  `) as ManagedUserRow[];
+  const [userRows, linkRows] = await Promise.all([
+    sql`
+      SELECT u.id, u.email, u.name, u.role, u.active
+      FROM users u
+      WHERE u.id = ${id}::uuid
+      LIMIT 1
+    `,
+    sql`
+      SELECT ps.parent_user_id, ps.student_user_id, u.name AS student_name
+      FROM parent_students ps
+      INNER JOIN users u ON u.id = ps.student_user_id
+      WHERE ps.parent_user_id = ${id}::uuid
+      ORDER BY u.name ASC, u.email ASC
+    `,
+  ]);
+  const rows = userRows as ManagedUserRow[];
+  const links = linkRows as ParentLinkRow[];
 
-  return rows[0] ? mapManagedUser(rows[0]) : null;
+  const row = rows[0];
+  if (!row) {
+    return null;
+  }
+  return mapManagedUser(row, groupParentLinks(links).get(row.id));
 }
 
 async function countActiveAdmins(): Promise<number> {

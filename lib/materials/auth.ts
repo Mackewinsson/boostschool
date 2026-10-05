@@ -68,16 +68,6 @@ export async function getEffectiveStudentId(
   return null;
 }
 
-export async function getLinkedStudentName(
-  context: NonNullable<Awaited<ReturnType<typeof getAuthContext>>>,
-): Promise<string | null> {
-  if (context.role !== "parent") {
-    return null;
-  }
-  const linked = await getLinkedStudentForParent(context.userId);
-  return linked?.name ?? null;
-}
-
 export async function requireAuth() {
   const context = await getAuthContext();
   if (!context) {

@@ -10,7 +10,16 @@ type CreateParentPayload = {
   email?: string;
   password?: string;
   studentId?: string;
+  studentIds?: string[];
 };
+
+function readStudentIds(body: CreateParentPayload): string[] {
+  const fromList = Array.isArray(body.studentIds)
+    ? body.studentIds.filter((id): id is string => typeof id === "string")
+    : [];
+  const single = typeof body.studentId === "string" ? [body.studentId] : [];
+  return [...fromList, ...single].map((id) => id.trim()).filter(Boolean);
+}
 
 export async function POST(request: Request) {
   try {
@@ -23,7 +32,7 @@ export async function POST(request: Request) {
     const name = body.name?.trim() ?? "";
     const email = body.email?.trim().toLowerCase() ?? "";
     const password = body.password ?? "";
-    const studentId = body.studentId?.trim() ?? "";
+    const studentIds = readStudentIds(body);
 
     if (name.length < 2) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -34,8 +43,8 @@ export async function POST(request: Request) {
     if (password.length < 8) {
       return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
     }
-    if (!studentId) {
-      return NextResponse.json({ error: "studentId is required" }, { status: 400 });
+    if (studentIds.length === 0) {
+      return NextResponse.json({ error: "At least one student is required" }, { status: 400 });
     }
 
     const existing = await findUserByEmail(email);
@@ -47,7 +56,7 @@ export async function POST(request: Request) {
       name,
       email,
       password,
-      studentId,
+      studentIds,
     });
 
     return NextResponse.json({
@@ -55,10 +64,13 @@ export async function POST(request: Request) {
         id: parent.id,
         email: parent.email,
         name: parent.name,
-        studentId,
+        studentIds,
       },
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "PARENT_STUDENT_REQUIRED") {
+      return NextResponse.json({ error: "A valid student is required" }, { status: 400 });
+    }
     return apiError(error);
   }
 }

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminButton } from "@/components/admin/admin-button";
+import { ParentStudentPicker } from "@/components/admin/parent-student-picker";
 import type { StudentContent } from "@/lib/student-content/types";
 
 type RosterStudent = {
@@ -28,7 +29,7 @@ export function CreateStudentParentPanel({
   const [parentName, setParentName] = useState("");
   const [parentEmail, setParentEmail] = useState("");
   const [parentPassword, setParentPassword] = useState("");
-  const [parentStudentId, setParentStudentId] = useState("");
+  const [parentStudentIds, setParentStudentIds] = useState<string[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<"student" | "parent" | null>(null);
@@ -97,7 +98,7 @@ export function CreateStudentParentPanel({
       setError(copy.errorParentPassword);
       return;
     }
-    if (!parentStudentId) {
+    if (parentStudentIds.length === 0) {
       setError(copy.errorParentStudent);
       return;
     }
@@ -111,7 +112,7 @@ export function CreateStudentParentPanel({
           name: parentName,
           email: parentEmail,
           password: parentPassword,
-          studentId: parentStudentId,
+          studentIds: parentStudentIds,
         }),
       });
       if (!response.ok) {
@@ -121,7 +122,7 @@ export function CreateStudentParentPanel({
       setParentName("");
       setParentEmail("");
       setParentPassword("");
-      setParentStudentId("");
+      setParentStudentIds([]);
       setMessage(copy.successParentCreated);
       onCreated?.();
       router.refresh();
@@ -234,32 +235,14 @@ export function CreateStudentParentPanel({
               autoComplete="new-password"
             />
           </div>
-          <div className="admin-field" data-testid="user-student-link">
-            <label className="admin-label" htmlFor="roster-parent-student">
-              {copy.parentStudentLabel}
-            </label>
-            {students.length > 0 ? (
-              <select
-                id="roster-parent-student"
-                className="admin-input"
-                name="studentId"
-                required
-                value={parentStudentId}
-                onChange={(event) => setParentStudentId(event.target.value)}
-              >
-                <option value="">—</option>
-                {students.map((student) => (
-                  <option key={student.id} value={student.id}>
-                    {student.name} ({student.email})
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p className="admin-muted" style={{ margin: 0 }}>
-                {copy.usersStudentLinkEmpty}
-              </p>
-            )}
-          </div>
+          <ParentStudentPicker
+            label={copy.parentStudentLabel}
+            hint={copy.usersStudentLinkHint}
+            emptyLabel={copy.usersStudentLinkEmpty}
+            students={students}
+            selectedIds={parentStudentIds}
+            onChange={setParentStudentIds}
+          />
           <AdminButton type="submit" disabled={busy !== null || students.length === 0}>
             {copy.createParentButton}
           </AdminButton>

@@ -1,31 +1,60 @@
 import { getDb } from "@/lib/db/client";
 import { createUser, findUserById } from "./users";
 
+const STUDENT_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 type ParentStudentRow = {
   student_user_id: string;
   student_name: string;
 };
 
-export async function getLinkedStudentForParent(
+export type LinkedStudent = {
+  id: string;
+  name: string;
+};
+
+function mapLinkedStudent(row: ParentStudentRow): LinkedStudent {
+  return {
+    id: row.student_user_id,
+    name: row.student_name,
+  };
+}
+
+export async function listLinkedStudentsForParent(
   parentUserId: string,
-): Promise<{ id: string; name: string } | null> {
+): Promise<LinkedStudent[]> {
   const sql = getDb();
   const rows = (await sql`
     SELECT ps.student_user_id, u.name AS student_name
     FROM parent_students ps
     INNER JOIN users u ON u.id = ps.student_user_id
     WHERE ps.parent_user_id = ${parentUserId}::uuid
-    LIMIT 1
+    ORDER BY u.name ASC, u.email ASC
   `) as ParentStudentRow[];
 
-  if (!rows[0]) {
-    return null;
-  }
+  return rows.map(mapLinkedStudent);
+}
 
-  return {
-    id: rows[0].student_user_id,
-    name: rows[0].student_name,
-  };
+export async function getLinkedStudentForParent(
+  parentUserId: string,
+): Promise<LinkedStudent | null> {
+  const students = await listLinkedStudentsForParent(parentUserId);
+  return students[0] ?? null;
+}
+
+/** Linked students for a parent, plus the one to show. Unknown ids fall back to the first. */
+export async function getParentPortalView(
+  parentUserId: string,
+  preferredStudentId?: string | null,
+): Promise<{ linkedStudents: LinkedStudent[]; active: LinkedStudent | null }> {
+  const linkedStudents = await listLinkedStudentsForParent(parentUserId);
+  const preferred = preferredStudentId?.trim() ?? "";
+  const active =
+    linkedStudents.find((student) => student.id === preferred) ??
+    linkedStudents[0] ??
+    null;
+  return { linkedStudents, active };
 }
 
 export async function linkParentToStudent(
@@ -44,7 +73,7 @@ export async function assertLinkableStudent(
   studentUserId: string,
   parentUserId?: string,
 ): Promise<void> {
-  if (!studentUserId) {
+  if (!studentUserId || !STUDENT_ID_RE.test(studentUserId)) {
     throw new Error("PARENT_STUDENT_REQUIRED");
   }
   if (parentUserId && parentUserId === studentUserId) {
@@ -56,6 +85,22 @@ export async function assertLinkableStudent(
   }
 }
 
+export async function assertLinkableStudents(
+  studentUserIds: string[],
+  parentUserId?: string,
+): Promise<string[]> {
+  const unique = [
+    ...new Set(studentUserIds.map((id) => id.trim()).filter(Boolean)),
+  ];
+  if (unique.length === 0) {
+    throw new Error("PARENT_STUDENT_REQUIRED");
+  }
+  for (const studentUserId of unique) {
+    await assertLinkableStudent(studentUserId, parentUserId);
+  }
+  return unique;
+}
+
 export async function clearLinksForStudent(studentUserId: string): Promise<void> {
   const sql = getDb();
   await sql`
@@ -64,20 +109,20 @@ export async function clearLinksForStudent(studentUserId: string): Promise<void>
   `;
 }
 
-/** Replace any existing parent→student links with a single student. */
-export async function setParentStudentLink(
+/** Replace this parent's student links with the given set (one or more). */
+export async function setParentStudentLinks(
   parentUserId: string,
-  studentUserId: string,
+  studentUserIds: string[],
 ): Promise<void> {
+  const unique = await assertLinkableStudents(studentUserIds, parentUserId);
   const sql = getDb();
   await sql`
     DELETE FROM parent_students
     WHERE parent_user_id = ${parentUserId}::uuid
   `;
-  await sql`
-    INSERT INTO parent_students (parent_user_id, student_user_id)
-    VALUES (${parentUserId}::uuid, ${studentUserId}::uuid)
-  `;
+  for (const studentUserId of unique) {
+    await linkParentToStudent(parentUserId, studentUserId);
+  }
 }
 
 export async function clearParentStudentLinks(parentUserId: string): Promise<void> {
@@ -92,16 +137,16 @@ export async function createParentForStudent(input: {
   name: string;
   email: string;
   password: string;
-  studentId: string;
+  studentIds: string[];
 }) {
-  await assertLinkableStudent(input.studentId);
+  const studentIds = await assertLinkableStudents(input.studentIds);
   const parent = await createUser({
     name: input.name,
     email: input.email,
     password: input.password,
     role: "parent",
   });
-  await linkParentToStudent(parent.id, input.studentId);
+  await setParentStudentLinks(parent.id, studentIds);
   return parent;
 }
 

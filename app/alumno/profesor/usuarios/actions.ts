@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdminUser } from "@/lib/admin/auth";
 import {
-  assertLinkableStudent,
+  assertLinkableStudents,
   clearLinksForStudent,
   clearParentStudentLinks,
-  setParentStudentLink,
+  setParentStudentLinks,
 } from "@/lib/auth/parents";
 import type { UserRole } from "@/lib/auth/constants";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password";
@@ -24,6 +24,15 @@ import { teacherPaths } from "@/lib/teacher/paths";
 
 function readString(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
+}
+
+function readStudentIds(formData: FormData): string[] {
+  const fromList = formData
+    .getAll("studentIds")
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+  const single = readString(formData, "studentId");
+  return [...new Set(single ? [...fromList, single] : fromList)];
 }
 
 function readPassword(formData: FormData, key: string): string {
@@ -83,7 +92,7 @@ export async function createManagedUserAction(formData: FormData) {
   const email = readString(formData, "email").toLowerCase();
   const password = readPassword(formData, "password");
   const role = parseRole(readString(formData, "role"));
-  const studentId = readString(formData, "studentId");
+  const studentIds = readStudentIds(formData);
   const active = formData.get("active") === "on";
 
   if (
@@ -97,7 +106,7 @@ export async function createManagedUserAction(formData: FormData) {
 
   if (role === "parent") {
     try {
-      await assertLinkableStudent(studentId);
+      await assertLinkableStudents(studentIds);
     } catch {
       redirect(`${teacherPaths.users}?error=parentStudent`);
     }
@@ -118,7 +127,7 @@ export async function createManagedUserAction(formData: FormData) {
       active,
     });
     if (role === "parent") {
-      await setParentStudentLink(user.id, studentId);
+      await setParentStudentLinks(user.id, studentIds);
     }
     userId = user.id;
   } catch (error) {
@@ -135,7 +144,7 @@ export async function updateManagedUserAction(formData: FormData) {
   const name = readString(formData, "name");
   const email = readString(formData, "email").toLowerCase();
   const role = parseRole(readString(formData, "role"));
-  const studentId = readString(formData, "studentId");
+  const studentIds = readStudentIds(formData);
   const active = formData.get("active") === "on";
 
   if (!id || name.length < 2 || !email.includes("@") || !role) {
@@ -144,7 +153,7 @@ export async function updateManagedUserAction(formData: FormData) {
 
   if (role === "parent") {
     try {
-      await assertLinkableStudent(studentId, id);
+      await assertLinkableStudents(studentIds, id);
     } catch {
       redirect(`${teacherPaths.user(id)}?error=parentStudent`);
     }
@@ -161,7 +170,7 @@ export async function updateManagedUserAction(formData: FormData) {
     });
 
     if (role === "parent") {
-      await setParentStudentLink(id, studentId);
+      await setParentStudentLinks(id, studentIds);
     } else {
       await clearParentStudentLinks(id);
     }
