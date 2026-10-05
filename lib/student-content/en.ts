@@ -132,6 +132,8 @@ export const en: StudentContent = {
     addClassButton: "Create class",
     cancelClassButton: "Cancel class",
     restoreClassButton: "Restore class",
+    cancelClassHint:
+      "On each class, the red Cancel class button removes only that date. The rest of the schedule stays.",
     extrasTitle: "Extra materials",
     extrasHint: "Resources without a class date. Not mixed with homework.",
     extrasEmpty: "No extra materials yet.",

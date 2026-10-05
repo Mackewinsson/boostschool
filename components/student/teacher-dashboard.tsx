@@ -579,6 +579,7 @@ export function TeacherDashboard({
                   sessionCanceled: copy.sessionCanceled,
                   cancelSessionButton: copy.cancelClassButton,
                   restoreSessionButton: copy.restoreClassButton,
+                  cancelClassHint: copy.cancelClassHint,
                 }}
                 onSaveHomework={handleSaveHomework}
                 onStatusChange={handleStatusChange}

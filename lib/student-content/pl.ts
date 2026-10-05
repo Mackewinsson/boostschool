@@ -132,6 +132,8 @@ export const pl: StudentContent = {
     addClassButton: "Utwórz zajęcia",
     cancelClassButton: "Odwołaj zajęcia",
     restoreClassButton: "Przywróć zajęcia",
+    cancelClassHint:
+      "Przy każdych zajęciach czerwony przycisk Odwołaj zajęcia usuwa tylko tę datę. Reszta planu zostaje.",
     extrasTitle: "Materiały dodatkowe",
     extrasHint: "Zasoby bez daty zajęć. Nie mieszają się z zadaniami.",
     extrasEmpty: "Brak materiałów dodatkowych.",

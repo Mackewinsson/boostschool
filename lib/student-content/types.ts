@@ -122,6 +122,7 @@ export type StudentContent = {
     addClassButton: string;
     cancelClassButton: string;
     restoreClassButton: string;
+    cancelClassHint: string;
     extrasTitle: string;
     extrasHint: string;
     extrasEmpty: string;

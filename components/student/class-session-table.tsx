@@ -50,6 +50,7 @@ export type ClassSessionTableCopy = {
   sessionCanceled?: string;
   cancelSessionButton?: string;
   restoreSessionButton?: string;
+  cancelClassHint?: string;
   notesLabel?: string;
   notesPlaceholder?: string;
   notesSaved?: string;
@@ -173,7 +174,12 @@ export function ClassSessionTable({
   return (
     <section className="mt-10" data-testid="class-session-table">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <h2 className="text-xl font-bold text-fg">{copy.classesTitle}</h2>
+        <div>
+          <h2 className="text-xl font-bold text-fg">{copy.classesTitle}</h2>
+          {mode === "teacher" && copy.cancelClassHint ? (
+            <p className="mt-1 max-w-xl text-sm text-fg-muted">{copy.cancelClassHint}</p>
+          ) : null}
+        </div>
         {mode === "teacher" && onAddClass ? (
           <form
             className="flex flex-col gap-2 sm:flex-row sm:items-end"
@@ -373,21 +379,34 @@ function SessionRow({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           {mode === "teacher" ? (
-            <label className="block text-sm">
-              <span className="flex flex-wrap items-center gap-2">
-                <span className="font-medium text-fg">{copy.scheduledAtLabel}</span>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium text-fg">{copy.scheduledAtLabel}</span>
                 {rescheduled ? (
                   <SessionRescheduledBadge label={copy.sessionRescheduled} />
                 ) : null}
-              </span>
+                {canToggleCancel ? (
+                  <button
+                    type="button"
+                    disabled={saving}
+                    data-testid="cancel-session"
+                    onClick={() => void onCancelSession?.(session.id, true)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-danger/50 bg-danger/10 px-3 py-1 text-sm font-semibold text-danger transition hover:bg-danger/20 disabled:opacity-60"
+                  >
+                    <CalendarX2 size={14} aria-hidden="true" />
+                    {copy.cancelSessionButton}
+                  </button>
+                ) : null}
+              </div>
               <input
                 type="datetime-local"
                 value={scheduledAt}
                 onChange={(event) => setScheduledAt(event.target.value)}
+                aria-label={copy.scheduledAtLabel}
                 data-testid="session-datetime"
                 className="mt-1.5 w-full max-w-xs rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-fg focus:border-accent/50 focus:outline-none"
               />
-            </label>
+            </div>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-base font-semibold text-accent">{dateLabel}</p>
@@ -405,20 +424,6 @@ function SessionRow({
               <Video size={14} aria-hidden="true" />
               {copy.joinMeetLabel}
             </a>
-          ) : null}
-          {canToggleCancel ? (
-            <div className="mt-3">
-              <button
-                type="button"
-                disabled={saving}
-                data-testid="cancel-session"
-                onClick={() => void onCancelSession?.(session.id, true)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-sm font-medium text-fg-muted transition hover:border-danger/40 hover:text-danger disabled:opacity-60"
-              >
-                <CalendarX2 size={14} aria-hidden="true" />
-                {copy.cancelSessionButton}
-              </button>
-            </div>
           ) : null}
         </div>
 
