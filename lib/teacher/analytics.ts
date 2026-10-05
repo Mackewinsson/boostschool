@@ -147,6 +147,7 @@ export async function getTeacherAnalytics(
       WHERE m.scheduled_at IS NOT NULL
         AND m.scheduled_at >= ${weekStartIso}
         AND m.scheduled_at < ${weekEndIso}
+        AND m.canceled_at IS NULL
         AND u.role = 'student'
         AND u.active = true
       ORDER BY m.scheduled_at ASC, u.name ASC
@@ -170,6 +171,7 @@ export async function getTeacherAnalytics(
               WHERE sm.user_id = s.id
                 AND m.scheduled_at IS NOT NULL
                 AND m.scheduled_at >= ${nowIso}
+                AND m.canceled_at IS NULL
             )
         ) AS students_no_upcoming,
         (
@@ -202,6 +204,7 @@ export async function getTeacherAnalytics(
           WHERE m.scheduled_at IS NOT NULL
             AND m.scheduled_at >= ${overdueFromIso}
             AND m.scheduled_at < ${nowIso}
+            AND m.canceled_at IS NULL
             AND NULLIF(BTRIM(m.description), '') IS NOT NULL
             AND (sm.completion_status IS NULL OR sm.completion_status <> 'done')
             AND u.role = 'student'
@@ -220,6 +223,7 @@ export async function getTeacherAnalytics(
       WHERE m.scheduled_at IS NOT NULL
         AND m.scheduled_at >= ${overdueFromIso}
         AND m.scheduled_at < ${nowIso}
+        AND m.canceled_at IS NULL
         AND NULLIF(BTRIM(m.description), '') IS NOT NULL
         AND (sm.completion_status IS NULL OR sm.completion_status <> 'done')
         AND u.role = 'student'
@@ -243,6 +247,7 @@ export async function getTeacherAnalytics(
           WHERE sm.user_id = s.id
             AND m.scheduled_at IS NOT NULL
             AND m.scheduled_at >= ${nowIso}
+            AND m.canceled_at IS NULL
         )
       ORDER BY s.name ASC
       LIMIT 8
