@@ -8,7 +8,7 @@ import {
   TriangleAlert,
   UserRound,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Locale } from "@/lib/locale";
 import { summarizeParentHomework } from "@/lib/materials/parent-homework";
 import { formatScheduledAt, splitSessionsAndExtras } from "@/lib/materials/schedule-groups";
@@ -27,6 +27,50 @@ type ParentDashboardProps = {
     "accountTitle" | "accountHint" | "accountNavLabel"
   >;
 };
+
+const PARENT_STUDENT_STORAGE_KEY = "bb-parent-active-student";
+
+type LinkedStudent = {
+  id: string;
+  name: string;
+};
+
+type ParentMaterialsPayload = {
+  materials?: Material[];
+  linkedStudentName?: string | null;
+  linkedStudents?: LinkedStudent[];
+  activeStudentId?: string | null;
+};
+
+async function fetchParentMaterials(
+  studentId?: string,
+): Promise<ParentMaterialsPayload | null> {
+  const params = new URLSearchParams();
+  if (studentId) params.set("studentId", studentId);
+  const query = params.toString();
+  const response = await fetch(
+    query ? `/api/alumno/my-materials?${query}` : "/api/alumno/my-materials",
+  );
+  if (!response.ok) return null;
+  return (await response.json()) as ParentMaterialsPayload;
+}
+
+function rememberActiveStudent(studentId: string | null | undefined) {
+  if (!studentId) return;
+  try {
+    window.sessionStorage.setItem(PARENT_STUDENT_STORAGE_KEY, studentId);
+  } catch {
+    // Ignore storage failures; the current view still updates.
+  }
+}
+
+function readRememberedStudent(): string | undefined {
+  try {
+    return window.sessionStorage.getItem(PARENT_STUDENT_STORAGE_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 const statusLabels = (copy: StudentContent["student"]) => ({
   pending: copy.statusPending,
@@ -72,30 +116,62 @@ export function ParentDashboard({
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
   const [linkedStudentName, setLinkedStudentName] = useState<string | null>(null);
+  const [linkedStudents, setLinkedStudents] = useState<LinkedStudent[]>([]);
+  const [activeStudentId, setActiveStudentId] = useState<string | null>(null);
   const [linked, setLinked] = useState(true);
+  const requestSeq = useRef(0);
+
+  function applyView(data: ParentMaterialsPayload) {
+    setMaterials(data.materials ?? []);
+    setLinkedStudents(data.linkedStudents ?? []);
+    setLinkedStudentName(data.linkedStudentName ?? null);
+    setActiveStudentId(data.activeStudentId ?? null);
+    setLinked(data.linkedStudentName != null);
+    rememberActiveStudent(data.activeStudentId);
+  }
 
   useEffect(() => {
-    async function load() {
+    const seq = ++requestSeq.current;
+    const stored = readRememberedStudent();
+    async function loadInitial() {
       try {
-        const response = await fetch("/api/alumno/my-materials");
-        if (!response.ok) {
+        const data = await fetchParentMaterials(stored);
+        if (seq !== requestSeq.current) return;
+        if (!data) {
           setMaterials([]);
           setLinked(false);
           return;
         }
-        const data = (await response.json()) as {
-          materials?: Material[];
-          linkedStudentName?: string | null;
-        };
-        setMaterials(data.materials ?? []);
-        setLinkedStudentName(data.linkedStudentName ?? null);
-        setLinked(data.linkedStudentName != null);
+        applyView(data);
+      } catch {
+        if (seq !== requestSeq.current) return;
+        setMaterials([]);
+        setLinked(false);
       } finally {
-        setLoading(false);
+        if (seq === requestSeq.current) setLoading(false);
       }
     }
-    void load();
+    void loadInitial();
   }, []);
+
+  function handleStudentChange(studentId: string) {
+    const seq = ++requestSeq.current;
+    const previousId = activeStudentId;
+    setActiveStudentId(studentId);
+    void (async () => {
+      try {
+        const data = await fetchParentMaterials(studentId);
+        if (seq !== requestSeq.current) return;
+        if (!data) {
+          setActiveStudentId(previousId);
+          return;
+        }
+        applyView(data);
+      } catch {
+        if (seq === requestSeq.current) setActiveStudentId(previousId);
+      }
+    })();
+  }
 
   const { sessions, extras } = useMemo(
     () => splitSessionsAndExtras(materials),
@@ -144,7 +220,29 @@ export function ParentDashboard({
           </h1>
           <p className="mt-3 max-w-2xl text-base text-fg-muted">{copy.subtitle}</p>
         </div>
-        {linkedStudentName ? (
+        {linkedStudents.length > 1 ? (
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="parent-student-switcher"
+              className="text-sm font-medium text-fg-muted"
+            >
+              {copy.switchStudentLabel}
+            </label>
+            <select
+              id="parent-student-switcher"
+              data-testid="parent-student-switcher"
+              className="rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-fg"
+              value={activeStudentId ?? ""}
+              onChange={(event) => handleStudentChange(event.target.value)}
+            >
+              {linkedStudents.map((student) => (
+                <option key={student.id} value={student.id}>
+                  {student.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : linkedStudentName ? (
           <p
             data-testid="parent-linked-student"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-fg"

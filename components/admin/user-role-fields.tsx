@@ -4,34 +4,29 @@ import { useState } from "react";
 import type { UserRole } from "@/lib/auth/constants";
 import type { StudentSummary } from "@/lib/materials/types";
 import type { StudentContent } from "@/lib/student-content/types";
+import { ParentStudentPicker } from "./parent-student-picker";
 
 type UserRoleFieldsProps = {
   copy: StudentContent["teacher"];
   roleFieldId: string;
-  studentFieldId: string;
   defaultRole: UserRole;
-  defaultStudentId?: string;
+  defaultStudentIds?: string[];
   roleDisabled?: boolean;
   lockedRole?: UserRole;
   students: StudentSummary[];
 };
 
-function studentLabel(student: StudentSummary): string {
-  const name = student.name?.trim() || [student.firstName, student.lastName].filter(Boolean).join(" ");
-  return name ? `${name} (${student.email})` : student.email;
-}
-
 export function UserRoleFields({
   copy,
   roleFieldId,
-  studentFieldId,
   defaultRole,
-  defaultStudentId = "",
+  defaultStudentIds = [],
   roleDisabled = false,
   lockedRole,
   students,
 }: UserRoleFieldsProps) {
   const [role, setRole] = useState<UserRole>(defaultRole);
+  const [selectedStudentIds, setSelectedStudentIds] = useState(defaultStudentIds);
   const showStudentLink = role === "parent";
 
   return (
@@ -59,31 +54,14 @@ export function UserRoleFields({
       </div>
 
       {showStudentLink ? (
-        <div className="admin-field" data-testid="user-student-link">
-          <label className="admin-label" htmlFor={studentFieldId}>
-            {copy.usersStudentLinkLabel}
-          </label>
-          {students.length > 0 ? (
-            <select
-              id={studentFieldId}
-              className="admin-input"
-              name="studentId"
-              required
-              defaultValue={defaultStudentId}
-            >
-              <option value="">—</option>
-              {students.map((student) => (
-                <option key={student.id} value={student.id}>
-                  {studentLabel(student)}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <p className="admin-muted" style={{ margin: 0 }}>
-              {copy.usersStudentLinkEmpty}
-            </p>
-          )}
-        </div>
+        <ParentStudentPicker
+          label={copy.usersStudentLinkLabel}
+          hint={copy.usersStudentLinkHint}
+          emptyLabel={copy.usersStudentLinkEmpty}
+          students={students}
+          selectedIds={selectedStudentIds}
+          onChange={setSelectedStudentIds}
+        />
       ) : null}
     </>
   );

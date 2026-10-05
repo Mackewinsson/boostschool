@@ -70,6 +70,7 @@ export type StudentContent = {
     titleFallback: string;
     subtitle: string;
     linkedLabel: string;
+    switchStudentLabel: string;
     unlinkedTitle: string;
     unlinkedBody: string;
     statUpcoming: string;
@@ -241,6 +242,7 @@ export type StudentContent = {
     usersPasswordUpdated: string;
     usersActiveLabel: string;
     usersStudentLinkLabel: string;
+    usersStudentLinkHint: string;
     usersStudentLinkEmpty: string;
     usersCreateButton: string;
     usersSaveButton: string;

@@ -96,7 +96,7 @@ No hardcodear strings visibles en componentes. Cambios de estilo (colores, fuent
 |---|---|---|
 | **teacher** | `/alumno/profesor` | Horario, tabla de clases, deberes, estado, extras, Meet |
 | **student** | `/alumno` | Ver clases, deberes, Meet, apuntes |
-| **parent** | `/alumno` (read-only dashboard) | Vinculado a un alumno: ve clases, deberes y **si los hizo**; **sin** Meet ni apuntes |
+| **parent** | `/alumno` (read-only dashboard) | Vinculado a uno o más alumnos: elige cuál ver; ve clases, deberes y **si los hizo**; **sin** Meet ni apuntes |
 
 `GET /api/alumno/my-materials` devuelve `readOnly: true` para padres.
 
@@ -242,6 +242,6 @@ En Vercel el deploy usa `vercel-build` (`db:migrate` + `next build`) con el `DAT
 3. **`"use client"`** solo con estado, efectos o eventos de browser.
 4. **Lint limpio** antes de commit.
 5. **Portal:** cambios de horario semanal deben realinear clases futuras; no dejar `active: false` por accidente al guardar horario fijo.
-6. **Padre:** vinculado a un alumno; ve si hizo los deberes (solo lectura). Sin Meet; sin apuntes. **Alumno:** sin estado de deberes (solo la profe marca hecho/pendiente).
+6. **Padre:** vinculado a uno o más alumnos; si hay varios, cambia de alumno en el dashboard. Ve si hizo los deberes (solo lectura). Sin Meet; sin apuntes. **Alumno:** sin estado de deberes (solo la profe marca hecho/pendiente).
 7. **Accesibilidad:** roles semánticos; `aria-label` en controles solo-ícono.
 8. **Commits / push:** solo si el usuario lo pide.

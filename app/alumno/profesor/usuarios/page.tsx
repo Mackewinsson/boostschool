@@ -108,6 +108,19 @@ export default async function TeacherUsersPage({ searchParams }: PageProps) {
                       >
                         <span style={{ padding: "0.85rem 1rem", fontWeight: 600 }}>
                           {user.name}
+                          {user.role === "parent" && user.linkedStudentNames.length > 0 ? (
+                            <span
+                              style={{
+                                display: "block",
+                                marginTop: "0.2rem",
+                                fontWeight: 400,
+                                fontSize: "0.75rem",
+                                color: "var(--fg-muted)",
+                              }}
+                            >
+                              {user.linkedStudentNames.join(", ")}
+                            </span>
+                          ) : null}
                         </span>
                         <span
                           style={{
@@ -176,7 +189,6 @@ export default async function TeacherUsersPage({ searchParams }: PageProps) {
             <UserRoleFields
               copy={copy}
               roleFieldId="user-role"
-              studentFieldId="user-student"
               defaultRole="student"
               students={students}
             />

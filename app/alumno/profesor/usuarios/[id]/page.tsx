@@ -64,13 +64,17 @@ export default async function TeacherUserDetailPage({
   const studentOptions: StudentSummary[] = students.filter(
     (student) => student.id !== user.id,
   );
-  if (
-    user.linkedStudentId &&
-    user.linkedStudentId !== user.id &&
-    !studentOptions.some((student) => student.id === user.linkedStudentId)
-  ) {
-    const linked = await findUserById(user.linkedStudentId);
-    if (linked) {
+  const missingLinkedIds = user.linkedStudentIds.filter(
+    (studentId) =>
+      studentId !== user.id &&
+      !studentOptions.some((student) => student.id === studentId),
+  );
+  if (missingLinkedIds.length > 0) {
+    const linkedUsers = await Promise.all(
+      missingLinkedIds.map((studentId) => findUserById(studentId)),
+    );
+    for (const linked of linkedUsers) {
+      if (!linked || linked.role !== "student") continue;
       studentOptions.unshift({
         id: linked.id,
         email: linked.email,
@@ -148,9 +152,8 @@ export default async function TeacherUserDetailPage({
           <UserRoleFields
             copy={copy}
             roleFieldId="edit-role"
-            studentFieldId="edit-student"
             defaultRole={user.role}
-            defaultStudentId={user.linkedStudentId ?? ""}
+            defaultStudentIds={user.linkedStudentIds}
             roleDisabled={isSelf}
             lockedRole={isSelf ? "admin" : undefined}
             students={studentOptions}
