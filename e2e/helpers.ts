@@ -246,14 +246,23 @@ export async function rowWithMeet(page: Page) {
   return row;
 }
 
+/** Canceled rows render no datetime input, so skip them instead of failing. */
+async function datetimeValueOf(
+  row: ReturnType<ReturnType<typeof classRows>["nth"]>,
+): Promise<string | null> {
+  const input = row.getByTestId("session-datetime");
+  if ((await input.count()) === 0) return null;
+  return input.inputValue();
+}
+
 export async function rowWithDatetimeEnding(page: Page, timeSuffix: string) {
   const rows = classRows(page);
   await expect(rows.first()).toBeVisible({ timeout: 15_000 });
   const count = await rows.count();
   for (let i = 0; i < count; i += 1) {
     const candidate = rows.nth(i);
-    const value = await candidate.getByTestId("session-datetime").inputValue();
-    if (value.endsWith(timeSuffix)) {
+    const value = await datetimeValueOf(candidate);
+    if (value?.endsWith(timeSuffix)) {
       return candidate;
     }
   }
@@ -266,7 +275,7 @@ export async function rowWithDatetimeValue(page: Page, datetimeLocal: string) {
   const count = await rows.count();
   for (let i = 0; i < count; i += 1) {
     const candidate = rows.nth(i);
-    const value = await candidate.getByTestId("session-datetime").inputValue();
+    const value = await datetimeValueOf(candidate);
     if (value === datetimeLocal) {
       return candidate;
     }
@@ -284,7 +293,8 @@ export async function firstRowWithWeekday(
   const count = await rows.count();
   for (let i = 0; i < count; i += 1) {
     const candidate = rows.nth(i);
-    const value = await candidate.getByTestId("session-datetime").inputValue();
+    const value = await datetimeValueOf(candidate);
+    if (!value) continue;
     if (timeSuffix && !value.endsWith(timeSuffix)) continue;
     if (weekdayFromDatetimeLocal(value) === weekday) {
       return candidate;
@@ -302,7 +312,7 @@ export async function nextRowAfterDatetime(page: Page, afterValue: string) {
   let best: { row: ReturnType<typeof rows.nth>; value: string } | null = null;
   for (let i = 0; i < count; i += 1) {
     const candidate = rows.nth(i);
-    const value = await candidate.getByTestId("session-datetime").inputValue();
+    const value = await datetimeValueOf(candidate);
     if (!value || value <= afterValue) continue;
     if (!best || value < best.value) {
       best = { row: candidate, value };

@@ -18,6 +18,7 @@ export type CalendarSessionSource = {
   id: string;
   scheduledAt: string | null;
   originalScheduledAt?: string | null;
+  canceledAt?: string | null;
   studentId?: string;
   studentLabel?: string;
 };
@@ -28,6 +29,7 @@ export type CalendarSessionChip = {
   iso: string;
   isPast: boolean;
   isRescheduled: boolean;
+  isCanceled: boolean;
   studentId?: string;
   studentLabel?: string;
 };
@@ -191,6 +193,7 @@ export function sessionsByDateKey(
       iso: session.scheduledAt,
       isPast: date.getTime() < nowMs,
       isRescheduled: Boolean(session.originalScheduledAt),
+      isCanceled: Boolean(session.canceledAt),
       studentId: session.studentId,
       studentLabel: session.studentLabel,
     });
@@ -213,7 +216,7 @@ export function initialVisibleMonth(
   const today = partsInZone(now, timeZone);
   const upcoming = sessions
     .filter((session) => {
-      if (!session.scheduledAt) return false;
+      if (!session.scheduledAt || session.canceledAt) return false;
       const date = new Date(session.scheduledAt);
       return !Number.isNaN(date.getTime()) && date.getTime() >= now.getTime();
     })

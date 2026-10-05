@@ -41,11 +41,14 @@ export function datedSessionsChronological(sessions: Material[]): Material[] {
 /**
  * Maps a session id → the previous dated class (the one whose
  * “for the next class” homework belongs on this class).
+ * Canceled classes are skipped, so homework carries to the next real class.
  */
 export function previousSessionById(
   sessions: Material[],
 ): Map<string, Material> {
-  const dated = datedSessionsChronological(sessions);
+  const dated = datedSessionsChronological(sessions).filter(
+    (session) => !session.canceledAt,
+  );
   const map = new Map<string, Material>();
   for (let index = 1; index < dated.length; index += 1) {
     const current = dated[index];

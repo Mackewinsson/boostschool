@@ -120,6 +120,9 @@ export type StudentContent = {
     saveHomeworkButton: string;
     addClassLabel: string;
     addClassButton: string;
+    cancelClassButton: string;
+    restoreClassButton: string;
+    cancelClassHint: string;
     extrasTitle: string;
     extrasHint: string;
     extrasEmpty: string;
@@ -203,6 +206,8 @@ export type StudentContent = {
     successAssigned: string;
     successUpdated: string;
     successClassAdded: string;
+    successClassCanceled: string;
+    successClassRestored: string;
     errorGeneric: string;
     errorUrl: string;
     errorTitle: string;
@@ -210,6 +215,7 @@ export type StudentContent = {
     errorClassDate: string;
     sessionErrorTimeConflict: string;
     sessionRescheduled: string;
+    sessionCanceled: string;
     navMaterials: string;
     navStudents: string;
     navLeads: string;

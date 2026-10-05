@@ -7,6 +7,7 @@ export type TeacherCalendarSession = {
   id: string;
   scheduledAt: string;
   originalScheduledAt: string | null;
+  canceledAt: string | null;
   studentId: string;
   studentLabel: string;
 };
@@ -15,6 +16,7 @@ type CalendarSessionDbRow = {
   material_id: string;
   scheduled_at: string;
   original_scheduled_at: string | null;
+  canceled_at: string | null;
   student_id: string;
   student_name: string;
 };
@@ -66,6 +68,7 @@ export async function getTeacherCalendarSessions(
       m.id AS material_id,
       m.scheduled_at,
       m.original_scheduled_at,
+      m.canceled_at,
       u.id AS student_id,
       u.name AS student_name
     FROM materials m
@@ -83,6 +86,7 @@ export async function getTeacherCalendarSessions(
     id: row.material_id,
     scheduledAt: toIso(row.scheduled_at) ?? "",
     originalScheduledAt: toIso(row.original_scheduled_at),
+    canceledAt: toIso(row.canceled_at),
     studentId: row.student_id,
     studentLabel: studentShortLabel(row.student_name),
   }));
