@@ -54,18 +54,20 @@ function chipLabel(chip: { timeLabel: string; studentLabel?: string }): string {
 }
 
 function chipClassName(
-  chip: { isRescheduled: boolean; isPast: boolean },
+  chip: { isRescheduled: boolean; isPast: boolean; isCanceled: boolean },
   interactive: boolean,
 ): string {
   const base =
     "block w-full truncate rounded-md px-1 py-0.5 text-left text-[11px] font-semibold tabular-nums transition sm:px-1.5";
-  const tone = chip.isRescheduled
-    ? chip.isPast
-      ? "bg-warn/10 text-warn/80 hover:bg-warn/20"
-      : "bg-warn/20 text-warn hover:bg-warn/30"
-    : chip.isPast
-      ? "bg-border/80 text-fg-muted hover:bg-border"
-      : "bg-accent/15 text-accent hover:bg-accent/25";
+  const tone = chip.isCanceled
+    ? "bg-danger/10 text-danger/80 line-through hover:bg-danger/20"
+    : chip.isRescheduled
+      ? chip.isPast
+        ? "bg-warn/10 text-warn/80 hover:bg-warn/20"
+        : "bg-warn/20 text-warn hover:bg-warn/30"
+      : chip.isPast
+        ? "bg-border/80 text-fg-muted hover:bg-border"
+        : "bg-accent/15 text-accent hover:bg-accent/25";
   return interactive ? `${base} ${tone}` : base;
 }
 
@@ -224,6 +226,7 @@ export function ClassMonthCalendar({
                               data-session-id={chip.id}
                               data-student-id={chip.studentId}
                               data-rescheduled={chip.isRescheduled ? "true" : "false"}
+                              data-canceled={chip.isCanceled ? "true" : "false"}
                               aria-label={sessionAriaLabel(chip)}
                               className={chipClassName(chip, true)}
                             >
@@ -235,6 +238,7 @@ export function ClassMonthCalendar({
                               data-testid="calendar-session-chip"
                               data-session-id={chip.id}
                               data-rescheduled={chip.isRescheduled ? "true" : "false"}
+                              data-canceled={chip.isCanceled ? "true" : "false"}
                               onClick={() => scrollToSession(chip.id)}
                               aria-label={sessionAriaLabel(chip)}
                               className={chipClassName(chip, true)}
