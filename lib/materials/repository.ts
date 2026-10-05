@@ -19,6 +19,7 @@ type MaterialRow = {
   meet_url: string | null;
   schedule_id?: string | null;
   original_scheduled_at?: string | null;
+  canceled_at?: string | null;
   created_at: string;
   assigned_at?: string;
   completion_status?: CompletionStatus | null;
@@ -61,6 +62,7 @@ function mapMaterial(row: MaterialRow): Material {
     meetUrl: row.meet_url,
     scheduleId: row.schedule_id ?? null,
     originalScheduledAt: row.original_scheduled_at ?? null,
+    canceledAt: row.canceled_at ?? null,
     createdAt: row.created_at,
     ...(row.assigned_at !== undefined ? { assignedAt: row.assigned_at } : {}),
     ...(row.completion_status !== undefined
@@ -103,7 +105,7 @@ export async function listMaterials(): Promise<Material[]> {
   const sql = getDb();
   const rows = (await sql`
     SELECT id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
-           original_scheduled_at, created_at
+           original_scheduled_at, canceled_at, created_at
     FROM materials
     ORDER BY scheduled_at ASC NULLS LAST, created_at DESC
   `) as MaterialRow[];
@@ -114,7 +116,7 @@ export async function getMaterial(id: string): Promise<Material | null> {
   const sql = getDb();
   const rows = (await sql`
     SELECT id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
-           original_scheduled_at, created_at
+           original_scheduled_at, canceled_at, created_at
     FROM materials
     WHERE id = ${id}::uuid
     LIMIT 1
@@ -137,7 +139,24 @@ export async function patchMaterialClassDetails(
       meet_url = ${input.meetUrl}
     WHERE id = ${id}::uuid
     RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
-              original_scheduled_at, created_at
+              original_scheduled_at, canceled_at, created_at
+  `) as MaterialRow[];
+  return rows[0] ? mapMaterial(rows[0]) : null;
+}
+
+/** Cancel or restore a class session. The row survives so the weekly
+ * schedule does not regenerate that date. */
+export async function setMaterialCanceled(
+  id: string,
+  canceled: boolean,
+): Promise<Material | null> {
+  const sql = getDb();
+  const rows = (await sql`
+    UPDATE materials
+    SET canceled_at = ${canceled ? new Date().toISOString() : null}
+    WHERE id = ${id}::uuid
+    RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
+              original_scheduled_at, canceled_at, created_at
   `) as MaterialRow[];
   return rows[0] ? mapMaterial(rows[0]) : null;
 }
@@ -164,7 +183,7 @@ export async function createMaterial(input: {
       ${input.scheduleId ?? null}
     )
     RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
-              original_scheduled_at, created_at
+              original_scheduled_at, canceled_at, created_at
   `) as MaterialRow[];
   return mapMaterial(rows[0]);
 }
@@ -192,7 +211,7 @@ export async function updateMaterial(
       original_scheduled_at = ${input.originalScheduledAt ?? null}
     WHERE id = ${id}::uuid
     RETURNING id, title, description, url, locale, scheduled_at, meet_url, schedule_id,
-              original_scheduled_at, created_at
+              original_scheduled_at, canceled_at, created_at
   `) as MaterialRow[];
   return rows[0] ? mapMaterial(rows[0]) : null;
 }
@@ -273,11 +292,12 @@ export async function listMaterialsForStudent(userId: string): Promise<Material[
   const sql = getDb();
   const rows = (await sql`
     SELECT m.id, m.title, m.description, m.url, m.locale, m.scheduled_at, m.meet_url,
-           m.schedule_id, m.original_scheduled_at, m.created_at, sm.assigned_at,
-           sm.completion_status, sm.reviewed_at, sm.notes
+           m.schedule_id, m.original_scheduled_at, m.canceled_at, m.created_at,
+           sm.assigned_at, sm.completion_status, sm.reviewed_at, sm.notes
     FROM materials m
     INNER JOIN student_materials sm ON sm.material_id = m.id
     WHERE sm.user_id = ${userId}::uuid
+      AND m.canceled_at IS NULL
     ORDER BY m.scheduled_at ASC NULLS LAST, sm.assigned_at DESC
   `) as MaterialRow[];
   return rows.map(mapMaterial);
