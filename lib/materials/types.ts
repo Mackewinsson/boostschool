@@ -18,6 +18,8 @@ export type Material = {
   meetUrl: string | null;
   scheduleId?: string | null;
   originalScheduledAt?: string | null;
+  /** Set when the teacher cancels the class; hidden from student and parent. */
+  canceledAt?: string | null;
   createdAt: string;
   assignedAt?: string;
   completionStatus?: CompletionStatus | null;

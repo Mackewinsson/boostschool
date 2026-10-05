@@ -202,6 +202,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS materials_schedule_occurrence_uidx
   ON materials (schedule_id, scheduled_at)
   WHERE schedule_id IS NOT NULL AND scheduled_at IS NOT NULL;
 
+-- Canceled class: row stays so the weekly schedule does not recreate that date
+ALTER TABLE materials
+  ADD COLUMN IF NOT EXISTS canceled_at TIMESTAMPTZ;
+
 -- Remove demo placeholder that linked to a personal site
 DELETE FROM student_materials
 WHERE material_id IN (
