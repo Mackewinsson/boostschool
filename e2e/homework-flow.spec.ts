@@ -447,6 +447,76 @@ test.describe("class table homework flow", () => {
     );
   });
 
+  test("canceling a weekly class keeps it canceled and hides it from the student", async ({
+    page,
+  }) => {
+    const marker = uniqueMarker("cancel");
+    const exercise = `Cancel homework (${marker})`;
+
+    await login(page, e2eCreds.teacher, /\/alumno\/profesor/);
+    await selectStudent(page, STUDENT_LABEL);
+    await saveWeeklySchedule(page, {
+      weekday: "3",
+      timeLocal: "16:45",
+      horizonWeeks: "6",
+    });
+
+    const row = await rowWithDatetimeEnding(page, "T16:45");
+    const sessionId = await row.getAttribute("data-session-id");
+    expect(sessionId).toBeTruthy();
+    const when = await row.getByTestId("session-datetime").inputValue();
+
+    await row.getByTestId("session-homework").fill(exercise);
+    await row.getByRole("button", { name: "Guardar" }).click();
+    await expect(page.getByText("Cambios guardados.")).toBeVisible({
+      timeout: 15_000,
+    });
+
+    const target = page.locator(`[data-session-id="${sessionId}"]`);
+    await target.getByTestId("cancel-session").click();
+    await expect(page.getByText("Clase cancelada.")).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(target).toHaveAttribute("data-canceled", "true");
+    await expect(target.getByTestId("session-canceled")).toHaveText("Cancelada");
+    await expect(target.getByTestId("session-homework")).toHaveCount(0);
+
+    // Saving the weekly schedule must not bring that date back
+    await saveWeeklySchedule(page, {
+      weekday: "3",
+      timeLocal: "16:45",
+      horizonWeeks: "6",
+    });
+    await expect(target).toHaveAttribute("data-canceled", "true");
+    const activeTimes = await classRows(page)
+      .locator('[data-testid="session-datetime"]')
+      .evaluateAll((inputs) =>
+        inputs.map((el) => (el as HTMLInputElement).value).filter(Boolean),
+      );
+    expect(activeTimes).not.toContain(when);
+
+    // Restoring brings the class (and its homework) back untouched
+    await target.getByTestId("restore-session").click();
+    await expect(page.getByText("Clase reactivada.")).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(target.getByTestId("session-datetime")).toHaveValue(when);
+    await expect(target.getByTestId("session-homework")).toHaveValue(
+      new RegExp(marker),
+    );
+
+    await target.getByTestId("cancel-session").click();
+    await expect(page.getByText("Clase cancelada.")).toBeVisible({
+      timeout: 15_000,
+    });
+
+    await logout(page);
+
+    await login(page, e2eCreds.student, /\/alumno\/?$/);
+    await expect(classTable(page)).toBeVisible();
+    await expect(page.getByText(marker)).toHaveCount(0);
+  });
+
   test("extras stay outside class table and can be deleted", async ({ page }) => {
     const extraTitle = uniqueTitle("E2E extra-del");
 

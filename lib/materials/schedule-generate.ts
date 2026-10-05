@@ -78,6 +78,9 @@ export function upcomingOccurrences(
   return results.slice(0, maxResults);
 }
 
+/**
+ * Canceled rows count as "taken", so a canceled date is never regenerated.
+ */
 async function materialExistsForOccurrence(
   schedule: StudentClassSchedule,
   scheduledAtIso: string,
@@ -97,6 +100,29 @@ async function materialExistsForOccurrence(
   return rows.length > 0;
 }
 
+/** Epoch ms of upcoming classes this student already has canceled. */
+async function canceledOccurrenceTimes(
+  studentUserId: string,
+): Promise<Set<number>> {
+  const sql = getDb();
+  const rows = (await sql`
+    SELECT m.scheduled_at
+    FROM materials m
+    INNER JOIN student_materials sm ON sm.material_id = m.id
+    WHERE sm.user_id = ${studentUserId}::uuid
+      AND m.canceled_at IS NOT NULL
+      AND m.scheduled_at IS NOT NULL
+      AND m.scheduled_at >= now()
+  `) as { scheduled_at: string }[];
+
+  const times = new Set<number>();
+  for (const row of rows) {
+    const time = new Date(row.scheduled_at).getTime();
+    if (!Number.isNaN(time)) times.add(time);
+  }
+  return times;
+}
+
 type FutureSessionRow = {
   id: string;
   description: string | null;
@@ -106,8 +132,8 @@ type FutureSessionRow = {
 /**
  * Rebuild upcoming class slots for a student from their fixed weekly schedule.
  * Keeps homework text (oldest homework → next occurrence), deletes empty
- * weekly shells, then fills the horizon. Manual extras and one-off
- * reschedules (original_scheduled_at) are left alone.
+ * weekly shells, then fills the horizon. Manual extras, one-off reschedules
+ * (original_scheduled_at) and canceled classes are left alone.
  */
 export async function realignFutureSessionsForSchedule(
   schedule: StudentClassSchedule,
@@ -123,8 +149,8 @@ export async function realignFutureSessionsForSchedule(
   }
 
   const sql = getDb();
-  // Only weekly shells for this schedule. Manual extras (schedule_id null)
-  // and pinned reschedules stay put.
+  // Only weekly shells for this schedule. Manual extras (schedule_id null),
+  // pinned reschedules and canceled classes stay put.
   const future = (await sql`
     SELECT m.id, m.description, m.scheduled_at
     FROM materials m
@@ -133,12 +159,17 @@ export async function realignFutureSessionsForSchedule(
       AND m.scheduled_at >= now()
       AND m.schedule_id = ${schedule.id}::uuid
       AND m.original_scheduled_at IS NULL
+      AND m.canceled_at IS NULL
     ORDER BY m.scheduled_at ASC
   `) as FutureSessionRow[];
 
   const withHomework = future.filter((row) => Boolean(row.description?.trim()));
   const empty = future.filter((row) => !row.description?.trim());
-  const occurrences = upcomingOccurrences(schedule);
+  const canceled = await canceledOccurrenceTimes(schedule.studentUserId);
+  // A canceled date stays empty: it is skipped instead of refilled.
+  const occurrences = upcomingOccurrences(schedule).filter(
+    (occurrence) => !canceled.has(occurrence.getTime()),
+  );
 
   await sql`
     UPDATE materials
@@ -146,6 +177,7 @@ export async function realignFutureSessionsForSchedule(
     WHERE schedule_id = ${schedule.id}::uuid
       AND scheduled_at >= now()
       AND original_scheduled_at IS NULL
+      AND canceled_at IS NULL
   `;
 
   // Empty future classes are regenerated cleanly from the schedule
@@ -165,6 +197,7 @@ export async function realignFutureSessionsForSchedule(
       WHERE schedule_id = ${schedule.id}::uuid
         AND scheduled_at = ${scheduledAt}::timestamptz
         AND id <> ${row.id}::uuid
+        AND canceled_at IS NULL
         AND (description IS NULL OR btrim(description) = '')
     `;
     await sql`
@@ -225,7 +258,11 @@ export async function generateSessionsForSchedule(
   }
 
   let created = 0;
+  const canceled = await canceledOccurrenceTimes(schedule.studentUserId);
   for (const occurrence of upcomingOccurrences(schedule)) {
+    if (canceled.has(occurrence.getTime())) {
+      continue;
+    }
     const scheduledAt = occurrence.toISOString();
     if (await materialExistsForOccurrence(schedule, scheduledAt)) {
       continue;

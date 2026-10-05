@@ -350,6 +350,29 @@ export function TeacherDashboard({
     }
   }
 
+  async function handleCancelSession(sessionId: string, canceled: boolean) {
+    setError(null);
+    setMessage(null);
+    setBusyKey(sessionId);
+    try {
+      const response = await fetch(`/api/alumno/sessions/${sessionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ canceled }),
+      });
+      if (!response.ok) {
+        setError(copy.errorGeneric);
+        return;
+      }
+      await loadData();
+      setMessage(canceled ? copy.successClassCanceled : copy.successClassRestored);
+    } catch {
+      setError(copy.errorGeneric);
+    } finally {
+      setBusyKey(null);
+    }
+  }
+
   async function handleAddExtra(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selectedStudentId) return;
@@ -553,10 +576,14 @@ export function TeacherDashboard({
                   addClassLabel: copy.addClassLabel,
                   addClassButton: copy.addClassButton,
                   sessionRescheduled: copy.sessionRescheduled,
+                  sessionCanceled: copy.sessionCanceled,
+                  cancelSessionButton: copy.cancelClassButton,
+                  restoreSessionButton: copy.restoreClassButton,
                 }}
                 onSaveHomework={handleSaveHomework}
                 onStatusChange={handleStatusChange}
                 onAddClass={handleAddClass}
+                onCancelSession={handleCancelSession}
               />
             </>
           ) : null}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Video } from "lucide-react";
+import { CalendarX2, Video } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "@/lib/locale";
 import type { CompletionStatus, Material } from "@/lib/materials/types";
@@ -47,6 +47,9 @@ export type ClassSessionTableCopy = {
   addClassLabel?: string;
   addClassButton?: string;
   sessionRescheduled?: string;
+  sessionCanceled?: string;
+  cancelSessionButton?: string;
+  restoreSessionButton?: string;
   notesLabel?: string;
   notesPlaceholder?: string;
   notesSaved?: string;
@@ -65,6 +68,7 @@ type ClassSessionTableProps = {
   onSaveHomework?: (sessionId: string, description: string, scheduledAt: string) => Promise<void>;
   onStatusChange?: (sessionId: string, status: CompletionStatus | null) => Promise<void>;
   onAddClass?: (scheduledAt: string) => Promise<void>;
+  onCancelSession?: (sessionId: string, canceled: boolean) => Promise<void>;
   onSaveNotes?: (sessionId: string, notes: string) => Promise<void>;
   allowNotes?: boolean;
   /** Parents should not get the Meet join link. */
@@ -87,6 +91,18 @@ function SessionRescheduledBadge({ label }: { label?: string }) {
   );
 }
 
+function SessionCanceledBadge({ label }: { label?: string }) {
+  if (!label) return null;
+  return (
+    <span
+      data-testid="session-canceled"
+      className="inline-flex items-center rounded-full bg-danger/20 px-2.5 py-0.5 text-xs font-semibold text-danger"
+    >
+      {label}
+    </span>
+  );
+}
+
 export function ClassSessionTable({
   sessions,
   locale,
@@ -98,6 +114,7 @@ export function ClassSessionTable({
   onSaveHomework,
   onStatusChange,
   onAddClass,
+  onCancelSession,
   onSaveNotes,
   allowNotes = false,
   showMeetLink = true,
@@ -142,6 +159,7 @@ export function ClassSessionTable({
             timeZone={timeZone}
             onSaveHomework={onSaveHomework}
             onStatusChange={onStatusChange}
+            onCancelSession={onCancelSession}
             onSaveNotes={onSaveNotes}
             allowNotes={allowNotes}
             showMeetLink={showMeetLink}
@@ -248,6 +266,7 @@ function SessionRow({
   timeZone,
   onSaveHomework,
   onStatusChange,
+  onCancelSession,
   onSaveNotes,
   allowNotes,
   showMeetLink,
@@ -262,6 +281,7 @@ function SessionRow({
   timeZone: string;
   onSaveHomework?: ClassSessionTableProps["onSaveHomework"];
   onStatusChange?: ClassSessionTableProps["onStatusChange"];
+  onCancelSession?: ClassSessionTableProps["onCancelSession"];
   onSaveNotes?: ClassSessionTableProps["onSaveNotes"];
   allowNotes: boolean;
   showMeetLink: boolean;
@@ -296,6 +316,8 @@ function SessionRow({
   const thisClassHint = copy.homeworkForThisClassHint;
   const nextClassHint = copy.homeworkForNextClassHint;
   const rescheduled = Boolean(session.originalScheduledAt);
+  const canceled = Boolean(session.canceledAt);
+  const canToggleCancel = mode === "teacher" && Boolean(onCancelSession);
 
   async function handleNotesBlur() {
     if (!allowNotes || !onSaveNotes) return;
@@ -305,12 +327,43 @@ function SessionRow({
     window.setTimeout(() => setNotesJustSaved(false), 1500);
   }
 
+  if (canceled) {
+    return (
+      <li
+        id={sessionRowDomId(session.id)}
+        data-testid="class-session-row"
+        data-session-id={session.id}
+        data-canceled="true"
+        className="scroll-mt-28 rounded-2xl border border-dashed border-danger/40 bg-danger/5 p-4 ring-accent/70 transition data-[calendar-focus=true]:ring-2 sm:p-5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-base font-semibold text-fg-faint line-through">{dateLabel}</p>
+            <SessionCanceledBadge label={copy.sessionCanceled} />
+          </div>
+          {canToggleCancel ? (
+            <button
+              type="button"
+              disabled={saving}
+              data-testid="restore-session"
+              onClick={() => void onCancelSession?.(session.id, false)}
+              className="rounded-xl border border-border px-3 py-1.5 text-sm font-medium text-fg-muted transition hover:border-accent/30 hover:text-accent disabled:opacity-60"
+            >
+              {copy.restoreSessionButton}
+            </button>
+          ) : null}
+        </div>
+      </li>
+    );
+  }
+
   return (
     <li
       id={sessionRowDomId(session.id)}
       data-testid="class-session-row"
       data-session-id={session.id}
       data-rescheduled={rescheduled ? "true" : "false"}
+      data-canceled="false"
       className={`scroll-mt-28 rounded-2xl border p-4 sm:p-5 transition ring-accent/70 data-[calendar-focus=true]:ring-2 ${
         rescheduled
           ? "border-warn/50 bg-warn/5"
@@ -352,6 +405,20 @@ function SessionRow({
               <Video size={14} aria-hidden="true" />
               {copy.joinMeetLabel}
             </a>
+          ) : null}
+          {canToggleCancel ? (
+            <div className="mt-3">
+              <button
+                type="button"
+                disabled={saving}
+                data-testid="cancel-session"
+                onClick={() => void onCancelSession?.(session.id, true)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-sm font-medium text-fg-muted transition hover:border-danger/40 hover:text-danger disabled:opacity-60"
+              >
+                <CalendarX2 size={14} aria-hidden="true" />
+                {copy.cancelSessionButton}
+              </button>
+            </div>
           ) : null}
         </div>
 
