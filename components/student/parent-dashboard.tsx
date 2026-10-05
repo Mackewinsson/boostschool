@@ -155,20 +155,31 @@ export function ParentDashboard({
   }, []);
 
   function handleStudentChange(studentId: string) {
+    const next = linkedStudents.find((student) => student.id === studentId);
+    if (!next) return;
     const seq = ++requestSeq.current;
     const previousId = activeStudentId;
+    const previousName = linkedStudentName;
+    const previousMaterials = materials;
     setActiveStudentId(studentId);
+    setLinkedStudentName(next.name);
+    setMaterials([]);
     void (async () => {
       try {
         const data = await fetchParentMaterials(studentId);
         if (seq !== requestSeq.current) return;
         if (!data) {
           setActiveStudentId(previousId);
+          setLinkedStudentName(previousName);
+          setMaterials(previousMaterials);
           return;
         }
         applyView(data);
       } catch {
-        if (seq === requestSeq.current) setActiveStudentId(previousId);
+        if (seq !== requestSeq.current) return;
+        setActiveStudentId(previousId);
+        setLinkedStudentName(previousName);
+        setMaterials(previousMaterials);
       }
     })();
   }
